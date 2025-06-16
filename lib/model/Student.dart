@@ -66,7 +66,7 @@ class Student {
   }
 
   String get_next_year (){
-    return "${this.year + 1}A $departement";
+    return "$departement ${this.year + 1}A";
   }
   @override
   String toString() {
