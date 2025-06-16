@@ -20,6 +20,21 @@ class Student {
   Student(this.id, this.name,this.choices,this.specialization,this.ranking_s1,this.ects_number,this.lang_lvl,this.missed_hours,this.comment){
     year_departement(specialization);
   }
+  void add_student(id, name,choices,specialization,ranking_s1,ects_number,lang_lvl,missed_hours,comment) {
+    this.id = id;
+    this.name = name;
+      for(int i=0;i<choices.length;i++) {
+        this.choices = choices[i] ;
+        }
+
+    this.specialization = specialization;
+    this.ranking_s1 = ranking_s1;
+    this.ects_number = ects_number;
+    this.lang_lvl = lang_lvl;
+    this.missed_hours = missed_hours;
+    this.comment = comment;
+    year_departement(specialization);
+  }
 
   void year_departement (String specialization){
     if (specialization.contains("2")) {
@@ -53,5 +68,21 @@ class Student {
   String get_next_year (){
     return "${this.year + 1}A $departement";
   }
-
+  @override
+  String toString() {
+    String choicesString = choices.entries.map((entry) => '\n    Vœu ${entry.key}: ${entry.value}').join('');
+    return 'Étudiant {\n'
+        '  ID: $id,\n'
+        '  Nom: $name,\n'
+        '  Spécialisation: $specialization (Année: $year, Département: $departement),\n'
+        '  Classement S1: $ranking_s1,\n'
+        '  Crédits ECTS: $ects_number,\n'
+        '  Niveau Langue: $lang_lvl,\n'
+        '  Heures Manquées: $missed_hours,\n'
+        '  Commentaire: "$comment",\n'
+        '  Post-Commentaire: "${post_comment ?? 'N/A'}",\n'
+        '  Vœux: $choicesString\n'
+        '  Vœu Accepté: ${accepted ?? 'Aucun'}\n'
+        '}';
+  }
 }

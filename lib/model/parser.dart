@@ -2,8 +2,56 @@ import 'dart:io';
 
 import 'package:excel/excel.dart';
 import 'package:mobinsa/model/Student.dart';
+import 'package:mobinsa/model/Choice.dart';
+import 'package:mobinsa/model/School.dart';
+
+
+class ExcelParsingException implements Exception {
+  final String message;
+  ExcelParsingException(this.message);
+  @override
+  String toString() => "ExcelParsingException: $message";
+}
+
 
 class SheetParser{
+  // --- Constantes pour les indices de colonnes (À AJUSTER SELON VOTRE FICHIER EXCEL) ---
+  // Rappel : les indices sont 0-basés pour l'accès aux données de la ligne
+  static const int _colStudentName = 0;     // Colonne 1 dans Excel
+  static const int _colWishOrder = 1;       // Colonne 2
+  static const int _colCountry = 2;         // Colonne 3
+  static const int _colSchoolName = 3;      // Colonne 4
+  static const int _colSpecialization = 4;  // Colonne 5
+  static const int _colInterRanking = 5;    // Colonne 6
+  static const int _colRankingS1 = 6;       // Colonne 7
+  static const int _colEctsNumber = 7;      // Colonne 8
+  static const int _colLangLvl = 8;         // Colonne 9
+  static const int _colMissedHours = 9;     // Colonne 10
+  static const int _colComment = 10;        // Colonne 11
+
+
+  // --- Fonctions d'aide pour l'extraction sécurisée des données de cellules ---
+  static String _getStringCellData(List<Data?> row, int colIndex, {String defaultValue = ""}) {
+    if (colIndex < row.length && row[colIndex]?.value != null) {
+      return row[colIndex]!.value.toString().trim();
+    }
+    return defaultValue;
+  }
+
+  static int _getIntCellData(List<Data?> row, int colIndex, {int defaultValue = 0}) {
+    if (colIndex < row.length && row[colIndex]?.value != null) {
+      return int.tryParse(row[colIndex]!.value.toString().trim()) ?? defaultValue;
+    }
+    return defaultValue;
+  }
+
+  static double _getDoubleCellData(List<Data?> row, int colIndex, {double defaultValue = 0.0}) {
+    if (colIndex < row.length && row[colIndex]?.value != null) {
+      return double.tryParse(row[colIndex]!.value.toString().trim()) ?? defaultValue;
+    }
+    return defaultValue;
+  }
+
 
 
   static Excel parseExcel(String path){
@@ -14,9 +62,9 @@ class SheetParser{
       Excel createdFile= Excel.createExcel();
       String? test;
       String test2 = test ?? "DUMN";
-      print(parsedData.sheets.values.firstOrNull?.rows[1]);
-      print("Decoded File sheets : ${parsedData.sheets}, $parsedData");
-      print("Decoded File  : ${parsedData.tables}");
+      // print(parsedData.sheets.values.firstOrNull?.rows[1]);
+      // print("Decoded File sheets : ${parsedData.sheets}, $parsedData");
+      // print("Decoded File  : ${parsedData.tables}");
       return parsedData;
     }
     else{
@@ -24,41 +72,123 @@ class SheetParser{
     }
   }
 
+
+  // --- Méthode principale pour extraire les étudiants ---
+
+
   static List<Student> extractStudents(String path) {
-    List<Student> students = [];
+    Map<String, Student> tempStudentMap = {};
+    int nextStudentId=1;
     Excel excel = parseExcel(path);
-    
-    // Supposons que les données sont dans la première feuille
-    String sheetName = excel.sheets.keys.first;
-    var sheet = excel.sheets[sheetName];
-    
-    if (sheet == null || sheet.maxRows < 2) {
-      return students;
+
+    if (excel == null) {
+      print("Échec du parsing du fichier Excel. Aucune donnée ne peut être extraite.");
+      return []; // Retourne une liste vide si le parsing échoue
     }
-    
-    // Traiter chaque ligne à partir de la ligne 2 (index 1) qui contient les données
-    for (int row = 1; row < sheet.maxRows; row++) {
-      // Vérifiez si la ligne contient des données
-      if (sheet.rows[row].isEmpty || sheet.rows[row][0] == null) continue;
-      
-      // Le nom de l'étudiant 
-      String name = sheet.rows[row][0]?.value.toString() ?? "Inconnu";
-      
-    //voeux 
-      List<String> choices = [];
-      for (int col = 2; col < 4; col++) {
-        if (sheet.rows[row].length > col && sheet.rows[row][col] != null) {
-          var choice = sheet.rows[row][col]?.value.toString();
-          if (choice != null && choice.isNotEmpty) {
-            choices.add(choice);
+
+    if (excel.sheets.isEmpty) {
+      print("Information: Le fichier Excel ne contient aucune feuille.");
+      return [];
+    }
+    String sheetName = excel.sheets.keys.first; // Prend la première feuille par défaut
+    var sheet = excel.tables[sheetName]; // Utilisez .tables pour la nouvelle version de la lib excel
+
+    if (sheet == null) {
+      print("Erreur: La feuille '$sheetName' n'a pas pu être chargée ou n'existe pas dans les tables.");
+      return [];
+    }
+
+    if (sheet.maxRows < 2) {
+      print("Information: La feuille '$sheetName' contient moins de 2 lignes (pas de données ou juste l'en-tête).");
+      return [];
+    }
+    // Itérer sur les lignes, en commençant par la deuxième (index 1) pour sauter l'en-tête
+    for (int rowIndex = 1; rowIndex < sheet.maxRows; rowIndex++) {
+      var rowData = sheet.row(rowIndex); // Récupère les données de la ligne actuelle
+
+      // Vérification minimale : le nom de l'étudiant doit être présent
+      String studentName = _getStringCellData(rowData, _colStudentName);
+      if (studentName.isEmpty) {
+        // print("Ligne ${rowIndex + 1}: Nom de l'étudiant manquant, ligne ignorée.");
+        continue; // Passer à la ligne suivante
+      }
+
+      // --- Récupération/Création de l'objet Student ---
+      Student currentStudent;
+      if (!tempStudentMap.containsKey(studentName)) {
+        // Nouvel étudiant : lire ses informations spécifiques et le créer
+        String specialization = _getStringCellData(rowData, _colSpecialization, defaultValue: "Non spécifiée");
+        int rankingS1 = _getIntCellData(rowData, _colRankingS1);
+        int ectsNumber = _getIntCellData(rowData, _colEctsNumber);
+        String langLvl = _getStringCellData(rowData, _colLangLvl, defaultValue: "N/A");
+        double missedHours = _getDoubleCellData(rowData, _colMissedHours);
+        String comment = _getStringCellData(rowData, _colComment);
+        // Lire d'autres champs de Student si nécessaire (post_comment, etc.)
+        // String? postComment = _getStringCellData(rowData, _colPostComment, defaultValue: null); // Exemple
+
+        currentStudent = Student(
+            nextStudentId,
+            studentName,
+            {}, // Initialiser avec une Map de choix vide
+            specialization,
+            rankingS1,
+            ectsNumber,
+            langLvl,
+            missedHours,
+            comment
+          // post_comment: postComment, // Si vous avez ce champ et l'avez lu
+        );
+        tempStudentMap[studentName] = currentStudent;
+        nextStudentId++;
+      } else {
+        // Étudiant existant : le récupérer
+        currentStudent = tempStudentMap[studentName]!;
+        // Optionnel : mettre à jour des informations de l'étudiant si elles sont plus complètes
+        // sur cette ligne, mais attention à ne pas écraser des données valides.
+        // Exemple : si la spécialisation était "Non spécifiée" et qu'on en trouve une :
+        if (currentStudent.specialization == "Non spécifiée") {
+          String newSpecialization = _getStringCellData(rowData, _colSpecialization, defaultValue: "Non spécifiée");
+          if (newSpecialization != "Non spécifiée") {
+            currentStudent.specialization = newSpecialization;
+            currentStudent.year_departement(newSpecialization); // Mettre à jour année/département
           }
         }
       }
-      
-      //students.add(Student(name,choices));
+
+      // --- Traitement du Vœu pour l'étudiant actuel ---
+      String rawWishOrder = _getStringCellData(rowData, _colWishOrder);
+      String country = _getStringCellData(rowData, _colCountry);
+      String schoolName = _getStringCellData(rowData, _colSchoolName);
+      String rawInterRanking = _getStringCellData(rowData, _colInterRanking);
+
+      // Un vœu nécessite au moins un ordre, un nom d'école et un pays
+      if (rawWishOrder.isEmpty || schoolName.isEmpty || country.isEmpty || rawInterRanking.isEmpty) {
+        // print("Ligne ${rowIndex + 1} pour ${studentName}: Données de vœu incomplètes, vœu ignoré.");
+        continue; // Passer si les informations essentielles du vœu sont manquantes
+      }
+
+      int? wishOrder = int.tryParse(rawWishOrder);
+      double? interRanking = double.tryParse(rawInterRanking); // Votre Choice utilise double
+
+      if (wishOrder == null || interRanking == null) {
+        // print("Ligne ${rowIndex + 1} pour ${studentName}: Format numérique invalide pour l'ordre du vœu ou interRanking, vœu ignoré.");
+        continue;
+      }
+
+      // Création de l'objet School
+      School school = School(0,schoolName,"ds",0,0,0,[],"","","","","");
+
+      // Création de l'objet Choice (en passant l'instance de Student, comme défini dans votre classe Choice)
+      Choice choice = Choice(school, interRanking, currentStudent);
+
+      // Ajout du choix à la map de choix de l'étudiant
+      currentStudent.choices[wishOrder] = choice;
     }
-    
-    return students;
+    // Conversion de la map des étudiants en une liste triée par ID
+    List<Student> finalStudentList = tempStudentMap.values.toList();
+    finalStudentList.sort((a, b) => a.id.compareTo(b.id));
+
+    return finalStudentList;
   }
 
   static void parseSchools(Excel file){
@@ -102,4 +232,10 @@ class SheetParser{
     }
   }
 }
+
+
+
+
+
+
 
