@@ -130,7 +130,9 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(onPressed: () async {
               String? filePath = await pickFile();
               if (filePath != null){
+                //Afficher les écoles dans la console
                 Excel schoolResult = SheetParser.parseExcel(filePath);
+                SheetParser.parseSchools(schoolResult);
               }
             }, child: Text("Importez les écoles")),
             Padding(padding: EdgeInsets.only(bottom: 10)),
