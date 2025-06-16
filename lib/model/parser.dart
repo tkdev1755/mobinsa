@@ -229,11 +229,12 @@ class SheetParser{
         int slots = 4;
         int b_slots = 2;
         int m_slots = 2;
+        List<String> specialization = specializationStringToList(sheet.rows[row][5]?.value.toString() ?? "PROBLEM SPECIALIZATION");
         //int slots = int.parse(sheet.rows[row][3]?.value.toString() ?? "-1");
         //int b_slots = int.parse(sheet.rows[row][4]?.value.toString() ?? "-1");
         //int m_slots = int.parse(sheet.rows[row][5]?.value.toString() ?? "-1");
-        String spez = sheet.rows[row][6]?.value.toString() ?? "PROBLEM SPECIALIZATION";
-        List<String> specialization = specializationStringToList(spez);
+        //String spez = sheet.rows[row][6]?.value.toString() ?? "PROBLEM SPECIALIZATION";
+        //List<String> specialization = specializationStringToList(spez);
         String graduation_level = sheet.rows[row][7]?.value.toString() ?? "PROBLEM GRADUATION_LEVEL";
         String program = sheet.rows[row][8]?.value.toString() ?? "PROBLEM PROGRAM";
         String use_language = sheet.rows[row][9]?.value.toString() ?? "PROBLEM USE_LANGUAGE";
@@ -258,6 +259,8 @@ class SheetParser{
       }
     }
     print("LES SCHOOLS: $schools");
+    print("Une school:");
+    print(schools[0].name);print(schools[0].country);print(schools[0].content_type);print(schools[0].specialization);
     return schools;
   }
 
@@ -267,10 +270,12 @@ class SheetParser{
     for(String prog in ["ENP","ENR","GSI","MRI","STI","Paysagiste"]){
       if(specialization.contains(prog)) {
         program.add(prog);
+        print(prog+" DETECTÉ");
       }
     }
     for(String yea in ["2A","3A","4A","5A"]){
       if(specialization.contains(yea)) {
+        print(yea+" DETECTÉ");
         for(String prog in program){
           spez.add("$prog $yea"); //used interpolation, avoids concatenation (prog+" "+yea)
         }
