@@ -176,7 +176,7 @@ class SheetParser{
       }
 
       // Création de l'objet School
-      School school = School(0,schoolName,"ds",0,0,0,[],"","","","","");
+      School school = School(schoolName,"ds","",0,0,0,[],"","","","","");
 
       // Création de l'objet Choice (en passant l'instance de Student, comme défini dans votre classe Choice)
       Choice choice = Choice(school, interRanking, currentStudent);

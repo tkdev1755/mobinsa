@@ -63,9 +63,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
   int _counter = 0;
   List<Student> students = [];
   List<School> schools = [];
+  String? selectedFilenameSchools;
+  String? selectedFilenameStudents;
   void _incrementCounter() {
     print(Directory.current);
     setState(() {
@@ -137,6 +140,8 @@ class _MyHomePageState extends State<MyHomePage> {
               }
             }, child: Text("Importez les écoles")),
             Padding(padding: EdgeInsets.only(bottom: 10)),
+            Visibility(child: Text("Fichier Choisi :"), visible: selectedFilenameSchools != null,),
+            Padding(padding: EdgeInsets.only(bottom: 10)),
             ElevatedButton(
               onPressed: () async {
                 String? filePath = await pickFile();
@@ -151,6 +156,8 @@ class _MyHomePageState extends State<MyHomePage> {
               },
               child: Text("Importez les étudiants")
             ),
+            Padding(padding: EdgeInsets.only(bottom: 10)),
+            Visibility(child: Text("Fichier Choisi :"), visible: selectedFilenameSchools != null,),
             // ajoutez ici vos fonctions à tester
             Text("Espace debug"),
             ElevatedButton(onPressed: (){
