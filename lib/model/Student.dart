@@ -12,8 +12,8 @@ class Student {
   double missed_hours;
   String comment;
   String? post_comment;
-  int? year;
-  String? departement;
+  late int year;
+  late String departement;
 
 
 
