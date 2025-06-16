@@ -229,26 +229,30 @@ class SheetParser{
         }
         /*String name = sheet.rows[row][0]?.value.toString() ?? "PROBLEM NAME";
         String country = sheet.rows[row][1]?.value.toString() ?? "PROBLEM COUNTRY";
-        String contrat = sheet.rows[row][2]?.value.toString() ?? "PROBLEM CONTRAT_TYPE";
+        String contract = sheet.rows[row][2]?.value.toString() ?? "PROBLEM CONTRACT_TYPE";
         int slots = int.parse(sheet.rows[row][3]?.value.toString() ?? "-1");
         int b_slots = int.parse(sheet.rows[row][4]?.value.toString() ?? "-1");
         int m_slots = int.parse(sheet.rows[row][5]?.value.toString() ?? "-1");
-        String temp = sheet.rows[row][7]?.value.toString() ?? "PROBLEM SPECIALIZATION";
+        String faux_specialization = sheet.rows[row][6]?.value.toString() ?? "PROBLEM SPECIALIZATION";
         List<String> specialization ;
         String graduation_level = sheet.rows[row][7]?.value.toString() ?? "PROBLEM GRADUATION_LEVEL";
         String program = sheet.rows[row][8]?.value.toString() ?? "PROBLEM PROGRAM";
         String use_language = sheet.rows[row][9]?.value.toString() ?? "PROBLEM USE_LANGUAGE";
         String req_lang_level = sheet.rows[row][10]?.value.toString() ?? "PROBLEM REQ_LANG_LEVEL";
         String academic_level = sheet.rows[row][11]?.value.toString() ?? "PROBLEM ACADEMIC_LEVEL";*/
-        /*School school = School(1,
+        /*School school = School(
           name,
           country,
-          contrat,
+          contract,
           slots,
           b_slots,
           m_slots,
-          sheet.rows[row][4]?.value.toString() ?? "PROBLEM NAME", //Places bachelor
-          sheet.rows[row][5]?.value.toString() ?? "PROBLEM NAME", //Places
+          specialization,
+          graduation_level,
+          program,
+          use_language,
+          req_lang_level,
+          academic_level
         ); */
 
         print("");
