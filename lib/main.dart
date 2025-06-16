@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:mobinsa/model/School.dart';
 import 'package:mobinsa/model/parser.dart';
 import 'package:mobinsa/model/Student.dart';
+import 'package:mobinsa/view/assemblyPreview.dart';
 
 void main() {
   runApp(const MyApp());
@@ -61,7 +63,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-
+  List<Student> students = [];
+  List<School> schools = [];
   void _incrementCounter() {
     print(Directory.current);
     setState(() {
@@ -148,7 +151,10 @@ class _MyHomePageState extends State<MyHomePage> {
             // ajoutez ici vos fonctions à tester
             Text("Espace debug"),
             ElevatedButton(onPressed: (){
-            }, child: Text("debug"))
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AssemblyPreview(students: students, schools: schools)),);
+            }, child: Text("Génerer"))
           ],
         ),
       ),
