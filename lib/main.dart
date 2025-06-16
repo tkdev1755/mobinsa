@@ -1,4 +1,9 @@
+import 'dart:io';
+
+import 'package:excel/excel.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:mobinsa/model/parser.dart';
 
 void main() {
   runApp(const MyApp());
@@ -57,6 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
   void _incrementCounter() {
+    print(Directory.current);
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
@@ -65,6 +71,17 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
+  }
+  Future<String?> pickFile() async {
+    final result = await FilePicker.platform.pickFiles();
+
+    if (result != null && result.files.isNotEmpty) {
+      final file = result.files.first;
+
+      return file.path;
+    } else {
+      print('Aucun fichier sélectionné');
+    }
   }
 
   @override
@@ -104,19 +121,24 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            const Text('Importez vos fichiers'),
+            Padding(padding: EdgeInsets.only(bottom: 10)),
+            ElevatedButton(onPressed: () async {
+              String? filePath = await pickFile();
+              if (filePath != null){
+                Excel schoolResult = SheetParser.parseExcel(filePath);
+              }
+            }, child: Text("Importez les écoles")),
+            Padding(padding: EdgeInsets.only(bottom: 10)),
+            ElevatedButton(onPressed: () async {
+              String? filePath = await pickFile();
+              if (filePath != null){
+                SheetParser.parseExcel(filePath);
+              }
+            }, child: Text("Importez les étudiants"))
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
