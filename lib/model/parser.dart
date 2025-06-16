@@ -55,7 +55,7 @@ class SheetParser{
         }
       }
       
-      students.add(Student(name,choices));
+      //students.add(Student(name,choices));
     }
     
     return students;
