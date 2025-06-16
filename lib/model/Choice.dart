@@ -8,4 +8,14 @@ class Choice {
 
   Choice (this.school, this.interranking,this.student);
 
+  bool accepted (){
+    if (school.accepted()){
+      student.accepted = this;
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
 }
