@@ -1,10 +1,13 @@
 
 
 import 'package:flutter/material.dart';
-
+import 'package:mobinsa/model/Student.dart';
+import 'package:mobinsa/model/School.dart';
 
 class AssemblyPreview extends StatefulWidget {
-  const AssemblyPreview({Key? key}) : super(key: key);
+  List<Student> students;
+  List<School> schools;
+  AssemblyPreview({Key? key, required this.students, required this.schools}) : super(key: key);
 
   @override
   State<AssemblyPreview> createState() => _AssemblyPreviewState();

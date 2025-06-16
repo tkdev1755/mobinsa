@@ -60,5 +60,46 @@ class SheetParser{
     
     return students;
   }
+
+  static void parseSchools(Excel file){
+    //Données Europe et Hors-Europe
+    for(int eu=0; eu<2; eu++) {
+      String sheetName = file.sheets.keys.toList()[eu];
+      var sheet = file.sheets[sheetName];
+
+      if (sheet == null || sheet.maxRows < 2) {
+        // Ajouter une throw indiquant que le ficher n'as pas été parsé correctement
+        return;
+      }
+      //Afficher la première colonne
+      //int MAXCOLUMN = sheet.rows[0].length - 1;
+      String? colData = sheet.rows[0][0]?.value.toString();
+      int MAXCOLUMN = 1;
+      while (colData != "" && colData != null){
+        print(colData);
+        colData = sheet.rows[0][MAXCOLUMN]?.value.toString();
+        MAXCOLUMN++;
+      }
+      MAXCOLUMN--;
+      /*for (int col = 0; col < MAXCOLUMN; col++) {
+        String value = sheet.rows[0][col]?.value.toString() ?? "Problème 1ere colonne" ;
+        stdout.write("$value; ");
+      }*/
+      print("");
+      // Traiter chaque ligne à partir de la ligne 2 (index 1) qui contient les données
+      for (int row = 1; row < sheet.maxRows; row++) {
+        // Vérifiez si la ligne contient des données
+        if (sheet.rows[row].isEmpty || sheet.rows[row][0] == null) continue;
+        // Offre de séjour
+        //String offre = sheet.rows[row][0]?.value.toString() ?? "Problème parsing";
+        //print("Offre: $offre");
+        for (int col = 0; col < MAXCOLUMN; col++) { //MAXCOLUMN YEAH
+          String value = sheet.rows[row][col]?.value.toString() ?? "Problème parsing";
+          stdout.write("$value; ");
+        }
+        print("");
+      }
+    }
+  }
 }
 
