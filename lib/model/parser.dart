@@ -186,7 +186,8 @@ class SheetParser{
     return finalStudentList;
   }
 
-  static void parseSchools(Excel file){
+  static List<School> parseSchools(Excel file){
+    List<School> schools = [];
     //Données Europe et Hors-Europe
     for(int eu=0; eu<2; eu++) {
       String sheetName = file.sheets.keys.toList()[eu];
@@ -194,7 +195,7 @@ class SheetParser{
 
       if (sheet == null || sheet.maxRows < 2) {
         // Ajouter une throw indiquant que le ficher n'as pas été parsé correctement
-        return;
+        return [];
       }
       //Afficher la première colonne
       //int MAXCOLUMN = sheet.rows[0].length - 1;
@@ -222,20 +223,23 @@ class SheetParser{
           String value = sheet.rows[row][col]?.value.toString() ?? "Problème parsing";
           stdout.write("$value; ");
         }
-        /*String name = sheet.rows[row][0]?.value.toString() ?? "PROBLEM NAME";
+        String name = sheet.rows[row][0]?.value.toString() ?? "PROBLEM NAME";
         String country = sheet.rows[row][1]?.value.toString() ?? "PROBLEM COUNTRY";
         String contract = sheet.rows[row][2]?.value.toString() ?? "PROBLEM CONTRACT_TYPE";
-        int slots = int.parse(sheet.rows[row][3]?.value.toString() ?? "-1");
-        int b_slots = int.parse(sheet.rows[row][4]?.value.toString() ?? "-1");
-        int m_slots = int.parse(sheet.rows[row][5]?.value.toString() ?? "-1");
-        String faux_specialization = sheet.rows[row][6]?.value.toString() ?? "PROBLEM SPECIALIZATION";
-        List<String> specialization ;
+        int slots = 4;
+        int b_slots = 2;
+        int m_slots = 2;
+        //int slots = int.parse(sheet.rows[row][3]?.value.toString() ?? "-1");
+        //int b_slots = int.parse(sheet.rows[row][4]?.value.toString() ?? "-1");
+        //int m_slots = int.parse(sheet.rows[row][5]?.value.toString() ?? "-1");
+        String spez = sheet.rows[row][6]?.value.toString() ?? "PROBLEM SPECIALIZATION";
+        List<String> specialization = specializationStringToList(spez);
         String graduation_level = sheet.rows[row][7]?.value.toString() ?? "PROBLEM GRADUATION_LEVEL";
         String program = sheet.rows[row][8]?.value.toString() ?? "PROBLEM PROGRAM";
         String use_language = sheet.rows[row][9]?.value.toString() ?? "PROBLEM USE_LANGUAGE";
         String req_lang_level = sheet.rows[row][10]?.value.toString() ?? "PROBLEM REQ_LANG_LEVEL";
-        String academic_level = sheet.rows[row][11]?.value.toString() ?? "PROBLEM ACADEMIC_LEVEL";*/
-        /*School school = School(
+        String academic_level = sheet.rows[row][11]?.value.toString() ?? "PROBLEM ACADEMIC_LEVEL";
+        School school = School(
           name,
           country,
           contract,
@@ -248,11 +252,31 @@ class SheetParser{
           use_language,
           req_lang_level,
           academic_level
-        ); */
-
+        );
+        schools.add(school);
         print("");
       }
     }
+    print("LES SCHOOLS: $schools");
+    return schools;
+  }
+
+  //transforme la colonne DISCIPLINE en une liste de STI 3A, STI 4A, MRI 3A, MRI 4A
+  static List<String> specializationStringToList(String specialization){
+    List<String> program = []; List<String> spez = [];
+    for(String prog in ["ENP","ENR","GSI","MRI","STI","Paysagiste"]){
+      if(specialization.contains(prog)) {
+        program.add(prog);
+      }
+    }
+    for(String yea in ["2A","3A","4A","5A"]){
+      if(specialization.contains(yea)) {
+        for(String prog in program){
+          spez.add("$prog $yea"); //used interpolation, avoids concatenation (prog+" "+yea)
+        }
+      }
+    }
+    return spez;
   }
 }
 
