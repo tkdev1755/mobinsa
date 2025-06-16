@@ -10,7 +10,7 @@ class SheetParser{
     File newFile = File(path);
     if (newFile.existsSync()){
       Excel parsedData = Excel.decodeBytes(newFile.readAsBytesSync());
-      print("Decoded File sheets : ${parsedData.sheets}");
+      print("Decoded File sheets : ${parsedData.sheets}, $parsedData");
       print("Decoded File  : ${parsedData.tables}");
       return parsedData;
     }
