@@ -50,4 +50,8 @@ class Student {
     this.post_comment = new_comment;
   }
 
+  String get_next_year (){
+    return "${this.year + 1}A $departement";
+  }
+
 }
