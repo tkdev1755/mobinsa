@@ -14,6 +14,8 @@ class Student {
   String? post_comment;
 
 
-  Student(this.id, this.name,this.choices,this.specialization,this.ranking_s1,this.ects_number,this.lang_lvl,this.missed_hours,this.comment);
+
+  Student(this.id, this.name,this.choices,this.specialization,this.ranking_s1,this.ects_number,this.lang_lvl,this.missed_hours,this.comment)
+   ;
 
 }
