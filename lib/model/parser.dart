@@ -76,18 +76,13 @@ class SheetParser{
   // --- Méthode principale pour extraire les étudiants ---
 
 
-  static List<Student> extractStudents(String path) {
+  static List<Student> extractStudents(Excel excel) {
     Map<String, Student> tempStudentMap = {};
     int nextStudentId=1;
-    Excel excel = parseExcel(path);
-
-    if (excel == null) {
-      print("Échec du parsing du fichier Excel. Aucune donnée ne peut être extraite.");
-      return []; // Retourne une liste vide si le parsing échoue
-    }
 
     if (excel.sheets.isEmpty) {
       print("Information: Le fichier Excel ne contient aucune feuille.");
+
       return [];
     }
     String sheetName = excel.sheets.keys.first; // Prend la première feuille par défaut
