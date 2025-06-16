@@ -385,6 +385,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
   }
 
   Widget choiceCard(Choice choice, int index) {
+    // TODO: Ajouter les bouttons pour accepter et refuser dans un row de la column du iconbutton
     print("expanded ? ${expandedStudentsChoice[index]}");
     return Card(
       margin: const EdgeInsets.only(bottom: 8.0),
