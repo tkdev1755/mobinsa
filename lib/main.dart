@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mobinsa/model/parser.dart';
 import 'package:mobinsa/model/Student.dart';
+import 'package:mobinsa/view/displayApplicants.dart';
 
 void main() {
   runApp(const MyApp());
@@ -148,7 +149,17 @@ class _MyHomePageState extends State<MyHomePage> {
             // ajoutez ici vos fonctions à tester
             Text("Espace debug"),
             ElevatedButton(onPressed: (){
-            }, child: Text("debug"))
+            }, child: Text("debug")),
+            Padding(padding: EdgeInsets.only(bottom: 10)),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const DisplayApplicants()),
+                );
+              },
+              child: Text("Page d'affichage"),
+            ),
           ],
         ),
       ),

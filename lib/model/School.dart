@@ -32,10 +32,10 @@ class School{ //classe définissant les écoles/offres de séjours présentant t
     this.available_slots++;
   }
 
-  //bool accepted(Student s) { //affectation d'une offre de séjour à un élève
-    //if(this.available_slots > 0 && s.specialization.contains(s.specialization) && ) {
-    //  this.reduce_slots(s);
-    //  return true; }
-   // return false;
-  //}
+  // bool accepted(Student s) { //affectation d'une offre de séjour à un élève
+  //   if(this.available_slots > 0 && s.specialization.contains(s.specialization) && ) {
+  //    this.reduce_slots(s);
+  //    return true; }
+  //  return false;
+  // }
 }
