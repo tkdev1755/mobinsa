@@ -10,8 +10,7 @@ class School {
   int available_slots; //nombre de places disponible
   int b_slots; //nombre de place disponible en bachelor
   int m_slots; //nombre de place disponible en master
-  List<
-      String> specialization; //liste des spécialisations qui peuvent postuler à cette offre de séjour
+  List<String> specialization; //liste des spécialisations qui peuvent postuler à cette offre de séjour
   String graduation_level;
   String program; // Formation concernée par l'offre de séjour
   String use_langage; // langue d'enseignement
@@ -56,8 +55,7 @@ class School {
 
   bool accepted(Student s) {
     //affectation d'une offre de séjour à un élève
-    if (this.available_slots > 0 &&
-        s.specialization.contains(s.get_next_year())) {
+    if (this.available_slots > 0 && s.specialization.contains(s.get_next_year())) {
       this.reduce_slots(s);
       return true;
     }
