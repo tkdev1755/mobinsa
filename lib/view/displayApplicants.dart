@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mobinsa/model/Choice.dart';
+import 'package:mobinsa/model/Student.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+
+import '../model/School.dart';
+
+
 
 class DisplayApplicants extends StatefulWidget {
   const DisplayApplicants({Key? key}) : super(key: key);
@@ -17,24 +22,31 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
     {'nom': 'Petit', 'prenom': 'Emma', 'promo': "3A STI"},
     {'nom': 'Robert', 'prenom': 'Thomas', 'promo': "3A STI"},
   ];
-  
+
   final List<Map<String, String>> schools = [
     {'nom': 'Ecole 1', 'pays': 'Pays X'},
     {'nom': 'Ecole 2', 'pays': 'Pays Y'},
     {'nom': 'Ecole 3', 'pays': 'Pays Z'},
   ];
-  
+
   Map<String, String>? selectedStudent;
   Map<int, bool?> schoolChoices = {}; // null = pas de choix, true = accepté, false = refusé
-  
+  List<Choice> selectedStudentChoices = [
+    Choice(
+        School("","","",0,0,0,[],"","","","",""),10,Student(0,"",{},"",0,0,"",0.0,"")
+    )
+  ];
+  List<bool> expandedStudentsChoice = [false];
   @override
   Widget build(BuildContext context) {
+    print(expandedStudentsChoice);
+
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           title: const Text(
             "Mob'INSA",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, ),
           ),
           actions: [
             IconButton(
@@ -148,9 +160,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                               ),
                             ],
                           ),
-                          
+
                           const SizedBox(height: 30),
-                          
+
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -164,7 +176,6 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                     ...schools.asMap().entries.map((entry) {
                                       int index = entry.key;
                                       Map<String, String> school = entry.value;
-                                      
                                       return Container(
                                         margin: const EdgeInsets.only(bottom: 16.0),
                                         padding: const EdgeInsets.all(16.0),
@@ -222,8 +233,8 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                                       });
                                                     },
                                                     style: ElevatedButton.styleFrom(
-                                                      backgroundColor: schoolChoices[index] == false 
-                                                          ? Colors.red[700] 
+                                                      backgroundColor: schoolChoices[index] == false
+                                                          ? Colors.red[700]
                                                           : Colors.red,
                                                       padding: EdgeInsets.zero,
                                                       shape: RoundedRectangleBorder(
@@ -250,8 +261,8 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                                       });
                                                     },
                                                     style: ElevatedButton.styleFrom(
-                                                      backgroundColor: schoolChoices[index] == true 
-                                                          ? Colors.green[700] 
+                                                      backgroundColor: schoolChoices[index] == true
+                                                          ? Colors.green[700]
                                                           : Colors.green,
                                                       padding: EdgeInsets.zero,
                                                       shape: RoundedRectangleBorder(
@@ -271,12 +282,13 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                         ),
                                       );
                                     }).toList(),
+                                    choiceCard(selectedStudentChoices[0],0)
                                   ],
                                 ),
                               ),
-                              
+
                               const SizedBox(width: 20),
-                              
+
                               // Section Boutons d'action (droite)
                               Expanded(
                                 flex: 1,
@@ -307,7 +319,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                         ),
                                       ),
                                     ),
-                                    
+
                                     // Bouton Revenir à l'étudiant précédent
                                     Container(
                                       width: double.infinity,
@@ -332,7 +344,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                         ),
                                       ),
                                     ),
-                                    
+
                                     // Bouton Passer à l'étudiant suivant
                                     Container(
                                       width: double.infinity,
@@ -372,13 +384,75 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
     );
   }
 
-  Widget schoolCard(Choice choice) {
+  Widget choiceCard(Choice choice, int index) {
+    print("expanded ? ${expandedStudentsChoice[index]}");
     return Card(
-      child: Column(
-        children: [
-          Text(choice.school.name),
-          // Text(choice.school.country),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Visibility(
+          visible: !expandedStudentsChoice[index],
+          replacement: Column(
+            children: [
+              Row(
+                children: [
+                  Column(
+                    children: [
+                      Text(choice.school.name),
+                      Text(choice.school.country)
+                    ],
+                  ),
+                  Spacer(),
+                  Column(
+                    children: [
+                      IconButton(onPressed: (){
+                        setState(() {
+                        });
+                        expandedStudentsChoice[index] = false;
+                        print(expandedStudentsChoice);
+                      }, icon: Icon(PhosphorIcons.arrowDown()))
+                    ],
+                  )
+                  // Text(choice.school.country),
+                ],
+              ),
+              Row(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Niveau académique requis"),
+                      Text("${choice.school.academic_level}"),
+                      Text("Langue d'enseignement"),
+                      Text("${choice.school.use_langage}"),
+                      Text("Nombre de place"),
+                    ],
+                  )
+                ],
+              )
+            ],
+          ),
+          child: Row(
+            children: [
+              Column(
+                children: [
+                  Text(choice.school.name),
+                  Text(choice.school.country)
+                ],
+              ),
+              Spacer(),
+              Column(
+                children: [
+                  IconButton(onPressed: (){
+                    setState(() {
+                      expandedStudentsChoice[index] = true;
+                    });
+                  }, icon: Icon(PhosphorIcons.arrowDown()))
+                ],
+              )
+              // Text(choice.school.country),
+            ],
+          ),
+        ),
       ),
     );
   }
