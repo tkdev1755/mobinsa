@@ -33,7 +33,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
   Map<int, bool?> schoolChoices = {}; // null = pas de choix, true = accepté, false = refusé
   List<Choice> selectedStudentChoices = [
     Choice(
-        School("","","",0,0,0,[],"","","","",""),10,Student(0,"",{},"",0,0,"",0.0,"")
+        School("Ecole 1","Pays X","",0,0,0,[],"","","","",""),10,Student(0,"",{},"",0,0,"",0.0,"")
     )
   ];
   List<bool> expandedStudentsChoice = [false];
@@ -387,69 +387,93 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
   Widget choiceCard(Choice choice, int index) {
     print("expanded ? ${expandedStudentsChoice[index]}");
     return Card(
+      margin: const EdgeInsets.only(bottom: 8.0),
+      color: Colors.grey[300],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Visibility(
           visible: !expandedStudentsChoice[index],
           replacement: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    children: [
-                      Text(choice.school.name),
-                      Text(choice.school.country)
-                    ],
+                  Text(
+                    choice.school.name,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  Spacer(),
                   Column(
                     children: [
-                      IconButton(onPressed: (){
-                        setState(() {
-                        });
-                        expandedStudentsChoice[index] = false;
-                        print(expandedStudentsChoice);
-                      }, icon: Icon(PhosphorIcons.arrowDown()))
+                      IconButton(
+                        onPressed: (){
+                          setState(() {
+                          });
+                          expandedStudentsChoice[index] = false;
+                          print(expandedStudentsChoice);
+                        },
+                          icon: Icon(PhosphorIcons.arrowDown())
+                        ),
                     ],
                   )
-                  // Text(choice.school.country),
                 ],
               ),
-              Row(
+              const SizedBox(height: 4),
+              Text(
+                choice.school.country,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Niveau académique requis"),
-                      Text("${choice.school.academic_level}"),
-                      Text("Langue d'enseignement"),
-                      Text("${choice.school.use_langage}"),
-                      Text("Nombre de place"),
-                    ],
-                  )
+                  Text("Niveau académique requis"),
+                  Text("${choice.school.academic_level}"),
+                  Text("Langue d'enseignement"),
+                  Text("${choice.school.use_langage}"),
+                  Text("Nombre de place"),
                 ],
-              )
+              ),
             ],
           ),
           child: Row(
             children: [
               Column(
                 children: [
-                  Text(choice.school.name),
-                  Text(choice.school.country)
+                  Text(
+                    choice.school.name,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    choice.school.country,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
                 ],
               ),
-              Spacer(),
-              Column(
-                children: [
-                  IconButton(onPressed: (){
-                    setState(() {
-                      expandedStudentsChoice[index] = true;
-                    });
-                  }, icon: Icon(PhosphorIcons.arrowDown()))
-                ],
-              )
-              // Text(choice.school.country),
+              const Spacer(),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    expandedStudentsChoice[index] = true;
+                  });
+                },
+                icon: Icon(PhosphorIcons.arrowDown()),
+              ),
             ],
           ),
         ),
