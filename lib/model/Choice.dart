@@ -26,4 +26,5 @@ class Choice {
     return 'Choix{École: $school, Classement Inter.: $interranking}';
   }
 
+
 }
