@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mobinsa/model/Choice.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-
-
 
 class DisplayApplicants extends StatefulWidget {
   const DisplayApplicants({Key? key}) : super(key: key);
@@ -18,13 +17,16 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
     {'nom': 'Petit', 'prenom': 'Emma', 'promo': "3A STI"},
     {'nom': 'Robert', 'prenom': 'Thomas', 'promo': "3A STI"},
   ];
-  final List<String> choices = [
-    "Choix 1",
-    "Choix 2",
-    "Choix 3",
+  
+  final List<Map<String, String>> schools = [
+    {'nom': 'Ecole 1', 'pays': 'Pays X'},
+    {'nom': 'Ecole 2', 'pays': 'Pays Y'},
+    {'nom': 'Ecole 3', 'pays': 'Pays Z'},
   ];
+  
   Map<String, String>? selectedStudent;
-
+  Map<int, bool?> schoolChoices = {}; // null = pas de choix, true = accepté, false = refusé
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -32,7 +34,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
         appBar: AppBar(
           title: const Text(
             "Mob'INSA",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, ),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           actions: [
             IconButton(
@@ -45,11 +47,11 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
               },
               tooltip: "Exporter en excel",
             ),
-              IconButton(
-                icon: Icon(PhosphorIcons.gear(PhosphorIconsStyle.regular), size: 32.0),
-                onPressed: null,
-                tooltip: "Cette fonctionnalité n'est pas encore disponible",
-              ),
+            IconButton(
+              icon: Icon(PhosphorIcons.gear(PhosphorIconsStyle.regular), size: 32.0),
+              onPressed: null,
+              tooltip: "Cette fonctionnalité n'est pas encore disponible",
+            ),
           ],
           backgroundColor: Colors.grey[100],
         ),
@@ -72,9 +74,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           style: const TextStyle(fontSize: 14),
                         ),
                         onTap: () {
-                          // TODO: Gérer la sélection de l'étudiant
                           setState(() {
                             selectedStudent = students[index];
+                            schoolChoices.clear(); // Reset des choix
                           });
                         },
                       ),
@@ -86,128 +88,297 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
             // Contenu principal (80% de la largeur)
             Container(
               width: MediaQuery.of(context).size.width * 0.8,
-              child: selectedStudent != null ? Column(
-                children: [
-                  // Section nom/prénom/promo
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${selectedStudent!['prenom']} ${selectedStudent!['nom']}',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '${selectedStudent!['promo']}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Section Choix (gauche)
-                      Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(16.0),
-                        color: Colors.grey[100],
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Choix',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              height: 200, // Hauteur fixe
-                              child: ListView.builder(
-                                itemCount: choices.length,
-                                itemBuilder: (context, index) {
-                                  return Card(
-                                    margin: const EdgeInsets.only(bottom: 8.0),
-                                    child: ListTile(
-                                      title: Text(choices[index]),
-                                      onTap: () {
-                                        // TODO: Gérer la sélection du choix
-                                      },
+              child: selectedStudent != null
+                  ? SingleChildScrollView(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Section nom/prénom/promo
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Nom et promo à gauche
+                              Expanded(
+                                flex: 1,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${selectedStudent!['prenom']} ${selectedStudent!['nom']}',
+                                      style: const TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                      
-                      // Sections droite
-                      Expanded(
-                        child: Column(
-                          children: [
-                            // Section Infos perso
-                            Container(
-                              padding: const EdgeInsets.all(16.0),
-                              color: Colors.grey[100],
-                              child: const Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Infos perso',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      '${selectedStudent!['promo']}',
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            
-                            // Section boutons
-                            Container(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () {},
-                                    child: const Text('Previous'),
+                              const SizedBox(width: 20),
+                              // Informations sur l'élève à droite
+                              Expanded(
+                                flex: 1,
+                                child: Container(
+                                  padding: const EdgeInsets.all(16.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[300],
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  ElevatedButton(
-                                    onPressed: () {},
-                                    child: const Text('Commenter'),
+                                  child: const Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Informations sur l\'élève (niveau de langue, niveau académique,...)',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  ElevatedButton(
-                                    onPressed: () {},
-                                    child: const Text('Next'),
-                                  ),
-                                ],
+                                ),
                               ),
+                            ],
                           ),
-                         ],
+                          
+                          const SizedBox(height: 30),
+                          
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Section Écoles (gauche)
+                              Expanded(
+                                flex: 1,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Liste des écoles
+                                    ...schools.asMap().entries.map((entry) {
+                                      int index = entry.key;
+                                      Map<String, String> school = entry.value;
+                                      
+                                      return Container(
+                                        margin: const EdgeInsets.only(bottom: 16.0),
+                                        padding: const EdgeInsets.all(16.0),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[300],
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            // Informations école
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                    children: [
+                                                      Text(
+                                                        school['nom']!,
+                                                        style: const TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                      Icon(
+                                                        Icons.keyboard_arrow_down,
+                                                        color: Colors.grey[600],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    school['pays']!,
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            const SizedBox(width: 16),
+                                            // Boutons Accepter/Refuser
+                                            Row(
+                                              children: [
+                                                // Bouton Refuser (X)
+                                                Container(
+                                                  width: 40,
+                                                  height: 40,
+                                                  child: ElevatedButton(
+                                                    onPressed: () {
+                                                      // TODO: Marquer l'école comme refusée
+                                                      setState(() {
+                                                        schoolChoices[index] = false;
+                                                      });
+                                                    },
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor: schoolChoices[index] == false 
+                                                          ? Colors.red[700] 
+                                                          : Colors.red,
+                                                      padding: EdgeInsets.zero,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(6),
+                                                      ),
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons.close,
+                                                      color: Colors.white,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                // Bouton Accepter (✓)
+                                                Container(
+                                                  width: 40,
+                                                  height: 40,
+                                                  child: ElevatedButton(
+                                                    onPressed: () {
+                                                      // TODO: Marquer l'école comme acceptée
+                                                      setState(() {
+                                                        schoolChoices[index] = true;
+                                                      });
+                                                    },
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor: schoolChoices[index] == true 
+                                                          ? Colors.green[700] 
+                                                          : Colors.green,
+                                                      padding: EdgeInsets.zero,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(6),
+                                                      ),
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons.check,
+                                                      color: Colors.white,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ],
+                                ),
+                              ),
+                              
+                              const SizedBox(width: 20),
+                              
+                              // Section Boutons d'action (droite)
+                              Expanded(
+                                flex: 1,
+                                child: Column(
+                                  children: [
+                                    // Bouton Laisser un commentaire
+                                    Container(
+                                      width: double.infinity,
+                                      height: 60,
+                                      margin: const EdgeInsets.only(bottom: 16),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          // TODO: Implémenter la fonctionnalité de commentaire
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Laissez un commentaire',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    
+                                    // Bouton Revenir à l'étudiant précédent
+                                    Container(
+                                      width: double.infinity,
+                                      height: 50,
+                                      margin: const EdgeInsets.only(bottom: 16),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          // TODO: Implémenter la navigation vers l'étudiant précédent
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.grey[300],
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Revenir à l\'étudiant précédent',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    
+                                    // Bouton Passer à l'étudiant suivant
+                                    Container(
+                                      width: double.infinity,
+                                      height: 50,
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          // TODO: Implémenter la navigation vers l'étudiant suivant
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.grey[300],
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Passer à l\'étudiant Suivant',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                     ),
-                   ],
-                 ),
-               ],
-             ) : const Center(child: Text("Sélectionnez un étudiant")),
-           ),
-         ],
+                    )
+                  : const Center(child: Text("Sélectionnez un étudiant")),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget schoolCard(Choice choice) {
+    return Card(
+      child: Column(
+        children: [
+          Text(choice.school.name),
+          // Text(choice.school.country),
+        ],
       ),
     );
   }
