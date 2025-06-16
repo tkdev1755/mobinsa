@@ -4,6 +4,7 @@ import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mobinsa/model/parser.dart';
+import 'package:mobinsa/model/Student.dart';  
 
 void main() {
   runApp(const MyApp());
@@ -130,12 +131,20 @@ class _MyHomePageState extends State<MyHomePage> {
               }
             }, child: Text("Importez les écoles")),
             Padding(padding: EdgeInsets.only(bottom: 10)),
-            ElevatedButton(onPressed: () async {
-              String? filePath = await pickFile();
-              if (filePath != null){
-                SheetParser.parseExcel(filePath);
-              }
-            }, child: Text("Importez les étudiants"))
+            ElevatedButton(
+              onPressed: () async {
+                String? filePath = await pickFile();
+                if (filePath != null){
+                  List<Student> students = SheetParser.extractStudents(filePath);
+                  // Afficher les étudiants dans la console
+                  for (var student in students) {
+                    print(student);
+                  }
+                  // Vous pouvez aussi mettre à jour l'UI pour afficher ces étudiants
+                }
+              }, 
+              child: Text("Importez les étudiants")
+            )
           ],
         ),
       ),
