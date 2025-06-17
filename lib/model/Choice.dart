@@ -5,7 +5,7 @@ class Choice {
   School school;
   double interranking;
   Student student;
-
+  String? post_comment;
   Choice (this.school, this.interranking,this.student);
 
   bool accepted(Student s) {

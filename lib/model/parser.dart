@@ -454,7 +454,6 @@ class SheetParser{
       DoubleCellValue studentMissedHours = DoubleCellValue(currentChoice.student.missed_hours);
       IntCellValue studentPlaces = IntCellValue(currentChoice.school.available_slots);
       TextCellValue studentComment = TextCellValue(currentChoice.student.comment);
-      TextCellValue studentAfterComment = TextCellValue(currentChoice.student.post_comment ?? " - ");
       studentValues = [
         studentName,
         studentWish,
@@ -463,7 +462,7 @@ class SheetParser{
         studentDepartment,
         studentInterRanking,
         studentCredits,
-        studentEngLVL, studentMissedHours,studentPlaces, studentComment,studentAfterComment];
+        studentEngLVL, studentMissedHours,studentPlaces, studentComment];
       resultSheet.appendRow(studentValues);
       List<Data?> currentRow = resultSheet.row(i+1);
       print("Right now student has the following wish accepted ${currentStudent.accepted_school}");
