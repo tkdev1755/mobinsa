@@ -123,6 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: schoolsLoaded ? () async {
                 String? filePath = await pickFile();
                 if (filePath != null){
+
                   selectedFilenameStudents = filePath.split("/").last;
                   Excel studentsResult = SheetParser.parseExcel(filePath);
                   if (!schoolsLoaded){

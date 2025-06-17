@@ -1,6 +1,8 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/Student.dart';
+import 'package:mobinsa/model/parser.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../model/School.dart';
@@ -12,7 +14,7 @@ import '../model/School.dart';
   16/06/2025@tahakhetib : J'ai apporté les modification suivantes
     - Ajouté les boutons accepter et refuser dans le choiceCard
     - Modifié le widget dans la liste de voeux pour le mettre à jour vers choice card
-    -
+    - Ajouté l'export du fichier excel
  */
 class DisplayApplicants extends StatefulWidget {
   List<School> schools;
@@ -58,7 +60,16 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                 PhosphorIcons.export(PhosphorIconsStyle.regular),
                 size: 32.0,
               ),
-              onPressed: () {
+              onPressed: () async {
+                List<int> bytes = SheetParser.exportResult(widget.students, widget.schools);
+                String? path = await FilePicker.platform.saveFile();
+                if (path != null){
+                  print("Now saving the excel file");
+                  SheetParser.saveExcelToDisk(path, bytes);
+                }
+                else{
+                  // TODO - Ajouter une gestion des erreurs
+                }
                 // TODO: Exporter en excel
               },
               tooltip: "Exporter en excel",
@@ -155,7 +166,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text("Niveau en langue",),
+                                    const Text("Niveau d'anglais",),
                                     Text("${selectedStudent!.lang_lvl}",
                                       style: const TextStyle(
                                         fontSize: 18,

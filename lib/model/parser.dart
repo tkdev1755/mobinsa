@@ -76,7 +76,10 @@ class SheetParser{
     else{
       throw Exception();
     }
+
   }
+
+
 
 
   // --- Méthode principale pour extraire les étudiants ---
@@ -233,7 +236,7 @@ class SheetParser{
           stdout.write("$value; ");
         }
         //VERSION DU TABLEUR
-        int version = 2;
+        int version = 1;
         if(version==2) {
           String name = sheet.rows[row][0]?.value.toString() ?? "PROBLEM NAME";
           String country = sheet.rows[row][1]?.value.toString() ??
@@ -340,6 +343,65 @@ class SheetParser{
       }
     }
     return spez;
+  }
+  static List<int> exportResult(List<Student> students, List<School> schools){
+    Map<int,String> indexes = {
+      0 : "Nom",
+      1 : "Voeu",
+      2 : "Pays",
+      3 : "Etablissement",
+      4 : "Département",
+      5 : "Interclassement",
+      6 : "Nb ECTS",
+      7 : "Niveau Anglais",
+      8 : "Absences",
+      9 : "Nbre de Places",
+      10 : "Commentaires",
+      11 : "Commentaires post-jury"
+    };
+    const studentNameColumn = (0,"Nom");
+    const studentWishColumn = (1,"Voeu");
+    const studentCountryColumn = (2,"Pays");
+    const studentSchoolColumn = (3,"Etablissement");
+    const studentDepartmentColumn = (4,"Département");
+    const studentInterRankingColumn = (5,"Interclassement");
+    const studentCreditsColumn = (6,"Nb ECTS");
+    const studentEngLVLColumn = (7,"Niveau Anglais");
+    const studentMissedHoursColumn = (8,"Absences");
+    const studentPlacesColumn = (9,"Nbre de Places");
+    const studentCommentColumn = (10,"Commentaire");
+    const studentAfterCommentColumn = (11,"Commentaire post-jury");
+
+    List<(int,int,Choice)> allChoices = [];
+    for (var s in students){
+      for (var c in s.choices.entries){
+       allChoices.add((s.id, c.key,c.value));
+      }
+    }
+    allChoices.sort((a,b) => b.$3.interranking.compareTo(a.$3.interranking));
+    Excel exportedExcel = Excel.createExcel();
+    Sheet resultSheet = exportedExcel.sheets["Sheet1"]!;
+    // Colonne N°1 : Ajoute le nom des étudiants
+    List<CellValue?> test = [];
+    resultSheet.insertRow(0);
+    for (int i = 0; i < 12; i++){
+      resultSheet.insertColumn(i);
+      CellValue value = TextCellValue(indexes[i]!);
+      test.add(value);
+    }
+    resultSheet.appendRow(test);
+    return exportedExcel.save() ?? [];
+
+
+
+    return [];
+  }
+
+  static int saveExcelToDisk(String path, List<int> bytes){
+    File excelFile = File(path);
+    excelFile.createSync();
+    excelFile.writeAsBytes(bytes);
+    return 1;
   }
 }
 
