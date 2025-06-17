@@ -195,6 +195,19 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                     )
                                   ],
                                 ),
+                                Padding(padding: EdgeInsets.only(right: 20)),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text("Classement S1",),
+                                    Text("${selectedStudent!.ranking_s1}",
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ],
                             ),
                           ),
@@ -460,10 +473,13 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text("Niveau académique requis"),
-                          Text("${choice.school.academic_level}",
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
+                          SizedBox(
+                            width: MediaQuery.sizeOf(context).width*0.5*0.4,
+                            child: Text("${choice.school.academic_level}",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                           Text("Langue d'enseignement",
@@ -477,6 +493,29 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           ),
                           Text("Nombre de places"),
                           Text("${choice.school.remaining_slots} | ",
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Padding(padding: EdgeInsets.only(right: 20)),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Discipline"),
+                          SizedBox(
+                            width : MediaQuery.sizeOf(context).width*0.5*0.3,
+                            child: Text("${choice.school.specialization.toString().replaceAll("[", "").replaceAll("]", "")}",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          Text("Interclassement"),
+                          Text("${choice.interranking}",
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
