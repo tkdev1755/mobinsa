@@ -50,7 +50,11 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
               ),
               onPressed: () async {
                 List<int> bytes = SheetParser.exportResult(widget.students, widget.schools);
-                String? path = await FilePicker.platform.saveFile();
+                String? path = await FilePicker.platform.saveFile(
+                  fileName: "CR_JURY_MOBILITE_${DateTime.now().year}",
+                  type: FileType.custom,
+                  allowedExtensions: ["xlsx"]
+                );
                 if (path != null){
                   print("Now saving the excel file");
                   SheetParser.saveExcelToDisk(path, bytes);

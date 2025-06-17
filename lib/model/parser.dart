@@ -428,13 +428,56 @@ class SheetParser{
     Sheet resultSheet = exportedExcel.sheets["Sheet1"]!;
     // Colonne N°1 : Ajoute le nom des étudiants
     List<CellValue?> test = [];
-    resultSheet.insertRow(0);
     for (int i = 0; i < 12; i++){
       resultSheet.insertColumn(i);
       CellValue value = TextCellValue(indexes[i]!);
       test.add(value);
     }
     resultSheet.appendRow(test);
+    int i = 0;
+    for (var c in allChoices){
+      List<CellValue?> studentValues = [];
+      Choice currentChoice = c.$3;
+      Student? currentStudent = students.where((e) => e.id == c.$1).firstOrNull;
+      if (currentStudent == null){
+        throw Exception("The current student doesn't exist ????");
+      }
+      int choiceNumber = c.$2;
+      TextCellValue studentName = TextCellValue(currentStudent.name);
+      IntCellValue studentWish = IntCellValue(choiceNumber);
+      TextCellValue studentCountry = TextCellValue(currentChoice.school.country);
+      TextCellValue studentSchool = TextCellValue(currentChoice.school.name);;
+      TextCellValue studentDepartment = TextCellValue(currentChoice.student.departement);
+      DoubleCellValue studentInterRanking = DoubleCellValue(currentChoice.interranking);;
+      IntCellValue studentCredits = IntCellValue(currentChoice.student.ects_number);
+      TextCellValue studentEngLVL = TextCellValue(currentChoice.student.lang_lvl);
+      DoubleCellValue studentMissedHours = DoubleCellValue(currentChoice.student.missed_hours);
+      IntCellValue studentPlaces = IntCellValue(currentChoice.school.available_slots);
+      TextCellValue studentComment = TextCellValue(currentChoice.student.comment);
+      TextCellValue studentAfterComment = TextCellValue(currentChoice.student.post_comment ?? " - ");
+      studentValues = [
+        studentName,
+        studentWish,
+        studentCountry,
+        studentSchool,
+        studentDepartment,
+        studentInterRanking,
+        studentCredits,
+        studentEngLVL, studentMissedHours,studentPlaces, studentComment,studentAfterComment];
+      resultSheet.appendRow(studentValues);
+      List<Data?> currentRow = resultSheet.row(i+1);
+      print("Right now student has the following wish accepted ${currentStudent.accepted_school}");
+      if ( currentStudent.accepted != null &&  currentStudent.accepted!.school.id == c.$3.school.id
+      ){
+        print("The voeux was accepted ! Painting it in green");
+        for (var data in currentRow){
+          data!.cellStyle = CellStyle(
+            backgroundColorHex: ExcelColor.green200
+          );
+        }
+      }
+      i++;
+    }
     return exportedExcel.save() ?? [];
 
 
@@ -443,7 +486,7 @@ class SheetParser{
   }
 
   static int saveExcelToDisk(String path, List<int> bytes){
-    File excelFile = File("$path.xlsx");
+    File excelFile = File("$path");
     excelFile.createSync();
     excelFile.writeAsBytes(bytes);
     return 1;

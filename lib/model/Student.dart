@@ -6,6 +6,7 @@ class Student {
   String name;
   Map <int,Choice> choices;
   Choice? accepted;
+  List<Choice> refused = [];
   School? accepted_school;
   String specialization;
   int ranking_s1 ;
@@ -64,6 +65,13 @@ class Student {
     }
   }
 
+  void addRefusedChoice(Choice choice){
+    refused.add(choice);
+  }
+
+  void removeRefusedChoice(Choice choice){
+    refused.remove(choice);
+  }
   void add_post_comment( String new_comment ) {
     this.post_comment = new_comment;
   }
