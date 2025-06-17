@@ -103,7 +103,13 @@ class _MyHomePageState extends State<MyHomePage> {
               String? filePath = await pickFile();
               if (filePath != null){
                 setState(() {
-                  selectedFilenameSchools = filePath.split("/").last;
+                  if(Platform.isWindows){
+                    selectedFilenameSchools = filePath.split('\\').last;
+                  }
+                  else{
+                     selectedFilenameSchools = filePath.split("/").last;
+                  }
+                 
                 });
                 Excel schoolResult = SheetParser.parseExcel(filePath);
                 try {
@@ -128,7 +134,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 String? filePath = await pickFile();
                 if (filePath != null) {
                   setState(() {
-                    selectedFilenameStudents = filePath.split("/").last;
+                    if(Platform.isWindows){
+                      selectedFilenameStudents = filePath.split('\\').last;
+                    }else{
+                      selectedFilenameStudents = filePath.split("/").last;
+                    }
+                    
                   });
                   Excel studentsResult = SheetParser.parseExcel(filePath);
                   try {
