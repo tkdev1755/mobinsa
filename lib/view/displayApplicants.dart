@@ -26,25 +26,12 @@ class DisplayApplicants extends StatefulWidget {
 }
 
 class _DisplayApplicantsState extends State<DisplayApplicants> {
-  final List<Map<String, String>> students = [
-    {'nom': 'Dupont', 'prenom': 'Jean', 'promo': "3A STI"},
-    {'nom': 'Martin', 'prenom': 'Sophie', 'promo': "3A STI"},
-    {'nom': 'Bernard', 'prenom': 'Lucas', 'promo': "3A STI"},
-    {'nom': 'Petit', 'prenom': 'Emma', 'promo': "3A STI"},
-    {'nom': 'Robert', 'prenom': 'Thomas', 'promo': "3A STI"},
-  ];
-
-  final List<Map<String, String>> schools = [
-    {'nom': 'Ecole 1', 'pays': 'Pays X'},
-    {'nom': 'Ecole 2', 'pays': 'Pays Y'},
-    {'nom': 'Ecole 3', 'pays': 'Pays Z'},
-  ];
 
   Student? selectedStudent;
   Map<int, bool?> schoolChoices = {}; // null = pas de choix, true = accepté, false = refusé
   int currentStudentIndex = -1;
   List<bool> expandedStudentsChoice = [false,false,false];
-
+  Color disabledColor = Colors.grey[100]!;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -80,7 +67,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
               tooltip: "Cette fonctionnalité n'est pas encore disponible",
             ),
           ],
-          backgroundColor: Colors.grey[100],
+          backgroundColor: disabledColor,
         ),
         body: Row(
           children: [
@@ -95,6 +82,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                   itemBuilder: (context, index) {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 8.0),
+                      color: widget.students[index].accepted_school != null ? Colors.green[700] : Colors.grey[300],
                       child: ListTile(
                         title: Text(
                           widget.students[index].name,
@@ -188,13 +176,6 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                     )
                                   ],
                                 ),
-                                /*const Text(
-                                        'Informations sur l\'élève (niveau de langue, niveau académique,...)',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),*/
                               ],
                             ),
                           ),
@@ -338,7 +319,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
     // TODO: Ajouter les bouttons pour accepter et refuser dans un row de la column du iconbutton
     return Card(
       margin: const EdgeInsets.only(bottom: 8.0),
-      color: Colors.grey[300],
+      color: choice.student.accepted_school == choice.school ? disabledColor : Colors.grey[300],
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
@@ -366,10 +347,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                       IconButton(
                           onPressed: (){
                             setState(() {
+                              expandedStudentsChoice[index-1] = false;
                             });
-                            expandedStudentsChoice[index-1] = false;
                           },
-                          icon: Icon(PhosphorIcons.arrowUp())
+                          icon: Icon(PhosphorIcons.arrowUp()),
                       ),
                     ],
                   )
@@ -425,10 +406,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                     width: 40,
                     height: 40,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // TODO: Marquer l'école comme refusée
+                      onPressed: schoolChoices[index] != true ? null : () {
                         setState(() {
                           schoolChoices[index] = false;
+                          choice.student.accepted_school = null;
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -453,10 +434,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                     width: 40,
                     height: 40,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // TODO: Marquer l'école comme acceptée
+                      onPressed: choice.student.accepted_school != null ? null : () {
                         setState(() {
                           schoolChoices[index] = true;
+                          choice.student.accepted_school = choice.school;
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -529,10 +510,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           width: 40,
                           height: 40,
                           child: ElevatedButton(
-                            onPressed: () {
-                              // TODO: Marquer l'école comme refusée
+                            onPressed: schoolChoices[index] != true ? null : () {
                               setState(() {
                                 schoolChoices[index] = false;
+                                choice.student.accepted_school = null;
                               });
                             },
                             style: ElevatedButton.styleFrom(
@@ -557,10 +538,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           width: 40,
                           height: 40,
                           child: ElevatedButton(
-                            onPressed: () {
-                              // TODO: Marquer l'école comme acceptée
+                            onPressed: choice.student.accepted_school != null ? null : () {
                               setState(() {
                                 schoolChoices[index] = true;
+                                choice.student.accepted_school = choice.school;
                               });
                             },
                             style: ElevatedButton.styleFrom(
