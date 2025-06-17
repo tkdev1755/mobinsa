@@ -128,8 +128,12 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: schoolsLoaded ? () async {
                 String? filePath = await pickFile();
                 if (filePath != null){
+                  if(Platform.isWindows){
+                    selectedFilenameStudents = filePath.split('\\').last;
+                  }else{
+                    selectedFilenameStudents = filePath.split("/").last;
+                  }
                   
-                  selectedFilenameStudents = filePath.split("/").last;
                   Excel studentsResult = SheetParser.parseExcel(filePath);
                   if (!schoolsLoaded){
                     return;
