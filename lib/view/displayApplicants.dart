@@ -20,6 +20,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
   Map<int, bool?> schoolChoices = {}; // null = pas de choix, true = accepté, false = refusé
   List<Choice> selectedStudentChoices = [];
   List<bool> expandedStudentsChoice = [];
+  int currentStudentIndex = -1; // Add this line to track current index
   
   @override
   Widget build(BuildContext context) {
@@ -77,6 +78,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                         onTap: () {
                           setState(() {
                             selectedStudent = student;
+                            currentStudentIndex = index; // Add this line
                             schoolChoices.clear(); // Reset des choix
                             selectedStudentChoices = student.choices.values.toList();
                             expandedStudentsChoice = List.generate(
@@ -341,14 +343,15 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                       height: 50,
                                       margin: const EdgeInsets.only(bottom: 16),
                                       child: ElevatedButton(
-                                        onPressed: () {
-                                          // TODO: Implémenter la navigation vers l'étudiant précédent
-                                        },
+                                        onPressed: currentStudentIndex > 0
+                                          ? () => selectStudentByIndex(currentStudentIndex - 1)
+                                          : null, // Disable if we're at the first student
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.grey[300],
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(8),
                                           ),
+                                          disabledBackgroundColor: Colors.grey[200],
                                         ),
                                         child: const Text(
                                           'Revenir à l\'étudiant précédent',
@@ -365,14 +368,15 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                       width: double.infinity,
                                       height: 50,
                                       child: ElevatedButton(
-                                        onPressed: () {
-                                          // TODO: Implémenter la navigation vers l'étudiant suivant
-                                        },
+                                        onPressed: currentStudentIndex < widget.students.length - 1 
+                                          ? () => selectStudentByIndex(currentStudentIndex + 1)
+                                          : null, // Disable if we're at the last student
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.grey[300],
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(8),
                                           ),
+                                          disabledBackgroundColor: Colors.grey[200],
                                         ),
                                         child: const Text(
                                           'Passer à l\'étudiant Suivant',
@@ -397,6 +401,21 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
         ),
       ),
     );
+  }
+
+  void selectStudentByIndex(int index) {
+    if (index >= 0 && index < widget.students.length) {
+      setState(() {
+        selectedStudent = widget.students[index];
+        currentStudentIndex = index;
+        schoolChoices.clear();
+        selectedStudentChoices = widget.students[index].choices.values.toList();
+        expandedStudentsChoice = List.generate(
+          selectedStudentChoices.length, 
+          (_) => false
+        );
+      });
+    }
   }
 
   Widget choiceCard(Choice choice, int index) {
