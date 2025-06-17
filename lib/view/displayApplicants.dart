@@ -394,8 +394,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
   }
 
   bool disbaleChoice(Choice choice){
+    //TODO: check if the student rank is the best
     return (choice.student.accepted != null && choice.student.accepted != choice) || 
-           (choice.school.available_slots == 0 && choice.student.accepted != choice);
+           (choice.school.remaining_slots == 0 && choice.student.accepted != choice);
   }
 
 
@@ -475,7 +476,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                             ),
                           ),
                           Text("Nombre de places"),
-                          Text("${choice.school.available_slots} | ",
+                          Text("${choice.school.remaining_slots} | ",
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
@@ -490,7 +491,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                     width: 40,
                     height: 40,
                     child: ElevatedButton(
-                      onPressed: choice.student.accepted != null ? null : () {
+                      onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () {
                         setState(() {
                           schoolChoices[index] = false;
                             choice.remove_choice();

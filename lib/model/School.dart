@@ -33,8 +33,9 @@ class School {
 
   void reduce_slots(Student s) {
     //réduire le nombre de places d'une offre de séjour si on affecté une mobilité à un étudiant
-    if (this.available_slots > 0) {
-      this.available_slots--;
+    if (this.remaining_slots > 0) {
+      this.remaining_slots--;
+      // this.available_slots--;
       if (s.year > 2) {
         this.m_slots--;
         print("SLOT SUCCESSFULLY REMOVED MASTER");
@@ -46,15 +47,20 @@ class School {
         if (this.b_slots == 0) this.is_full_b = true;
       }
     }
-    if (this.available_slots == 0)
+    if (this.remaining_slots == 0)
       this.is_full = true;
   }
 
   void add_slots(Student s) {
     //augmenter le nombre de places si on décide d'enlever une mobilité à un élève
-    this.available_slots++;
-    if (s.year > 2) this.m_slots++;
-    if (s.year == 2) this.b_slots++;
+    if(this.remaining_slots < this.available_slots){
+      this.remaining_slots++;
+      if (s.year > 2) this.m_slots++;
+      if (s.year == 2) this.b_slots++;
+    }
+    else{
+      print("NO MORE SLOTS AVAILABLE");
+    }
   }
 
   bool accepted(Student s) {
