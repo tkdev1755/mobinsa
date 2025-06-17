@@ -60,5 +60,10 @@ class School {
       return true;
     }
     return false;
-    }
   }
+  @override
+  String toString() {
+    // TODO: implement toString
+    return "Ecole : $name - $country - $specialization";
+  }
+}

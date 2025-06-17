@@ -107,7 +107,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 });
                 //Afficher les écoles dans la console
                 Excel schoolResult = SheetParser.parseExcel(filePath);
-                SheetParser.parseSchools(schoolResult);
+                schools = SheetParser.parseSchools(schoolResult);
+                schoolsLoaded = schools.isNotEmpty;
+                setState(() {
+
+                });
               }
               }, child: Text("Importez les écoles"),
             ),
@@ -116,21 +120,31 @@ class _MyHomePageState extends State<MyHomePage> {
             Padding(padding: EdgeInsets.only(bottom: 10)),
             /// BOUTON POUR LES ETUDIANTS
             ElevatedButton(
-              onPressed: studentsLoaded ? () async {
+              onPressed: schoolsLoaded ? () async {
                 String? filePath = await pickFile();
                 if (filePath != null){
                   selectedFilenameStudents = filePath.split("/").last;
                   Excel studentsResult = SheetParser.parseExcel(filePath);
+                  if (!schoolsLoaded){
+                    return;
+                  }
                   try {
-                    List<Student> students = SheetParser.extractStudents(studentsResult);
+                    students = SheetParser.extractStudents(studentsResult,schools);
                     studentsLoaded = students.isNotEmpty;
+                    for (var student in students) {
+                      print(student);
+                    }
+                    setState(() {
+
+                    });
                   } catch (e, s) {
                     print(s);
                   }
                   // Afficher les étudiants dans la console
-                  for (var student in students) {
-                    print(student);
-                  }
+
+                }
+                else{
+                  print("Aucun fichier sélectionné");
                 }
               } : null,
               child: Text("Importez les étudiants")
@@ -142,7 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const DisplayApplicants()),
+                  MaterialPageRoute(builder: (context) => DisplayApplicants(schools: schools,students: students,)),
                 );
               },
               child: Text("Page d'affichage"),

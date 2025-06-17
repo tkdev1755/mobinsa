@@ -5,7 +5,13 @@ import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/School.dart';
 
+/*
 
+
+  16/06/2025@tahakhetib : J'ai apporté les modification suivantes
+    - Mis à jour la fonction de Mehdi des étudiants pour récupérer l'école à partir d'un voeu
+    - Corrigé la fonction de Max des
+ */
 class ExcelParsingException implements Exception {
   final String message;
   ExcelParsingException(this.message);
@@ -76,7 +82,7 @@ class SheetParser{
   // --- Méthode principale pour extraire les étudiants ---
 
 
-  static List<Student> extractStudents(Excel excel) {
+  static List<Student> extractStudents(Excel excel, List<School> schools) {
     Map<String, Student> tempStudentMap = {};
     int nextStudentId=1;
 
@@ -171,8 +177,11 @@ class SheetParser{
       }
 
       // Création de l'objet School
-      School school = School(schoolName,"ds","",0,0,0,[],"","","","","");
-
+      School? school = schools.where((e) => e.name == schoolName).firstOrNull;
+      if (school == null){
+        print("The schools doesn't appear in the list of parsed school");
+        return [];
+      }
       // Création de l'objet Choice (en passant l'instance de Student, comme défini dans votre classe Choice)
       Choice choice = Choice(school, interRanking, currentStudent);
 
@@ -235,11 +244,11 @@ class SheetParser{
         //int m_slots = int.parse(sheet.rows[row][5]?.value.toString() ?? "-1");
         //String spez = sheet.rows[row][6]?.value.toString() ?? "PROBLEM SPECIALIZATION";
         //List<String> specialization = specializationStringToList(spez);
-        String graduation_level = sheet.rows[row][7]?.value.toString() ?? "PROBLEM GRADUATION_LEVEL";
-        String program = sheet.rows[row][8]?.value.toString() ?? "PROBLEM PROGRAM";
-        String use_language = sheet.rows[row][9]?.value.toString() ?? "PROBLEM USE_LANGUAGE";
-        String req_lang_level = sheet.rows[row][10]?.value.toString() ?? "PROBLEM REQ_LANG_LEVEL";
-        String academic_level = sheet.rows[row][11]?.value.toString() ?? "PROBLEM ACADEMIC_LEVEL";
+        String graduation_level = sheet.rows[row][6]?.value.toString() ?? "PROBLEM GRADUATION_LEVEL";
+        String program = sheet.rows[row][7]?.value.toString() ?? "PROBLEM PROGRAM";
+        String use_language = sheet.rows[row][8]?.value.toString() ?? "PROBLEM USE_LANGUAGE";
+        String req_lang_level = sheet.rows[row][9]?.value.toString() ?? "PROBLEM REQ_LANG_LEVEL";
+        String academic_level = sheet.rows[row][10]?.value.toString() ?? "PROBLEM ACADEMIC_LEVEL";
         School school = School(
           name,
           country,
