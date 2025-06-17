@@ -105,9 +105,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 setState(() {
                   selectedFilenameSchools = filePath.split("/").last;
                 });
-                //Afficher les écoles dans la console
                 Excel schoolResult = SheetParser.parseExcel(filePath);
-                SheetParser.parseSchools(schoolResult);
+                try {
+                  List<School> parsedSchools = SheetParser.parseSchools(schoolResult);
+                  setState(() {
+                    schools = parsedSchools;
+                    schoolsLoaded = schools.isNotEmpty;
+                  });
+                } catch (e, s) {
+                  print("Error parsing schools: $e");
+                  print(s);
+                }
               }
               }, child: Text("Importez les écoles"),
             ),

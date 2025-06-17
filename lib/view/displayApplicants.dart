@@ -276,7 +276,28 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                         ),
                                       );
                                     }).toList(),
-                                    choiceCard(selectedStudentChoices[0],0)
+                                    ...selectedStudentChoices.asMap().entries.map((entry) {
+                                      int index = entry.key;
+                                      Choice choice = entry.value;
+                                      return Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          if (index == 0) 
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: 24.0, bottom: 8.0),
+                                              child: Text(
+                                                "Choix de l'étudiant",
+                                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                              ),
+                                            ),
+                                          Text(
+                                            "Choix #${index+1}",
+                                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                                          ),
+                                          choiceCard(choice, index),
+                                        ],
+                                      );
+                                    }).toList(),
                                   ],
                                 ),
                               ),
@@ -379,98 +400,53 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
   }
 
   Widget choiceCard(Choice choice, int index) {
-    // TODO: Ajouter les bouttons pour accepter et refuser dans un row de la column du iconbutton
-    print("expanded ? ${expandedStudentsChoice[index]}");
     return Card(
-      margin: const EdgeInsets.only(bottom: 8.0),
-      color: Colors.grey[300],
+      margin: const EdgeInsets.only(bottom: 16.0),
+      color: Colors.grey[200],
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Visibility(
-          visible: !expandedStudentsChoice[index],
-          replacement: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
                     choice.school.name,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Column(
-                    children: [
-                      IconButton(
-                        onPressed: (){
-                          setState(() {
-                          });
-                          expandedStudentsChoice[index] = false;
-                          print(expandedStudentsChoice);
-                        },
-                          icon: Icon(PhosphorIcons.arrowDown())
-                        ),
-                    ],
-                  )
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                choice.school.country,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
                 ),
-              ),
-              const SizedBox(height: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Niveau académique requis"),
-                  Text("${choice.school.academic_level}"),
-                  Text("Langue d'enseignement"),
-                  Text("${choice.school.use_langage}"),
-                  Text("Nombre de place"),
-                ],
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Column(
-                children: [
-                  Text(
-                    choice.school.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                Text(
+                  "Classement: ${choice.interranking}",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
-                  Text(
-                    choice.school.country,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            Text(
+              "Pays: ${choice.school.country}",
+              style: TextStyle(
+                fontSize: 14,
               ),
-              const Spacer(),
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    expandedStudentsChoice[index] = true;
-                  });
-                },
-                icon: Icon(PhosphorIcons.arrowDown()),
+            ),
+            SizedBox(height: 8),
+            Text(
+              "Programme: ${choice.school.program}",
+              style: TextStyle(
+                fontSize: 14,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
