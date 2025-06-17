@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "Y:/INSA/mobInsa/mobinsa/windows"
+    "cmake.sourceDirectory": "Y:/INSA/mobInsa/mobinsa/windows",
+    "debug.enableStatusBarColor": false
 }

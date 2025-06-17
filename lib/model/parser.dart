@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:excel/excel.dart';
+import 'package:flutter/material.dart';
 import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/School.dart';
@@ -14,9 +15,13 @@ import 'package:mobinsa/model/School.dart';
  */
 class ExcelParsingException implements Exception {
   final String message;
+  
   ExcelParsingException(this.message);
+  
   @override
-  String toString() => "ExcelParsingException: $message";
+  String toString() {
+    return message;
+  }
 }
 
 
@@ -60,24 +65,36 @@ class SheetParser{
 
 
 
-  static Excel parseExcel(String path){
-
+  static Excel parseExcel(String path) {
+  try {
     File newFile = File(path);
-    if (newFile.existsSync()){
-      Excel parsedData = Excel.decodeBytes(newFile.readAsBytesSync());
-      Excel createdFile= Excel.createExcel();
-      String? test;
-      String test2 = test ?? "DUMN";
-      // print(parsedData.sheets.values.firstOrNull?.rows[1]);
-      // print("Decoded File sheets : ${parsedData.sheets}, $parsedData");
-      // print("Decoded File  : ${parsedData.tables}");
-      return parsedData;
+    
+    // Check if file exists
+    if (!newFile.existsSync()) {
+      throw ExcelParsingException("Le fichier n'existe pas");
     }
-    else{
-      throw Exception();
+    
+    // Check file extension
+    String extension = path.split('.').last.toLowerCase();
+    if (extension != "xlsx" && extension != "xls") {
+      throw ExcelParsingException("Le fichier doit être au format Excel (.xlsx ou .xls)");
     }
-
+    
+    Excel parsedData = Excel.decodeBytes(newFile.readAsBytesSync());
+    
+    // Check if the parsed data is valid
+    if (parsedData.sheets.isEmpty) {
+      throw ExcelParsingException("Le fichier Excel ne contient aucune feuille");
+    }
+    
+    return parsedData;
+  } catch (e) {
+    if (e is ExcelParsingException) {
+      rethrow;
+    }
+    throw ExcelParsingException("Erreur lors de la lecture du fichier: ${e.toString()}");
   }
+}
 
 
 
@@ -86,7 +103,12 @@ class SheetParser{
 
 
   static List<Student> extractStudents(Excel excel, List<School> schools) {
-    Map<String, Student> tempStudentMap = {};
+  // Check if schools list is empty
+  if (schools.isEmpty) {
+    throw ExcelParsingException("La liste des écoles est vide. Importez d'abord les écoles.");
+  }
+  
+  Map<String, Student> tempStudentMap = {};
     int nextStudentId=1;
 
     if (excel.sheets.isEmpty) {
@@ -195,11 +217,29 @@ class SheetParser{
     List<Student> finalStudentList = tempStudentMap.values.toList();
     finalStudentList.sort((a, b) => a.id.compareTo(b.id));
 
+    // Add verification at specific points, for example:
+    if (tempStudentMap.isEmpty) {
+      throw ExcelParsingException("Aucun étudiant n'a été trouvé dans le fichier");
+    }
+    
+    // Check if any student has no choices
+    for (var student in tempStudentMap.values) {
+      if (student.choices.isEmpty) {
+        throw ExcelParsingException("L'étudiant ${student.name} n'a aucun choix d'école");
+      }
+    }
+    
     return finalStudentList;
   }
 
-  static List<School> parseSchools(Excel file){
+  static List<School> parseSchools(Excel file) {
     List<School> schools = [];
+    
+    // Basic validation for file structure
+    if (file.sheets.length < 2) {
+      throw ExcelParsingException("Le fichier des écoles doit contenir au moins deux feuilles (Europe et Hors-Europe)");
+    }
+    
     //Données Europe et Hors-Europe
     for(int eu=0; eu<2; eu++) {
       String sheetName = file.sheets.keys.toList()[eu];
@@ -236,7 +276,7 @@ class SheetParser{
           stdout.write("$value; ");
         }
         //VERSION DU TABLEUR
-        int version = 1;
+        int version = 2;
         if(version==2) {
           String name = sheet.rows[row][0]?.value.toString() ?? "PROBLEM NAME";
           String country = sheet.rows[row][1]?.value.toString() ??
@@ -317,6 +357,11 @@ class SheetParser{
     print("LES SCHOOLS: $schools");
     print("Normalemennt MONS:");
     print(schools[5].name);print(schools[5].country);print(schools[5].content_type);print(schools[5].specialization);
+    
+    if (schools.isEmpty) {
+      throw ExcelParsingException("Aucune école n'a été trouvée dans le fichier");
+    }
+    
     return schools;
   }
 
@@ -383,13 +428,56 @@ class SheetParser{
     Sheet resultSheet = exportedExcel.sheets["Sheet1"]!;
     // Colonne N°1 : Ajoute le nom des étudiants
     List<CellValue?> test = [];
-    resultSheet.insertRow(0);
     for (int i = 0; i < 12; i++){
       resultSheet.insertColumn(i);
       CellValue value = TextCellValue(indexes[i]!);
       test.add(value);
     }
     resultSheet.appendRow(test);
+    int i = 0;
+    for (var c in allChoices){
+      List<CellValue?> studentValues = [];
+      Choice currentChoice = c.$3;
+      Student? currentStudent = students.where((e) => e.id == c.$1).firstOrNull;
+      if (currentStudent == null){
+        throw Exception("The current student doesn't exist ????");
+      }
+      int choiceNumber = c.$2;
+      TextCellValue studentName = TextCellValue(currentStudent.name);
+      IntCellValue studentWish = IntCellValue(choiceNumber);
+      TextCellValue studentCountry = TextCellValue(currentChoice.school.country);
+      TextCellValue studentSchool = TextCellValue(currentChoice.school.name);;
+      TextCellValue studentDepartment = TextCellValue(currentChoice.student.departement);
+      DoubleCellValue studentInterRanking = DoubleCellValue(currentChoice.interranking);;
+      IntCellValue studentCredits = IntCellValue(currentChoice.student.ects_number);
+      TextCellValue studentEngLVL = TextCellValue(currentChoice.student.lang_lvl);
+      DoubleCellValue studentMissedHours = DoubleCellValue(currentChoice.student.missed_hours);
+      IntCellValue studentPlaces = IntCellValue(currentChoice.school.available_slots);
+      TextCellValue studentComment = TextCellValue(currentChoice.student.comment);
+      TextCellValue studentAfterComment = TextCellValue(currentChoice.student.post_comment ?? " - ");
+      studentValues = [
+        studentName,
+        studentWish,
+        studentCountry,
+        studentSchool,
+        studentDepartment,
+        studentInterRanking,
+        studentCredits,
+        studentEngLVL, studentMissedHours,studentPlaces, studentComment,studentAfterComment];
+      resultSheet.appendRow(studentValues);
+      List<Data?> currentRow = resultSheet.row(i+1);
+      print("Right now student has the following wish accepted ${currentStudent.accepted_school}");
+      if ( currentStudent.accepted != null &&  currentStudent.accepted!.school.id == c.$3.school.id
+      ){
+        print("The voeux was accepted ! Painting it in green");
+        for (var data in currentRow){
+          data!.cellStyle = CellStyle(
+            backgroundColorHex: ExcelColor.green200
+          );
+        }
+      }
+      i++;
+    }
     return exportedExcel.save() ?? [];
 
 
@@ -398,7 +486,7 @@ class SheetParser{
   }
 
   static int saveExcelToDisk(String path, List<int> bytes){
-    File excelFile = File(path);
+    File excelFile = File("$path");
     excelFile.createSync();
     excelFile.writeAsBytes(bytes);
     return 1;

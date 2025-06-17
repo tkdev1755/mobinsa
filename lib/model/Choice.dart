@@ -32,5 +32,11 @@ class Choice {
     return 'Choix{École: $school, Classement Inter.: $interranking}';
   }
 
+  @override
+  bool operator ==(Object other) {
+    // TODO: implement ==
+    return super == other;
+  }
+
 
 }

@@ -8,6 +8,7 @@ class School {
   String country;
   String content_type;
   int available_slots; //nombre de places disponible
+  late int remaining_slots; //nombres de places restantes
   int b_slots; //nombre de place disponible en bachelor
   int m_slots; //nombre de place disponible en master
   List<String> specialization; //liste des spécialisations qui peuvent postuler à cette offre de séjour
@@ -25,6 +26,7 @@ class School {
       this.program, this.use_langage, this.req_lang_level,
       this.academic_level) {
     this.id = global_id;
+    this.remaining_slots = this.available_slots;
     global_id++;
   }
 

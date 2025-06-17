@@ -6,6 +6,7 @@ class Student {
   String name;
   Map <int,Choice> choices;
   Choice? accepted;
+  List<Choice> refused = [];
   School? accepted_school;
   String specialization;
   int ranking_s1 ;
@@ -64,6 +65,13 @@ class Student {
     }
   }
 
+  void addRefusedChoice(Choice choice){
+    refused.add(choice);
+  }
+
+  void removeRefusedChoice(Choice choice){
+    refused.remove(choice);
+  }
   void add_post_comment( String new_comment ) {
     this.post_comment = new_comment;
   }
@@ -88,4 +96,49 @@ class Student {
         '  Vœu Accepté: ${accepted ?? 'Aucun'}\n'
         '}';
   }
+
+  Map<int,List<Choice>> diff_interrankings(init_list) {
+    //Cette fonction permet de récupérer les étudiants ayant des voeux problématiques, c'est-à-dire des voeux avec un interclassement différent des autres
+    late Map<int,List<Choice>> diff_dict = {};
+    for (Student s in init_list) {
+      var ChoiceList = s.choices.values.toList();
+      if(ChoiceList.isEmpty) continue;
+      double ReferenceRank = ChoiceList.first.interranking;
+      List<Choice> problematicChoices = ChoiceList.where((choice) => choice.interranking != ReferenceRank).toList();
+      if (problematicChoices.isNotEmpty) {
+        diff_dict[s.id] = problematicChoices;
+      }
+    }
+    return diff_dict;
+  }
+
+  Map<(Student,int),List<Student>> ladder_interrankigs(init_list) {
+    // Cette fonction construit une map associant, pour chaque étudiant et chaque vœu problématique (où un autre étudiant a un meilleur interclassement sur la même école),
+    // la liste des étudiants mieux classés sur ce même vœu.
+    // Elle permet ainsi d’identifier les cas où un étudiant est dépassé par d’autres candidats pour un vœu donné.
+
+    Map<int,List<Choice>> diff_dict = diff_interrankings(init_list);
+    Map<(Student,int),List<Student>> ladder_map = {};
+    for(int i in diff_dict.keys) {
+      Student student = init_list.firstWhere((s) => s.id == i);
+      List<Choice> problematicChoices = diff_dict[i]!;
+      for(Choice c in problematicChoices) {
+        int choiceKey = student.choices.entries.firstWhere((e) => e.value == c).key;
+        for(Student other in init_list) {
+          if (other.id == i) continue;
+            for(Choice c2 in other.choices.values) {
+              if(c.school.id == c2.school.id && c.interranking < c2.interranking) {
+                // Ajoute à la map (si la clé n'existe pas encore)
+                ladder_map.putIfAbsent((student,choiceKey), () => []);
+                // Empêche les doublons
+                if (!ladder_map[choiceKey]!.any((s) => s.id == other.id)) {
+                  ladder_map[(student,choiceKey)]!.add(other); }
+            }
+          }
+        }
+      }
+    }
+    return ladder_map; // Retourne une map liant chaque couple (étudiant, numéro de vœu) à la liste des étudiants mieux classés sur ce vœu.
+  }
+
 }

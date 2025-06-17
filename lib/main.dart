@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -79,6 +79,26 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       print('Aucun fichier sélectionné');
     }
+  }
+
+  void showErrorDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -134,29 +154,57 @@ class _MyHomePageState extends State<MyHomePage> {
                       ElevatedButton(
                         style: customButtonStyle,
                         onPressed: () async {
-                        String? filePath = await pickFile();
-                        if (filePath != null){
-                          setState(() {
-                            if(Platform.isWindows){
-                              selectedFilenameSchools = filePath.split('\\').last;
+                          String? filePath = await pickFile();
+                          if (filePath != null) {
+                            try {
+                              setState(() {
+                                if(Platform.isWindows){
+                                  selectedFilenameSchools = filePath.split('\\').last;
+                                } else {
+                                  selectedFilenameSchools = filePath.split("/").last;
+                                }
+                              });
+                              
+                              // Try to parse Excel
+                              try {
+                                Excel schoolResult = SheetParser.parseExcel(filePath);
+                                
+                                // Try to extract schools
+                                try {
+                                  List<School> parsedSchools = SheetParser.parseSchools(schoolResult);
+                                  setState(() {
+                                    schools = parsedSchools;
+                                    schoolsLoaded = schools.isNotEmpty;
+                                  });
+                                  
+                                  // Show success message
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('${schools.length} écoles importées avec succès'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                } catch (e) {
+                                  // Error extracting schools from Excel
+                                  showErrorDialog(
+                                    context, 
+                                    "Erreur d'analyse des écoles", 
+                                    "Impossible de lire les données des écoles: ${e.toString()}"
+                                  );
+                                }
+                              } catch (e) {
+                                // Error parsing Excel file
+                                showErrorDialog(
+                                  context, 
+                                  "Erreur de format", 
+                                  "Le fichier n'est pas un fichier Excel valide: ${e.toString()}"
+                                );
+                              }
+                            } catch (e) {
+                              // General error
+                              showErrorDialog(context, "Erreur", e.toString());
                             }
-                            else{
-                               selectedFilenameSchools = filePath.split("/").last;
-                            }
-                           
-                          });
-                          Excel schoolResult = SheetParser.parseExcel(filePath);
-                          try {
-                            List<School> parsedSchools = SheetParser.parseSchools(schoolResult);
-                            setState(() {
-                              schools = parsedSchools;
-                              schoolsLoaded = schools.isNotEmpty;
-                            });
-                          } catch (e, s) {
-                            print("Error parsing schools: $e");
-                            print(s);
                           }
-                        }
                         }, child: Text("Importez les écoles"),
                       ),
                       Padding(padding: EdgeInsets.only(bottom: 10)),
@@ -168,27 +216,53 @@ class _MyHomePageState extends State<MyHomePage> {
                         onPressed: schoolsLoaded ? () async {
                           String? filePath = await pickFile();
                           if (filePath != null) {
-                            setState(() {
-                              if(Platform.isWindows){
-                                selectedFilenameStudents = filePath.split('\\').last;
-                              }else{
-                                selectedFilenameStudents = filePath.split("/").last;
-                              }
-                            });
-                            Excel studentsResult = SheetParser.parseExcel(filePath);
                             try {
-                              // Fixed line - pass both the Excel object AND schools list
-                             List<Student> parsedStudents = SheetParser.extractStudents(studentsResult, schools);
                               setState(() {
-                                students = parsedStudents;
-                                studentsLoaded = students.isNotEmpty;
+                                if(Platform.isWindows){
+                                  selectedFilenameStudents = filePath.split('\\').last;
+                                } else {
+                                  selectedFilenameStudents = filePath.split("/").last;
+                                }
                               });
-                              for (var student in students) {
-                                print(student);
+                              
+                              // Try to parse Excel
+                              try {
+                                Excel studentsResult = SheetParser.parseExcel(filePath);
+                                
+                                // Try to extract students
+                                try {
+                                  List<Student> parsedStudents = SheetParser.extractStudents(studentsResult, schools);
+                                  setState(() {
+                                    students = parsedStudents;
+                                    studentsLoaded = students.isNotEmpty;
+                                  });
+                                  
+                                  // Show success message
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('${students.length} étudiants importés avec succès'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                } catch (e) {
+                                  // Error extracting students from Excel
+                                  showErrorDialog(
+                                    context, 
+                                    "Erreur d'analyse des étudiants", 
+                                    "Impossible de lire les données des étudiants: ${e.toString()}"
+                                  );
+                                }
+                              } catch (e) {
+                                // Error parsing Excel file
+                                showErrorDialog(
+                                  context, 
+                                  "Erreur de format", 
+                                  "Le fichier n'est pas un fichier Excel valide: ${e.toString()}"
+                                );
                               }
-                            } catch (e, s) {
-                              print("Error parsing students: $e");
-                              print(s);
+                            } catch (e) {
+                              // General error
+                              showErrorDialog(context, "Erreur", e.toString());
                             }
                           }
                         } : null,
