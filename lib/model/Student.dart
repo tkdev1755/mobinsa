@@ -14,7 +14,7 @@ class Student {
   String lang_lvl;
   double missed_hours;
   String comment;
-  String? post_comment;
+
   late int year;
   late String departement;
 
@@ -72,8 +72,13 @@ class Student {
   void removeRefusedChoice(Choice choice){
     refused.remove(choice);
   }
-  void add_post_comment( String new_comment ) {
-    this.post_comment = new_comment;
+  void add_post_comment(int selectedChoice ,String new_comment ) {
+    if (choices.containsKey(selectedChoice)){
+      this.choices[selectedChoice]!.post_comment =  new_comment;
+    }
+    else{
+      throw Exception("The selected choice doesn't exists");
+    }
   }
 
   String get_next_year (){
@@ -91,7 +96,7 @@ class Student {
         '  Niveau Langue: $lang_lvl,\n'
         '  Heures Manquées: $missed_hours,\n'
         '  Commentaire: "$comment",\n'
-        '  Post-Commentaire: "${post_comment ?? 'N/A'}",\n'
+        '  Post-Commentaire: "${'N/A'}",\n'
         '  Vœux: $choicesString\n'
         '  Vœu Accepté: ${accepted ?? 'Aucun'}\n'
         '}';

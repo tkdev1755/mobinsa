@@ -249,8 +249,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                           ),
                                           TextButton(
                                             onPressed: () {
+                                              int selectedChoice = 0;
                                               setState(() {
-                                                selectedStudent?.add_post_comment(comment);
+                                                selectedStudent?.add_post_comment(selectedChoice,comment);
                                               });
                                               Navigator.pop(context);
                                             },
