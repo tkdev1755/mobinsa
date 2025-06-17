@@ -8,15 +8,16 @@ class Choice {
 
   Choice (this.school, this.interranking,this.student);
 
-  // bool accepted (){
-  //   if (school.accepted()){
-  //     student.accepted = this;
-  //     return true;
-  //   }
-  //   else {
-  //     return false;
-  //   }
-  // }
+  bool accepted(Student s) {
+    //affectation d'une offre de séjour à un élève
+    if (this.school.accepted(s)) {
+      student.accepted = this;
+      print("ACCEPTED CHOICE");
+      return true;
+    }
+    return false;
+  }
+
 
   @override
   String toString() {
