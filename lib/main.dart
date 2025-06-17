@@ -179,7 +179,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             Excel studentsResult = SheetParser.parseExcel(filePath);
                             try {
                               // Fixed line - pass both the Excel object AND schools list
-                             List<Student> parsedStudents = SheetParser.extractStudents(studentsResult);
+                             List<Student> parsedStudents = SheetParser.extractStudents(studentsResult, schools);
                               setState(() {
                                 students = parsedStudents;
                                 studentsLoaded = students.isNotEmpty;
