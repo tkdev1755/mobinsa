@@ -34,9 +34,15 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
   List<Choice> selectedStudentChoices = [
     Choice(
         School("Ecole 1","Pays X","",0,0,0,[],"","","","",""),10,Student(0,"",{},"",0,0,"",0.0,"")
+    ),
+    Choice(
+        School("Ecole 1","Pays X","",0,0,0,[],"","","","",""),10,Student(0,"",{},"",0,0,"",0.0,"")
+    ),
+    Choice(
+        School("Ecole 1","Pays X","",0,0,0,[],"","","","",""),10,Student(0,"",{},"",0,0,"",0.0,"")
     )
   ];
-  List<bool> expandedStudentsChoice = [false];
+  List<bool> expandedStudentsChoice = [false, false, false];
   @override
   Widget build(BuildContext context) {
     print(expandedStudentsChoice);
@@ -172,117 +178,12 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Liste des écoles
-                                    ...schools.asMap().entries.map((entry) {
+                                    // Liste des choix
+                                    ...selectedStudentChoices.asMap().entries.map((entry) {
                                       int index = entry.key;
-                                      Map<String, String> school = entry.value;
-                                      return Container(
-                                        margin: const EdgeInsets.only(bottom: 16.0),
-                                        padding: const EdgeInsets.all(16.0),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[300],
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            // Informations école
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                    children: [
-                                                      Text(
-                                                        school['nom']!,
-                                                        style: const TextStyle(
-                                                          fontSize: 18,
-                                                          fontWeight: FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                      Icon(
-                                                        Icons.keyboard_arrow_down,
-                                                        color: Colors.grey[600],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    school['pays']!,
-                                                    style: TextStyle(
-                                                      fontSize: 14,
-                                                      color: Colors.grey[600],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            const SizedBox(width: 16),
-                                            // Boutons Accepter/Refuser
-                                            Row(
-                                              children: [
-                                                // Bouton Refuser (X)
-                                                Container(
-                                                  width: 40,
-                                                  height: 40,
-                                                  child: ElevatedButton(
-                                                    onPressed: () {
-                                                      // TODO: Marquer l'école comme refusée
-                                                      setState(() {
-                                                        schoolChoices[index] = false;
-                                                      });
-                                                    },
-                                                    style: ElevatedButton.styleFrom(
-                                                      backgroundColor: schoolChoices[index] == false
-                                                          ? Colors.red[700]
-                                                          : Colors.red,
-                                                      padding: EdgeInsets.zero,
-                                                      shape: RoundedRectangleBorder(
-                                                        borderRadius: BorderRadius.circular(6),
-                                                      ),
-                                                    ),
-                                                    child: const Icon(
-                                                      Icons.close,
-                                                      color: Colors.white,
-                                                      size: 20,
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                // Bouton Accepter (✓)
-                                                Container(
-                                                  width: 40,
-                                                  height: 40,
-                                                  child: ElevatedButton(
-                                                    onPressed: () {
-                                                      // TODO: Marquer l'école comme acceptée
-                                                      setState(() {
-                                                        schoolChoices[index] = true;
-                                                      });
-                                                    },
-                                                    style: ElevatedButton.styleFrom(
-                                                      backgroundColor: schoolChoices[index] == true
-                                                          ? Colors.green[700]
-                                                          : Colors.green,
-                                                      padding: EdgeInsets.zero,
-                                                      shape: RoundedRectangleBorder(
-                                                        borderRadius: BorderRadius.circular(6),
-                                                      ),
-                                                    ),
-                                                    child: const Icon(
-                                                      Icons.check,
-                                                      color: Colors.white,
-                                                      size: 20,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      );
+                                      Choice choice = entry.value;
+                                      return choiceCard(choice, index);
                                     }).toList(),
-                                    choiceCard(selectedStudentChoices[0],0)
                                   ],
                                 ),
                               ),
