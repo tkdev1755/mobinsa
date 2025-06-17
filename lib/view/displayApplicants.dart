@@ -406,7 +406,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                     width: 40,
                     height: 40,
                     child: ElevatedButton(
-                      onPressed: schoolChoices[index] != true ? null : () {
+                      onPressed: choice.student.accepted_school != null && choice.student.accepted_school != choice.school ? null : () {
                         setState(() {
                           schoolChoices[index] = false;
                           choice.student.accepted_school = null;
@@ -510,7 +510,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           width: 40,
                           height: 40,
                           child: ElevatedButton(
-                            onPressed: schoolChoices[index] != true ? null : () {
+                            onPressed: choice.student.accepted_school != null && choice.student.accepted_school != choice.school ? null : () {
                               setState(() {
                                 schoolChoices[index] = false;
                                 choice.student.accepted_school = null;
