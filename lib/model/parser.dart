@@ -276,7 +276,7 @@ class SheetParser{
           stdout.write("$value; ");
         }
         //VERSION DU TABLEUR
-        int version = 2;
+        int version = 1;
         if(version==2) {
           String name = sheet.rows[row][0]?.value.toString() ?? "PROBLEM NAME";
           String country = sheet.rows[row][1]?.value.toString() ??

@@ -466,6 +466,12 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                         setState(() {
                           schoolChoices[index] = false;
                             choice.remove_choice();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Choix retiré"),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -494,6 +500,12 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                         setState(() {
                           schoolChoices[index] = true;
                           choice.accepted(choice.student);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Choix accepté"),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -570,6 +582,12 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                               setState(() {
                                 schoolChoices[index] = false;
                                 choice.remove_choice();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Choix retiré"),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
                               });
                             },
                             style: ElevatedButton.styleFrom(
@@ -594,10 +612,16 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           width: 40,
                           height: 40,
                           child: ElevatedButton(
-                            onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () {
+                            onPressed: choice.student.accepted != null ? null : () {
                               setState(() {
                                 schoolChoices[index] = true;
                                 choice.accepted(choice.student);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Choix accepté"),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
                               });
                             },
                             style: ElevatedButton.styleFrom(
