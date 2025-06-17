@@ -85,21 +85,38 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+
+     // Définir une fois le style de bouton
+    final ButtonStyle customButtonStyle = ElevatedButton.styleFrom(
+    backgroundColor: Colors.grey[300],      // fond gris clair
+    foregroundColor: Colors.black,         // texte noir
+    fixedSize: Size(250, 60), // 250px width, 60px height - adjust as needed
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12), // coins arrondis
+    ),
+    elevation: 1, // plat, sans ombre
+  );
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
       body: Center(
-
+        
         child: Column(
 
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('Importez vos fichiers'),
-            Padding(padding: EdgeInsets.only(bottom: 10)),
+          
+            
+            Padding(
+              padding: EdgeInsets.only(bottom: 10)),
             /// BOUTON POUR LES ECOLES
-            ElevatedButton(onPressed: () async {
+            ElevatedButton(
+              style: customButtonStyle,
+              onPressed: () async {
               String? filePath = await pickFile();
               if (filePath != null){
                 setState(() {
@@ -130,6 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Padding(padding: EdgeInsets.only(bottom: 10)),
             /// BOUTON POUR LES ETUDIANTS
             ElevatedButton(
+              style: customButtonStyle,
               onPressed: () async {
                 String? filePath = await pickFile();
                 if (filePath != null) {
@@ -164,6 +182,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Visibility(child: Text("Fichier Choisi : $selectedFilenameStudents"), visible: selectedFilenameStudents != null,),
             Padding(padding: EdgeInsets.only(bottom: 10)),
             ElevatedButton(
+              style: customButtonStyle,
               onPressed: studentsLoaded ? () {
                 Navigator.push(
                   context,
@@ -177,6 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Padding(padding: EdgeInsets.only(bottom: 10)),
             ElevatedButton(
+              style: customButtonStyle,
               onPressed: (schoolsLoaded && studentsLoaded) ? () {
                 Navigator.push(
                   context,
