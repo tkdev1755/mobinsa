@@ -85,125 +85,149 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-
-     // Définir une fois le style de bouton
+    // Keep your existing button style definition
     final ButtonStyle customButtonStyle = ElevatedButton.styleFrom(
-    backgroundColor: Colors.grey[300],      // fond gris clair
-    foregroundColor: Colors.black,         // texte noir
-    fixedSize: Size(250, 60), // 250px width, 60px height - adjust as needed
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12), // coins arrondis
-    ),
-    elevation: 1, // plat, sans ombre
-  );
+      backgroundColor: Colors.grey[300],
+      foregroundColor: Colors.black,
+      minimumSize: const Size.fromHeight(60), // Just define height, not width
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      elevation: 1,
+    );
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         title: Text(widget.title),
+        centerTitle: true,
       ),
-      body: Center(
-        
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
         child: Column(
-
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const Text('Importez vos fichiers'),
-          
+            // Logo at the top-left of the body (not centered)
+            Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                height: 100,
+                child: Image.asset(
+                  'assets/images/logo.jpg', // Correct file extension
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
             
-            Padding(
-              padding: EdgeInsets.only(bottom: 10)),
-            /// BOUTON POUR LES ECOLES
-            ElevatedButton(
-              style: customButtonStyle,
-              onPressed: () async {
-              String? filePath = await pickFile();
-              if (filePath != null){
-                setState(() {
-                  if(Platform.isWindows){
-                    selectedFilenameSchools = filePath.split('\\').last;
-                  }
-                  else{
-                     selectedFilenameSchools = filePath.split("/").last;
-                  }
-                 
-                });
-                Excel schoolResult = SheetParser.parseExcel(filePath);
-                try {
-                  List<School> parsedSchools = SheetParser.parseSchools(schoolResult);
-                  setState(() {
-                    schools = parsedSchools;
-                    schoolsLoaded = schools.isNotEmpty;
-                  });
-                } catch (e, s) {
-                  print("Error parsing schools: $e");
-                  print(s);
-                }
-              }
-              }, child: Text("Importez les écoles"),
+            const SizedBox(height: 24),
+            
+            // Center the content that follows but keep Column's crossAxisAlignment
+            Expanded(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 350), // Limit width for buttons
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text('Importez vos fichiers'),
+                      const SizedBox(height: 16),
+                      
+                      /// BOUTON POUR LES ECOLES
+                      ElevatedButton(
+                        style: customButtonStyle,
+                        onPressed: () async {
+                        String? filePath = await pickFile();
+                        if (filePath != null){
+                          setState(() {
+                            if(Platform.isWindows){
+                              selectedFilenameSchools = filePath.split('\\').last;
+                            }
+                            else{
+                               selectedFilenameSchools = filePath.split("/").last;
+                            }
+                           
+                          });
+                          Excel schoolResult = SheetParser.parseExcel(filePath);
+                          try {
+                            List<School> parsedSchools = SheetParser.parseSchools(schoolResult);
+                            setState(() {
+                              schools = parsedSchools;
+                              schoolsLoaded = schools.isNotEmpty;
+                            });
+                          } catch (e, s) {
+                            print("Error parsing schools: $e");
+                            print(s);
+                          }
+                        }
+                        }, child: Text("Importez les écoles"),
+                      ),
+                      Padding(padding: EdgeInsets.only(bottom: 10)),
+                      Visibility(child: Text("Fichier Choisi : $selectedFilenameSchools"), visible: selectedFilenameSchools != null,),
+                      Padding(padding: EdgeInsets.only(bottom: 10)),
+                      /// BOUTON POUR LES ETUDIANTS
+                      ElevatedButton(
+                        style: customButtonStyle,
+                        onPressed: () async {
+                          String? filePath = await pickFile();
+                          if (filePath != null) {
+                            setState(() {
+                              if(Platform.isWindows){
+                                selectedFilenameStudents = filePath.split('\\').last;
+                              }else{
+                                selectedFilenameStudents = filePath.split("/").last;
+                              }
+                              
+                            });
+                            Excel studentsResult = SheetParser.parseExcel(filePath);
+                            try {
+                              List<Student> parsedStudents = SheetParser.extractStudents(studentsResult);
+                              setState(() {
+                                students = parsedStudents; // Update the class-level list
+                                studentsLoaded = students.isNotEmpty;
+                              });
+                              // Now print the students
+                              for (var student in students) {
+                                print(student);
+                              }
+                            } catch (e, s) {
+                              print("Error parsing students: $e");
+                              print(s);
+                            }
+                          }
+                        },
+                        child: Text("Importez les étudiants")
+                      ),
+                      Padding(padding: EdgeInsets.only(bottom: 10)),
+                      Visibility(child: Text("Fichier Choisi : $selectedFilenameStudents"), visible: selectedFilenameStudents != null,),
+                      Padding(padding: EdgeInsets.only(bottom: 10)),
+                      ElevatedButton(
+                        style: customButtonStyle,
+                        onPressed: studentsLoaded ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => DisplayApplicants(
+                              students: students,
+                              schools: schools,  // Pass the schools list
+                            )),
+                          );
+                        } : null,
+                        child: Text("Page d'affichage"),
+                      ),
+                      Padding(padding: EdgeInsets.only(bottom: 10)),
+                      ElevatedButton(
+                        style: customButtonStyle,
+                        onPressed: (schoolsLoaded && studentsLoaded) ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => AssemblyPreview(students: students, schools: schools)),);
+                        } : null,
+                        child: Text("Génerer")
+                      )
+                    ],
+                  ),
+                ),
+              ),
             ),
-            Padding(padding: EdgeInsets.only(bottom: 10)),
-            Visibility(child: Text("Fichier Choisi : $selectedFilenameSchools"), visible: selectedFilenameSchools != null,),
-            Padding(padding: EdgeInsets.only(bottom: 10)),
-            /// BOUTON POUR LES ETUDIANTS
-            ElevatedButton(
-              style: customButtonStyle,
-              onPressed: () async {
-                String? filePath = await pickFile();
-                if (filePath != null) {
-                  setState(() {
-                    if(Platform.isWindows){
-                      selectedFilenameStudents = filePath.split('\\').last;
-                    }else{
-                      selectedFilenameStudents = filePath.split("/").last;
-                    }
-                    
-                  });
-                  Excel studentsResult = SheetParser.parseExcel(filePath);
-                  try {
-                    List<Student> parsedStudents = SheetParser.extractStudents(studentsResult);
-                    setState(() {
-                      students = parsedStudents; // Update the class-level list
-                      studentsLoaded = students.isNotEmpty;
-                    });
-                    // Now print the students
-                    for (var student in students) {
-                      print(student);
-                    }
-                  } catch (e, s) {
-                    print("Error parsing students: $e");
-                    print(s);
-                  }
-                }
-              },
-              child: Text("Importez les étudiants")
-            ),
-            Padding(padding: EdgeInsets.only(bottom: 10)),
-            Visibility(child: Text("Fichier Choisi : $selectedFilenameStudents"), visible: selectedFilenameStudents != null,),
-            Padding(padding: EdgeInsets.only(bottom: 10)),
-            ElevatedButton(
-              style: customButtonStyle,
-              onPressed: studentsLoaded ? () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => DisplayApplicants(
-                    students: students,
-                    schools: schools,  // Pass the schools list
-                  )),
-                );
-              } : null,
-              child: Text("Page d'affichage"),
-            ),
-            Padding(padding: EdgeInsets.only(bottom: 10)),
-            ElevatedButton(
-              style: customButtonStyle,
-              onPressed: (schoolsLoaded && studentsLoaded) ? () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AssemblyPreview(students: students, schools: schools)),);
-              } : null,
-              child: Text("Génerer")
-            )
           ],
         ),
       ),
