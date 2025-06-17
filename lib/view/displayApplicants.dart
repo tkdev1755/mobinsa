@@ -446,6 +446,70 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                 fontSize: 14,
               ),
             ),
+            SizedBox(height: 16),
+            // Adding accept/decline buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                // Decline button (red X)
+                Container(
+                  width: 40,
+                  height: 40,
+                  margin: EdgeInsets.only(right: 8),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        schoolChoices[index] = false;
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: schoolChoices[index] == false
+                          ? Colors.red[700]
+                          : Colors.red,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+                // Accept button (green check)
+                Container(
+                  width: 40,
+                  height: 40,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        schoolChoices[index] = true;
+                        // Optionally, update the student's accepted choice
+                        if (selectedStudent != null) {
+                          selectedStudent!.accepted = choice;
+                        }
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: schoolChoices[index] == true
+                          ? Colors.green[700]
+                          : Colors.green,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
