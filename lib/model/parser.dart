@@ -454,6 +454,7 @@ class SheetParser{
       DoubleCellValue studentMissedHours = DoubleCellValue(currentChoice.student.missed_hours);
       IntCellValue studentPlaces = IntCellValue(currentChoice.school.available_slots);
       TextCellValue studentComment = TextCellValue(currentChoice.student.comment);
+      TextCellValue studentPostComment = TextCellValue(currentChoice.post_comment ??  " - ");
       studentValues = [
         studentName,
         studentWish,
@@ -462,15 +463,15 @@ class SheetParser{
         studentDepartment,
         studentInterRanking,
         studentCredits,
-        studentEngLVL, studentMissedHours,studentPlaces, studentComment];
+        studentEngLVL, studentMissedHours,studentPlaces, studentComment,studentPostComment];
       resultSheet.appendRow(studentValues);
       List<Data?> currentRow = resultSheet.row(i+1);
       print("Right now student has the following wish accepted ${currentStudent.accepted_school}");
       if ( currentStudent.accepted != null &&  currentStudent.accepted!.school.id == c.$3.school.id
       ){
-        print("The voeux was accepted ! Painting it in green");
+        print("The voeu was accepted ! Painting it in green");
         for (var data in currentRow){
-          data!.cellStyle = CellStyle(
+          data?.cellStyle = CellStyle(
             backgroundColorHex: ExcelColor.green200
           );
         }
@@ -478,8 +479,6 @@ class SheetParser{
       i++;
     }
     return exportedExcel.save() ?? [];
-
-
 
     return [];
   }
