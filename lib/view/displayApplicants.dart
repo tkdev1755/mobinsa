@@ -32,6 +32,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
   int currentStudentIndex = -1;
   List<bool> expandedStudentsChoice = [false,false,false];
   Color disabledColor = Colors.grey[100]!;
+  String comment = "";
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -222,7 +223,38 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                 margin: const EdgeInsets.only(bottom: 16),
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    // TODO: Implémenter la fonctionnalité de commentaire
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: Text("Laisser un commentaire"),
+                                        content: TextField(
+                                          onChanged: (value) {
+                                            comment = value;
+                                          },
+                                          decoration: InputDecoration(
+                                            hintText: "Entrez votre commentaire",
+                                            border: OutlineInputBorder(),
+                                          ),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text("Annuler"),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                selectedStudent?.add_post_comment(comment);
+                                              });
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text("Valider"),
+                                          ),
+                                        ],
+                                      ),
+                                    );
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.red,
