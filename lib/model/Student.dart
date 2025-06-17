@@ -102,7 +102,7 @@ class Student {
         '}';
   }
 
-  Map<int,List<Choice>> diff_interrankings(init_list) {
+  Map<int,List<Choice>> diff_interrankings(List<Student>init_list) {
     //Cette fonction permet de récupérer les étudiants ayant des voeux problématiques, c'est-à-dire des voeux avec un interclassement différent des autres
     late Map<int,List<Choice>> diff_dict = {};
     for (Student s in init_list) {
@@ -117,7 +117,7 @@ class Student {
     return diff_dict;
   }
 
-  Map<(Student,int),List<Student>> ladder_interrankigs(init_list) {
+  Map<(Student,int),List<Student>> ladder_interrankigs(List<Student> init_list) {
     // Cette fonction construit une map associant, pour chaque étudiant et chaque vœu problématique (où un autre étudiant a un meilleur interclassement sur la même école),
     // la liste des étudiants mieux classés sur ce même vœu.
     // Elle permet ainsi d’identifier les cas où un étudiant est dépassé par d’autres candidats pour un vœu donné.
