@@ -30,7 +30,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
   ];
 
   Map<String, String>? selectedStudent;
-  Map<int, bool?> schoolChoices = {}; // null = pas de choix, true = accepté, false = refusé
+  // Map<int, bool?> schoolChoices = {}; // null = pas de choix, true = accepté, false = refusé
   List<Choice> selectedStudentChoices = [
     Choice(
         School("Ecole 1","Pays X","",0,0,0,[],"","","","",""),10,Student(0,"",{},"",0,0,"",0.0,"")
@@ -94,7 +94,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                         onTap: () {
                           setState(() {
                             selectedStudent = students[index];
-                            schoolChoices.clear(); // Reset des choix
+                            // schoolChoices.clear(); // Reset des choix
                           });
                         },
                       ),
