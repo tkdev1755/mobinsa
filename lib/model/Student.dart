@@ -72,7 +72,7 @@ class Student {
   void removeRefusedChoice(Choice choice){
     refused.remove(choice);
   }
-  void add_post_comment(int selectedChoice ,String new_comment ) {
+  void add_post_comment(int selectedChoice , String new_comment ) {
     if (choices.containsKey(selectedChoice)){
       this.choices[selectedChoice]!.post_comment =  new_comment;
     }

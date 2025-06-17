@@ -238,37 +238,64 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                 margin: const EdgeInsets.only(bottom: 16),
                                 child: ElevatedButton(
                                   onPressed: () {
+                                    int selectedChoice = 1;
+                                    String comment = "";
                                     showDialog(
                                       context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: Text("Laisser un commentaire"),
-                                        content: TextField(
-                                          onChanged: (value) {
-                                            comment = value;
-                                          },
-                                          decoration: InputDecoration(
-                                            hintText: "Entrez votre commentaire",
-                                            border: OutlineInputBorder(),
-                                          ),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: Text("Annuler"),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              int selectedChoice = 0;
-                                              setState(() {
-                                                selectedStudent?.add_post_comment(selectedChoice,comment);
-                                              });
-                                              Navigator.pop(context);
-                                            },
-                                            child: Text("Valider"),
-                                          ),
-                                        ],
+                                      builder: (BuildContext dialogContext) => StatefulBuilder(
+                                        builder: (BuildContext context, StateSetter setDialogState) {
+                                          return AlertDialog(
+                                            title: Text("Laisser un commentaire"),
+                                            content: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                DropdownButton<int>(
+                                                  value: selectedChoice,
+                                                  items: [1, 2, 3].map((int value) {
+                                                    return DropdownMenuItem<int>(
+                                                      value: value,
+                                                      child: Text("Choix $value"),
+                                                    );
+                                                  }).toList(),
+                                                  onChanged: (int? newValue) {
+                                                    setDialogState(() {
+                                                      selectedChoice = newValue!;
+                                                    });
+                                                  },
+                                                ),
+                                                SizedBox(height: 16),
+                                                TextField(
+                                                  onChanged: (value) {
+                                                    comment = value;
+                                                  },
+                                                  decoration: InputDecoration(
+                                                    hintText: "Entrez votre commentaire",
+                                                    border: OutlineInputBorder(),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text("Annuler"),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  setState(() {
+                                                    selectedStudent?.add_post_comment(selectedChoice, comment);
+                                                    print("selectedChoice: $selectedChoice");
+                                                    print("comment: $comment");
+                                                  });
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text("Valider"),
+                                              ),
+                                            ],
+                                          );
+                                        },
                                       ),
                                     );
                                   },
