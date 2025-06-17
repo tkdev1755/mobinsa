@@ -35,10 +35,12 @@ class School {
       this.available_slots--;
       if (s.year > 2) {
         this.m_slots--;
+        print("SLOT SUCCESSFULLY REMOVED MASTER");
         if (this.m_slots == 0) this.is_full_m = true;
       }
       else if (s.year == 2) {
         this.b_slots--;
+        print("SLOT SUCCESSFULLY REMOVED LICENCE");
         if (this.b_slots == 0) this.is_full_b = true;
       }
     }
@@ -55,7 +57,13 @@ class School {
 
   bool accepted(Student s) {
     //affectation d'une offre de séjour à un élève
-    if (this.available_slots > 0 && s.specialization.contains(s.get_next_year())) {
+    if (s.year == 2 && this.b_slots > 0 && s.specialization.contains(s.get_next_year())) {
+      print("ACCEPTED SCHOOL LICENCE");
+      this.reduce_slots(s);
+      return true;
+    }
+    else if (s.year > 2 && this.m_slots > 0 && s.specialization.contains(s.get_next_year())) {
+      print("ACCEPTED SCHOOL MASTER");
       this.reduce_slots(s);
       return true;
     }
