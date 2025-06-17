@@ -69,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String? selectedFilenameSchools;
   String? selectedFilenameStudents;
   bool schoolsLoaded = false;
-  bool studentsLoaded = false;
+  bool studentsLoaded = true;
 
   Future<String?> pickFile() async {
     final result = await FilePicker.platform.pickFiles();
@@ -116,35 +116,44 @@ class _MyHomePageState extends State<MyHomePage> {
             Padding(padding: EdgeInsets.only(bottom: 10)),
             /// BOUTON POUR LES ETUDIANTS
             ElevatedButton(
-              onPressed: studentsLoaded ? () async {
+              onPressed: () async {
                 String? filePath = await pickFile();
-                if (filePath != null){
-                  selectedFilenameStudents = filePath.split("/").last;
+                if (filePath != null) {
+                  setState(() {
+                    selectedFilenameStudents = filePath.split("/").last;
+                  });
                   Excel studentsResult = SheetParser.parseExcel(filePath);
                   try {
-                    List<Student> students = SheetParser.extractStudents(studentsResult);
-                    studentsLoaded = students.isNotEmpty;
+                    List<Student> parsedStudents = SheetParser.extractStudents(studentsResult);
+                    setState(() {
+                      students = parsedStudents; // Update the class-level list
+                      studentsLoaded = students.isNotEmpty;
+                    });
+                    // Now print the students
+                    for (var student in students) {
+                      print(student);
+                    }
                   } catch (e, s) {
+                    print("Error parsing students: $e");
                     print(s);
                   }
-                  // Afficher les étudiants dans la console
-                  for (var student in students) {
-                    print(student);
-                  }
                 }
-              } : null,
+              },
               child: Text("Importez les étudiants")
             ),
             Padding(padding: EdgeInsets.only(bottom: 10)),
             Visibility(child: Text("Fichier Choisi : $selectedFilenameStudents"), visible: selectedFilenameStudents != null,),
             Padding(padding: EdgeInsets.only(bottom: 10)),
             ElevatedButton(
-              onPressed: () {
+              onPressed: studentsLoaded ? () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const DisplayApplicants()),
+                  MaterialPageRoute(builder: (context) => DisplayApplicants(
+                    students: students,
+                    schools: schools,  // Pass the schools list
+                  )),
                 );
-              },
+              } : null,
               child: Text("Page d'affichage"),
             ),
             Padding(padding: EdgeInsets.only(bottom: 10)),

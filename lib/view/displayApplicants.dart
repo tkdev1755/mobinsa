@@ -5,38 +5,22 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../model/School.dart';
 
-
-
 class DisplayApplicants extends StatefulWidget {
-  const DisplayApplicants({Key? key}) : super(key: key);
+  final List<Student> students;
+  final List<School> schools;
+  
+  const DisplayApplicants({Key? key, required this.students, required this.schools}) : super(key: key);
 
   @override
   State<DisplayApplicants> createState() => _DisplayApplicantsState();
 }
 
 class _DisplayApplicantsState extends State<DisplayApplicants> {
-  final List<Map<String, String>> students = [
-    {'nom': 'Dupont', 'prenom': 'Jean', 'promo': "3A STI"},
-    {'nom': 'Martin', 'prenom': 'Sophie', 'promo': "3A STI"},
-    {'nom': 'Bernard', 'prenom': 'Lucas', 'promo': "3A STI"},
-    {'nom': 'Petit', 'prenom': 'Emma', 'promo': "3A STI"},
-    {'nom': 'Robert', 'prenom': 'Thomas', 'promo': "3A STI"},
-  ];
-
-  final List<Map<String, String>> schools = [
-    {'nom': 'Ecole 1', 'pays': 'Pays X'},
-    {'nom': 'Ecole 2', 'pays': 'Pays Y'},
-    {'nom': 'Ecole 3', 'pays': 'Pays Z'},
-  ];
-
-  Map<String, String>? selectedStudent;
+  Student? selectedStudent;
   Map<int, bool?> schoolChoices = {}; // null = pas de choix, true = accepté, false = refusé
-  List<Choice> selectedStudentChoices = [
-    Choice(
-        School("Ecole 1","Pays X","",0,0,0,[],"","","","",""),10,Student(0,"",{},"",0,0,"",0.0,"")
-    )
-  ];
-  List<bool> expandedStudentsChoice = [false];
+  List<Choice> selectedStudentChoices = [];
+  List<bool> expandedStudentsChoice = [];
+  
   @override
   Widget build(BuildContext context) {
     print(expandedStudentsChoice);
@@ -76,19 +60,29 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ListView.builder(
-                  itemCount: students.length,
+                  itemCount: widget.students.length,
                   itemBuilder: (context, index) {
+                    final student = widget.students[index];
                     return Card(
                       margin: const EdgeInsets.only(bottom: 8.0),
                       child: ListTile(
                         title: Text(
-                          '${students[index]['prenom']} ${students[index]['nom']}',
+                          student.name,
                           style: const TextStyle(fontSize: 14),
+                        ),
+                        subtitle: Text(
+                          "${student.departement} ${student.year}A",
+                          style: const TextStyle(fontSize: 12),
                         ),
                         onTap: () {
                           setState(() {
-                            selectedStudent = students[index];
+                            selectedStudent = student;
                             schoolChoices.clear(); // Reset des choix
+                            selectedStudentChoices = student.choices.values.toList();
+                            expandedStudentsChoice = List.generate(
+                              selectedStudentChoices.length, 
+                              (_) => false
+                            );
                           });
                         },
                       ),
@@ -117,7 +111,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '${selectedStudent!['prenom']} ${selectedStudent!['nom']}',
+                                      selectedStudent!.name,
                                       style: const TextStyle(
                                         fontSize: 28,
                                         fontWeight: FontWeight.bold,
@@ -125,7 +119,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      '${selectedStudent!['promo']}',
+                                      '${selectedStudent!.departement} ${selectedStudent!.year}A',
                                       style: const TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w500,
@@ -173,9 +167,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     // Liste des écoles
-                                    ...schools.asMap().entries.map((entry) {
+                                    ...widget.schools.asMap().entries.map((entry) {
                                       int index = entry.key;
-                                      Map<String, String> school = entry.value;
+                                      School school = entry.value;
                                       return Container(
                                         margin: const EdgeInsets.only(bottom: 16.0),
                                         padding: const EdgeInsets.all(16.0),
@@ -194,7 +188,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: [
                                                       Text(
-                                                        school['nom']!,
+                                                        school.name,
                                                         style: const TextStyle(
                                                           fontSize: 18,
                                                           fontWeight: FontWeight.bold,
@@ -208,7 +202,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                                   ),
                                                   const SizedBox(height: 4),
                                                   Text(
-                                                    school['pays']!,
+                                                    school.country,
                                                     style: TextStyle(
                                                       fontSize: 14,
                                                       color: Colors.grey[600],
