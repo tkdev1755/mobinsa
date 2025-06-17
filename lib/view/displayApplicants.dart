@@ -82,17 +82,20 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                   itemBuilder: (context, index) {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 8.0),
-                      color: widget.students[index].accepted_school != null ? Colors.green[700] : Colors.grey[300],
+                      color: currentStudentIndex == index ? Colors.blue[100] : (widget.students[index].accepted_school != null ? Colors.green[700] : Colors.grey[300]),
                       child: ListTile(
                         title: Text(
                           widget.students[index].name,
-                          style: const TextStyle(fontSize: 14),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: currentStudentIndex == index ? Colors.blue[900] : Colors.black,
+                          ),
                         ),
                         onTap: () {
                           setState(() {
                             selectedStudent = widget.students[index];
-                            currentStudentIndex = index; // Add this line
-                            schoolChoices.clear(); // Reset des choix
+                            currentStudentIndex = index;
+                            schoolChoices.clear();
                           });
                         },
                       ),
