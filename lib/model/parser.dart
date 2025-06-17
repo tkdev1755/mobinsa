@@ -398,7 +398,7 @@ class SheetParser{
   }
 
   static int saveExcelToDisk(String path, List<int> bytes){
-    File excelFile = File(path);
+    File excelFile = File("$path.xlsx");
     excelFile.createSync();
     excelFile.writeAsBytes(bytes);
     return 1;
