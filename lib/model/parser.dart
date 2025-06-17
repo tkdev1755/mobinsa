@@ -232,61 +232,110 @@ class SheetParser{
           String value = sheet.rows[row][col]?.value.toString() ?? "Problème parsing";
           stdout.write("$value; ");
         }
-        String name = sheet.rows[row][0]?.value.toString() ?? "PROBLEM NAME";
-        String country = sheet.rows[row][1]?.value.toString() ?? "PROBLEM COUNTRY";
-        String contract = sheet.rows[row][2]?.value.toString() ?? "PROBLEM CONTRACT_TYPE";
-        int slots = 4;
-        int b_slots = 2;
-        int m_slots = 2;
-        List<String> specialization = specializationStringToList(sheet.rows[row][5]?.value.toString() ?? "PROBLEM SPECIALIZATION");
-        //int slots = int.parse(sheet.rows[row][3]?.value.toString() ?? "-1");
-        //int b_slots = int.parse(sheet.rows[row][4]?.value.toString() ?? "-1");
-        //int m_slots = int.parse(sheet.rows[row][5]?.value.toString() ?? "-1");
-        //String spez = sheet.rows[row][6]?.value.toString() ?? "PROBLEM SPECIALIZATION";
-        //List<String> specialization = specializationStringToList(spez);
-        String graduation_level = sheet.rows[row][6]?.value.toString() ?? "PROBLEM GRADUATION_LEVEL";
-        String program = sheet.rows[row][7]?.value.toString() ?? "PROBLEM PROGRAM";
-        String use_language = sheet.rows[row][8]?.value.toString() ?? "PROBLEM USE_LANGUAGE";
-        String req_lang_level = sheet.rows[row][9]?.value.toString() ?? "PROBLEM REQ_LANG_LEVEL";
-        String academic_level = sheet.rows[row][10]?.value.toString() ?? "PROBLEM ACADEMIC_LEVEL";
-        School school = School(
-          name,
-          country,
-          contract,
-          slots,
-          b_slots,
-          m_slots,
-          specialization,
-          graduation_level,
-          program,
-          use_language,
-          req_lang_level,
-          academic_level
-        );
-        schools.add(school);
+        //VERSION DU TABLEUR
+        int version = 2;
+        if(version==2) {
+          String name = sheet.rows[row][0]?.value.toString() ?? "PROBLEM NAME";
+          String country = sheet.rows[row][1]?.value.toString() ??
+              "PROBLEM COUNTRY";
+          String contract = sheet.rows[row][2]?.value.toString() ??
+              "PROBLEM CONTRACT_TYPE";
+          int slots = int.parse(sheet.rows[row][3]?.value.toString() ?? "-1");
+          int b_slots = int.parse(sheet.rows[row][4]?.value.toString() ?? "-1");
+          int m_slots = int.parse(sheet.rows[row][5]?.value.toString() ?? "-1");
+          List<String> specialization = specializationStringToList(
+              sheet.rows[row][6]?.value.toString() ?? "PROBLEM SPECIALIZATION");
+          String graduation_level = sheet.rows[row][7]?.value.toString() ??
+              "PROBLEM GRADUATION_LEVEL";
+          String program = sheet.rows[row][8]?.value.toString() ??
+              "PROBLEM PROGRAM";
+          String use_language = sheet.rows[row][9]?.value.toString() ??
+              "PROBLEM USE_LANGUAGE";
+          String req_lang_level = sheet.rows[row][10]?.value.toString() ??
+              "PROBLEM REQ_LANG_LEVEL";
+          String academic_level = sheet.rows[row][11]?.value.toString() ??
+              "PROBLEM ACADEMIC_LEVEL";
+          School school = School(
+              name,
+              country,
+              contract,
+              slots,
+              b_slots,
+              m_slots,
+              specialization,
+              graduation_level,
+              program,
+              use_language,
+              req_lang_level,
+              academic_level
+          );
+          schools.add(school);
+        }
+        if(version==1) {
+          String name = sheet.rows[row][0]?.value.toString() ?? "PROBLEM NAME";
+          String country = sheet.rows[row][1]?.value.toString() ??
+              "PROBLEM COUNTRY";
+          String contract = sheet.rows[row][2]?.value.toString() ??
+              "PROBLEM CONTRACT_TYPE";
+          int slots = int.parse(sheet.rows[row][3]?.value.toString() ?? "-1");
+          int b_slots = slots;
+          int m_slots = slots;
+          List<String> specialization = specializationStringToList(
+              sheet.rows[row][5]?.value.toString() ?? "PROBLEM SPECIALIZATION");
+          String graduation_level = sheet.rows[row][6]?.value.toString() ??
+              "PROBLEM GRADUATION_LEVEL";
+          String program = sheet.rows[row][7]?.value.toString() ??
+              "PROBLEM PROGRAM";
+          String use_language = sheet.rows[row][8]?.value.toString() ??
+              "PROBLEM USE_LANGUAGE";
+          String req_lang_level = sheet.rows[row][9]?.value.toString() ??
+              "PROBLEM REQ_LANG_LEVEL";
+          String academic_level = sheet.rows[row][10]?.value.toString() ??
+              "PROBLEM ACADEMIC_LEVEL";
+          School school = School(
+              name,
+              country,
+              contract,
+              slots,
+              b_slots,
+              m_slots,
+              specialization,
+              graduation_level,
+              program,
+              use_language,
+              req_lang_level,
+              academic_level
+          );
+          schools.add(school);
+        }
         print("");
       }
     }
     print("LES SCHOOLS: $schools");
-    print("Une school:");
-    print(schools[0].name);print(schools[0].country);print(schools[0].content_type);print(schools[0].specialization);
+    print("Normalemennt MONS:");
+    print(schools[5].name);print(schools[5].country);print(schools[5].content_type);print(schools[5].specialization);
     return schools;
   }
 
   //transforme la colonne DISCIPLINE en une liste de STI 3A, STI 4A, MRI 3A, MRI 4A
   static List<String> specializationStringToList(String specialization){
-    List<String> program = []; List<String> spez = [];
-    for(String prog in ["ENP","ENR","GSI","MRI","STI","Paysagiste"]){
-      if(specialization.contains(prog)) {
-        program.add(prog);
-        print(prog+" DETECTÉ");
+    List<String> spez = [];
+    List<String> substrings = specialization.split("+");
+    for(String substring in substrings) {
+      List<String> program = [];
+      for (String prog in ["ENP", "ENR", "GSI", "MRI", "STI"]) {
+        if (substring.contains(prog)) {
+          program.add(prog);
+          print(prog + " DETECTÉ");
+        }
       }
-    }
-    for(String yea in ["2A","3A","4A","5A"]){
-      if(specialization.contains(yea)) {
-        print(yea+" DETECTÉ");
-        for(String prog in program){
-          spez.add("$prog $yea"); //used interpolation, avoids concatenation (prog+" "+yea)
+      for (String yea in ["2A", "3A", "4A", "5A"]) {
+        if (substring.contains(yea)) {
+          print(yea + " DETECTÉ");
+          for (String prog in program) {
+            spez.add(
+                "$prog $yea"); //used interpolation, avoids concatenation (prog+" "+yea)
+          }
         }
       }
     }
