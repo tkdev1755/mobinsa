@@ -1,10 +1,12 @@
 import 'package:mobinsa/model/Choice.dart';
+import 'package:mobinsa/model/School.dart';
 
 class Student {
   int id ;
   String name;
   Map <int,Choice> choices;
   Choice? accepted;
+  School? accepted_school;
   String specialization;
   int ranking_s1 ;
   int ects_number;
@@ -34,6 +36,7 @@ class Student {
     this.missed_hours = missed_hours;
     this.comment = comment;
     year_departement(specialization);
+    this.accepted_school = null;
   }
 
   void year_departement (String specialization){

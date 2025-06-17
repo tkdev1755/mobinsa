@@ -415,12 +415,50 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                       IconButton(
                         onPressed: (){
                           setState(() {
+                            expandedStudentsChoice[index] = false;
                           });
-                          expandedStudentsChoice[index] = false;
                           print(expandedStudentsChoice);
                         },
-                          icon: Icon(PhosphorIcons.arrowDown())
+                        icon: Icon(PhosphorIcons.arrowUp()),
+                        color: Colors.black,
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.grey[300],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
                         ),
+                      ),
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              // TODO: Gérer le refus
+                            },
+                            icon: Icon(PhosphorIcons.x(PhosphorIconsStyle.bold)),
+                            color: Colors.white,
+                            style: IconButton.styleFrom(
+                              backgroundColor: Colors.red[700],
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            onPressed: () {
+                              // TODO: Gérer la validation
+                            },
+                            icon: Icon(PhosphorIcons.check(PhosphorIconsStyle.bold)),
+                            color: Colors.white,
+                            style: IconButton.styleFrom(
+                              backgroundColor: Colors.green[700],
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   )
                 ],
@@ -448,21 +486,72 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
           ),
           child: Row(
             children: [
-              Column(
+              Row(
                 children: [
-                  Text(
-                    choice.school.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        choice.school.name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        choice.school.country,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    choice.school.country,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
+                  const SizedBox(width: 16),
+                  choice.student.accepted_school == null ?
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          choice.school.accepted(choice.student);
+                        },
+                        icon: Icon(PhosphorIcons.x(PhosphorIconsStyle.bold)),
+                        color: Colors.white,
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.red[700],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed: () {
+                          choice.school.accepted(choice.student);
+                        },
+                        icon: Icon(PhosphorIcons.check(PhosphorIconsStyle.bold)),
+                        color: Colors.white,
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.green[700],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                  :
+                  choice.student.accepted_school == choice.school ?
+                  Row(
+                    children: [
+                      Text("École acceptée"),
+                    ],
+                  )
+                  :
+                  Row(
+                    children: [
+                      Text("Un autre choix à été validé"),
+                    ],
                   ),
                 ],
               ),
