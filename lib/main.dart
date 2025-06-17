@@ -63,13 +63,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   List<Student> students = [];
   List<School> schools = [];
   String? selectedFilenameSchools;
   String? selectedFilenameStudents;
   bool schoolsLoaded = false;
-  bool studentsLoaded = true;
+  bool studentsLoaded = false;  // Changed to false
 
   Future<String?> pickFile() async {
     final result = await FilePicker.platform.pickFiles();
@@ -167,7 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       /// BOUTON POUR LES ETUDIANTS
                       ElevatedButton(
                         style: customButtonStyle,
-                        onPressed: () async {
+                        onPressed: schoolsLoaded ? () async {
                           String? filePath = await pickFile();
                           if (filePath != null) {
                             setState(() {
@@ -176,16 +175,15 @@ class _MyHomePageState extends State<MyHomePage> {
                               }else{
                                 selectedFilenameStudents = filePath.split("/").last;
                               }
-                              
                             });
                             Excel studentsResult = SheetParser.parseExcel(filePath);
                             try {
-                              List<Student> parsedStudents = SheetParser.extractStudents(studentsResult);
+                              // Fixed line - pass both the Excel object AND schools list
+                             List<Student> parsedStudents = SheetParser.extractStudents(studentsResult);
                               setState(() {
-                                students = parsedStudents; // Update the class-level list
+                                students = parsedStudents;
                                 studentsLoaded = students.isNotEmpty;
                               });
-                              // Now print the students
                               for (var student in students) {
                                 print(student);
                               }
@@ -194,7 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               print(s);
                             }
                           }
-                        },
+                        } : null,
                         child: Text("Importez les étudiants")
                       ),
                       Padding(padding: EdgeInsets.only(bottom: 10)),
