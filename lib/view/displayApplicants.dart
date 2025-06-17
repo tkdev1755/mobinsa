@@ -4,8 +4,6 @@ import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/parser.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-
-import '../main.dart';
 import '../model/School.dart';
 
 
@@ -71,9 +69,11 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
             IconButton(
               icon: Icon(PhosphorIcons.house(PhosphorIconsStyle.regular), size: 32.0),
               onPressed: () => {
-                Navigator.push(
+                Navigator.pop(
                   context,
-                  MaterialPageRoute(builder: (context) => MyApp()),
+                ),
+                Navigator.pop(
+                  context,
                 )
               },
               tooltip: "Revenir à la page d'accueil",
@@ -94,7 +94,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                   itemBuilder: (context, index) {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 8.0),
-                      color: currentStudentIndex == index ? Colors.blue[100] : (widget.students[index].accepted_school != null ? Colors.green[700] : Colors.grey[300]),
+                      color: currentStudentIndex == index ? Colors.blue[100] : (widget.students[index].accepted != null ? Colors.green[700] : Colors.grey[300]),
                       child: ListTile(
                         title: Text(
                           widget.students[index].name,
@@ -361,10 +361,17 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
     }
   }
 
+  bool disbaleChoice(Choice choice){
+    return (choice.student.accepted != null && choice.student.accepted != choice) || 
+           (choice.school.available_slots == 0 && choice.student.accepted != choice);
+  }
+
+
   Widget choiceCard(Choice choice, int index) {
+    print(" is the output disabled ? ${disbaleChoice(choice)}");
     return Card(
       margin: const EdgeInsets.only(bottom: 8.0),
-      color: choice.student.accepted_school == choice.school ? disabledColor : Colors.grey[300],
+      color: disbaleChoice(choice) ? disabledColor : Colors.grey[300],
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
@@ -451,10 +458,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                     width: 40,
                     height: 40,
                     child: ElevatedButton(
-                      onPressed: choice.student.accepted_school != null && choice.student.accepted_school != choice.school ? null : () {
+                      onPressed: choice.student.accepted != null ? null : () {
                         setState(() {
                           schoolChoices[index] = false;
-                          choice.student.accepted_school = null;
+                            choice.remove_choice();
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -479,10 +486,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                     width: 40,
                     height: 40,
                     child: ElevatedButton(
-                      onPressed: choice.student.accepted_school != null ? null : () {
+                      onPressed: choice.student.accepted != null ? null : () {
                         setState(() {
                           schoolChoices[index] = true;
-                          choice.student.accepted_school = choice.school;
+                          choice.accepted(choice.student);
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -555,10 +562,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           width: 40,
                           height: 40,
                           child: ElevatedButton(
-                            onPressed: choice.student.accepted_school != null && choice.student.accepted_school != choice.school ? null : () {
+                            onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () {
                               setState(() {
                                 schoolChoices[index] = false;
-                                choice.student.accepted_school = null;
+                                choice.remove_choice();
                               });
                             },
                             style: ElevatedButton.styleFrom(
@@ -583,10 +590,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           width: 40,
                           height: 40,
                           child: ElevatedButton(
-                            onPressed: choice.student.accepted_school != null ? null : () {
+                            onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () {
                               setState(() {
                                 schoolChoices[index] = true;
-                                choice.student.accepted_school = choice.school;
+                                choice.accepted(choice.student);
                               });
                             },
                             style: ElevatedButton.styleFrom(

@@ -18,6 +18,11 @@ class Choice {
     return false;
   }
 
+  void remove_choice() {
+    student.accepted = null;
+    school.add_slots(student);
+  }
+
 
   @override
   String toString() {

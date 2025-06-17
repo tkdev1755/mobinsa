@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:mobinsa/model/School.dart';
 import 'package:mobinsa/model/parser.dart';
 import 'package:mobinsa/model/Student.dart';
-import 'package:mobinsa/view/displayApplicants.dart';
 import 'package:mobinsa/view/assemblyPreview.dart';
 
 void main() {

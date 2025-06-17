@@ -57,12 +57,16 @@ class School {
 
   bool accepted(Student s) {
     //affectation d'une offre de séjour à un élève
-    if (s.year == 2 && this.b_slots > 0 && s.specialization.contains(s.get_next_year())) {
+    print("s.year : ${s.year}");
+    print("this.b_slots : ${this.b_slots}");
+    print("this.specialization : ${this.specialization}");
+    print("s.get_next_year() : ${s.get_next_year()}");
+    if (s.year == 2 && this.b_slots > 0 && this.specialization.contains(s.get_next_year())) {
       print("ACCEPTED SCHOOL LICENCE");
       this.reduce_slots(s);
       return true;
     }
-    else if (s.year > 2 && this.m_slots > 0 && s.specialization.contains(s.get_next_year())) {
+    else if (s.year > 2 && this.m_slots > 0 && this.specialization.contains(s.get_next_year())) {
       print("ACCEPTED SCHOOL MASTER");
       this.reduce_slots(s);
       return true;
