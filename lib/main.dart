@@ -200,20 +200,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       Padding(padding: EdgeInsets.only(bottom: 10)),
                       ElevatedButton(
                         style: customButtonStyle,
-                        onPressed: studentsLoaded ? () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => DisplayApplicants(
-                              students: students,
-                              schools: schools,  // Pass the schools list
-                            )),
-                          );
-                        } : null,
-                        child: Text("Page d'affichage"),
-                      ),
-                      Padding(padding: EdgeInsets.only(bottom: 10)),
-                      ElevatedButton(
-                        style: customButtonStyle,
                         onPressed: (schoolsLoaded && studentsLoaded) ? () {
                           Navigator.push(
                             context,

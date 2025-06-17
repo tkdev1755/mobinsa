@@ -5,6 +5,7 @@ import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/parser.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import '../main.dart';
 import '../model/School.dart';
 
 
@@ -60,12 +61,22 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                 }
                 // TODO: Exporter en excel
               },
-              tooltip: "Exporter en excel",
+              tooltip: "Exporter vers excel",
             ),
             IconButton(
               icon: Icon(PhosphorIcons.gear(PhosphorIconsStyle.regular), size: 32.0),
               onPressed: null,
               tooltip: "Cette fonctionnalité n'est pas encore disponible",
+            ),
+            IconButton(
+              icon: Icon(PhosphorIcons.house(PhosphorIconsStyle.regular), size: 32.0),
+              onPressed: () => {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MyApp()),
+                )
+              },
+              tooltip: "Revenir à la page d'accueil",
             ),
           ],
           backgroundColor: disabledColor,
