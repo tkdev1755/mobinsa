@@ -119,10 +119,18 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                             selectedStudent = widget.students[index];
                             currentStudentIndex = index;
                             schoolChoices.clear();
-                            // Initialiser showCancelButton pour chaque choix
+                            // Initialiser showCancelButton pour chaque choix en fonction de l'état actuel
                             showCancelButton.clear();
                             widget.students[index].choices.forEach((key, choice) {
-                              showCancelButton[key] = false;
+                              // Afficher le bouton annuler si le choix est accepté ou refusé
+                              showCancelButton[key] = (choice.student.accepted == choice) || 
+                                                      choice.student.refused.contains(choice);
+                              // Initialiser schoolChoices en fonction de l'état
+                              if (choice.student.accepted == choice) {
+                                schoolChoices[key] = true;
+                              } else if (choice.student.refused.contains(choice)) {
+                                schoolChoices[key] = false;
+                              }
                             });
                           });
                         },
@@ -358,10 +366,18 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
             widget.students[index].choices.values.toList().length,
                 (_) => false
         );
-        // Initialiser showCancelButton pour chaque choix
+        // Initialiser showCancelButton pour chaque choix en fonction de l'état actuel
         showCancelButton.clear();
         widget.students[index].choices.forEach((key, choice) {
-          showCancelButton[key] = false;
+          // Afficher le bouton annuler si le choix est accepté ou refusé
+          showCancelButton[key] = (choice.student.accepted == choice) || 
+                                  choice.student.refused.contains(choice);
+          // Initialiser schoolChoices en fonction de l'état
+          if (choice.student.accepted == choice) {
+            schoolChoices[key] = true;
+          } else if (choice.student.refused.contains(choice)) {
+            schoolChoices[key] = false;
+          }
         });
       });
     }
