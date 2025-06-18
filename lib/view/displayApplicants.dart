@@ -495,9 +495,13 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           SizedBox(
                             width : MediaQuery.sizeOf(context).width*0.5*0.3,
                             child: Text("${choice.school.specialization.toString().replaceAll("[", "").replaceAll("]", "")}",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w500,
+                                color : (choice.is_incoherent() ?
+                                    Colors.orange :
+                                    Colors.black),
+
                               ),
                             ),
                           ),
