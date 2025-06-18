@@ -112,6 +112,7 @@ class Student {
   String toString() {
     String choicesString = choices.entries.map((entry) => '\n    Vœu ${entry.key}: ${entry.value}').join('');
     String refusedChoicesString = refused.isNotEmpty ? refused.map((choice) => '\n    Refusé: $choice').join('') : '\n    Aucun refus';
+    // return this.name;
     return 'Étudiant {\n'
         '  ID: $id,\n'
         '  Nom: $name,\n'
@@ -183,7 +184,7 @@ class Student {
     /// pour la même école.
     Map<int, List<Student>> ladder = {};
     Map<int, Choice> diffDict = diff_interrankings();
-    print("Here is the diff_dict ${diffDict}");
+    //print("Here is the diff_dict ${diffDict}");
     if (diffDict.isEmpty) return {};
     for (var entry in diffDict.entries) {
       Choice c = entry.value; // Le choix problématique

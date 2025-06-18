@@ -53,14 +53,14 @@ class Choice {
     // si Student.toString() imprime aussi ses Choice qui impriment leur Student, etc.
     // Imprimez juste des informations clés de l'étudiant si nécessaire, ou son ID/nom.
     return 'Choix{École: $school, Classement Inter.: $interranking}';
+    // return school.name;
   }
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+    // if (identical(this, other)) return true;
     if (other is! Choice) return false;
-    return school.id == other.school.id &&
-        student.id == other.student.id;
+    return school.id == other.school.id;
   }
 
 

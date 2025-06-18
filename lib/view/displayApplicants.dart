@@ -388,10 +388,17 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
            (choice.school.remaining_slots == 0 && choice.student.accepted == null);
   }
 
-  bool disableChoiceByRanking(Student student,int choiceNumber){
-    Map<int, List<Student>> ladder = student.ladder_interranking(widget.students);
-    print(" ladder.keys: ${ladder.keys}");
-    return ladder.containsKey(choiceNumber);
+  bool disableChoiceByRanking(Student student_f,int choiceNumber){
+    Map<int, List<Student>> ladder = student_f.ladder_interranking(widget.students);
+    bool atLeastOneNotAccepted = false; 
+    //pour s'il y a au moins un étudiant mieux classé qui n'est pas accepté.
+    for (var entry in ladder.entries){
+      if (entry.value.any((student) => student.accepted == null && !student.refused.contains(student_f.choices[choiceNumber]))){
+        atLeastOneNotAccepted = true;
+        break;
+      }
+    }
+    return  atLeastOneNotAccepted && ladder.containsKey(choiceNumber);
   }
 
 
@@ -614,7 +621,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           width: 40,
                           height: 40,
                           child: Tooltip(
-                            message: choice.school.remaining_slots == 0 ? "Plus de places disponibles" : "Accepter ce choix",
+                            message: choice.school.remaining_slots == 0 ? "Plus de places disponibles" : disableChoiceByRanking(selectedStudent!, index) ? "Il y un étudiant avec un meilleur interclassement" : "Accepter ce choix",
                             child: ElevatedButton(
                               onPressed: disableChoiceByRanking(selectedStudent!, index) || choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
                                 setState(() {
@@ -789,9 +796,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                 width: 40,
                                 height: 40,
                                 child: Tooltip(
-                                  message: choice.school.remaining_slots == 0 ? "Plus de places disponibles" : "Accepter ce choix",
+                                  message: choice.school.remaining_slots == 0 ? "Plus de places disponibles" : disableChoiceByRanking(selectedStudent!, index) ? "Il y un étudiant avec un meilleur interclassement" : "Accepter ce choix",
                                   child: ElevatedButton(
-                                    onPressed: disableChoiceByRanking(selectedStudent!, index) || choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
+                                    onPressed: disableChoiceByRanking(selectedStudent!, index)  || choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
                                       setState(() {
                                         schoolChoices[index] = true;
                                         choice.accepted(choice.student);
