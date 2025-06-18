@@ -7,6 +7,7 @@ import 'package:mobinsa/view/debugPage.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../model/School.dart';
 
+//TODO: faire en sorte que le bouton retirer marcher pour retirer et pour refuser un choix
 
 /*
 
@@ -29,6 +30,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
 
   Student? selectedStudent;
   Map<int, bool?> schoolChoices = {}; // null = pas de choix, true = accepté, false = refusé
+  Map<int, bool> showCancelButton = {}; // true = afficher le bouton annuler, false = afficher les boutons accepter/refuser
   int currentStudentIndex = -1;
   List<bool> expandedStudentsChoice = [false,false,false];
   Color disabledColor = Colors.grey[100]!;
@@ -117,6 +119,11 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                             selectedStudent = widget.students[index];
                             currentStudentIndex = index;
                             schoolChoices.clear();
+                            // Initialiser showCancelButton pour chaque choix
+                            showCancelButton.clear();
+                            widget.students[index].choices.forEach((key, choice) {
+                              showCancelButton[key] = false;
+                            });
                           });
                         },
                       ),
@@ -407,6 +414,11 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
             widget.students[index].choices.values.toList().length,
                 (_) => false
         );
+        // Initialiser showCancelButton pour chaque choix
+        showCancelButton.clear();
+        widget.students[index].choices.forEach((key, choice) {
+          showCancelButton[key] = false;
+        });
       });
     }
   }
@@ -414,7 +426,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
   bool disbaleChoice(Choice choice){
     //TODO: check if the student rank is the best
     return (choice.student.accepted != null && choice.student.accepted != choice) || 
-           (choice.school.remaining_slots == 0 && choice.student.accepted != choice);
+           (choice.school.remaining_slots == 0 && choice.student.accepted == null);
   }
 
 
@@ -531,72 +543,117 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                     ],
                   ),
                   Spacer(),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    child: ElevatedButton(
-                      onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () {
-                        setState(() {
-                          schoolChoices[index] = false;
-                            choice.remove_choice();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Choix retiré"),
-                                backgroundColor: Colors.red,
+                  // Afficher le bouton annuler ou les boutons accepter/refuser
+                  if (showCancelButton[index] == true)
+                    Container(
+                      width: 80,
+                      height: 40,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            showCancelButton[index] = false;
+                            schoolChoices[index] = null;
+                            // Annuler l'action précédente
+                            if (choice.student.accepted == choice) {
+                              choice.remove_choice();
+                            }
+                            // Remettre le choix si il avait été retiré
+                            if (!choice.student.choices.containsValue(choice)) {
+                              choice.student.choices[index] = choice;
+                            }
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        child: const Text(
+                          "Annuler",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    Row(
+                      children: [
+                        // Bouton Refuser (X)
+                        Container(
+                          width: 40,
+                          height: 40,
+                          child: ElevatedButton(
+                            onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () {
+                              setState(() {
+                                schoolChoices[index] = false;
+                                choice.remove_choice();
+                                showCancelButton[index] = true;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Choix retiré"),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: schoolChoices[index] == false
+                                  ? Colors.red[700]
+                                  : Colors.red,
+                              padding: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
                               ),
-                            );
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: schoolChoices[index] == false
-                            ? Colors.red[700]
-                            : Colors.red,
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Bouton Accepter (✓)
-                  Container(
-                    width: 40,
-                    height: 40,
-                    child: ElevatedButton(
-                      onPressed: choice.student.accepted != null ? null : () {
-                        setState(() {
-                          schoolChoices[index] = true;
-                          choice.accepted(choice.student);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text("Choix accepté"),
-                              backgroundColor: Colors.green,
                             ),
-                          );
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: schoolChoices[index] == true
-                            ? Colors.green[700]
-                            : Colors.green,
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
                         ),
-                      ),
-                      child: const Icon(
-                        Icons.check,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+                        const SizedBox(width: 8),
+                        // Bouton Accepter (✓)
+                        Container(
+                          width: 40,
+                          height: 40,
+                          child: ElevatedButton(
+                            onPressed: choice.student.accepted != null ? null : () {
+                              setState(() {
+                                schoolChoices[index] = true;
+                                choice.accepted(choice.student);
+                                showCancelButton[index] = true;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Choix accepté"),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: schoolChoices[index] == true
+                                  ? Colors.green[700]
+                                  : Colors.green,
+                              padding: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
                 ],
               ),
             ],
@@ -646,73 +703,117 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                     Padding(padding: EdgeInsets.only(bottom: 10)),
                     Row(
                       children: [
-                        // Bouton Refuser (X)
-                        Container(
-                          width: 40,
-                          height: 40,
-                          child: ElevatedButton(
-                            onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () {
-                              setState(() {
-                                schoolChoices[index] = false;
-                                choice.remove_choice();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("Choix retiré"),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: schoolChoices[index] == false
-                                  ? Colors.red[700]
-                                  : Colors.red,
-                              padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6),
+                        // Afficher le bouton annuler ou les boutons accepter/refuser
+                        if (showCancelButton[index] == true)
+                          Container(
+                            width: 80,
+                            height: 40,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  showCancelButton[index] = false;
+                                  schoolChoices[index] = null;
+                                  // Annuler l'action précédente
+                                  if (choice.student.accepted == choice) {
+                                    choice.remove_choice();
+                                  }
+                                  // Remettre le choix si il avait été retiré
+                                  if (!choice.student.choices.containsValue(choice)) {
+                                    choice.student.choices[index] = choice;
+                                  }
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange,
+                                padding: EdgeInsets.zero,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              ),
+                              child: const Text(
+                                "Annuler",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                            child: const Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        // Bouton Accepter (✓)
-                        Container(
-                          width: 40,
-                          height: 40,
-                          child: ElevatedButton(
-                            onPressed: choice.student.accepted != null ? null : () {
-                              setState(() {
-                                schoolChoices[index] = true;
-                                choice.accepted(choice.student);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("Choix accepté"),
-                                    backgroundColor: Colors.green,
+                          )
+                        else
+                          Row(
+                            children: [
+                              // Bouton Refuser (X)
+                              Container(
+                                width: 40,
+                                height: 40,
+                                child: ElevatedButton(
+                                  onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () {
+                                    setState(() {
+                                      schoolChoices[index] = false;
+                                      choice.remove_choice();
+                                      showCancelButton[index] = true;
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text("Choix retiré"),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: schoolChoices[index] == false
+                                        ? Colors.red[700]
+                                        : Colors.red,
+                                    padding: EdgeInsets.zero,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
                                   ),
-                                );
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: schoolChoices[index] == true
-                                  ? Colors.green[700]
-                                  : Colors.green,
-                              padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6),
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
                               ),
-                            ),
-                            child: const Icon(
-                              Icons.check,
-                              color: Colors.white,
-                              size: 20,
-                            ),
+                              const SizedBox(width: 8),
+                              // Bouton Accepter (✓)
+                              Container(
+                                width: 40,
+                                height: 40,
+                                child: ElevatedButton(
+                                  onPressed: choice.student.accepted != null ? null : () {
+                                    setState(() {
+                                      schoolChoices[index] = true;
+                                      choice.accepted(choice.student);
+                                      showCancelButton[index] = true;
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text("Choix accepté"),
+                                          backgroundColor: Colors.green,
+                                        ),
+                                      );
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: schoolChoices[index] == true
+                                        ? Colors.green[700]
+                                        : Colors.green,
+                                    padding: EdgeInsets.zero,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
                       ],
                     ),
                   ],
