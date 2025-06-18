@@ -108,7 +108,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                       color: currentStudentIndex == index ? Colors.blue[100] : (widget.students[index].accepted != null ? Colors.green[700] : Colors.grey[300]),
                       child: ListTile(
                         title: Text(
-                          widget.students[index].name,
+                          widget.students[index].name, //Max demande humblement de rajouter widget.students[index].ranking_s1.toString()
                           style: TextStyle(
                             fontSize: 14,
                             color: currentStudentIndex == index ? Colors.blue[900] : Colors.black,
@@ -464,7 +464,6 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                             ),
                           ),
                           Text("Langue d'enseignement",
-
                           ),
                           Text("${choice.school.use_langage}",
                             style: const TextStyle(
@@ -472,8 +471,8 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          Text("Nombre de places"),
-                          Text("${choice.school.remaining_slots} | ",
+                          Text("Niveau de langue"),
+                          Text("${choice.school.req_lang_level} | ",
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
@@ -485,6 +484,13 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Text("Nombre de places"),
+                          Text("${choice.school.remaining_slots} | ${choice.school.b_slots} Bachelor, ${choice.school.m_slots} Master",
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                           Text("Discipline"),
                           SizedBox(
                             width : MediaQuery.sizeOf(context).width*0.5*0.3,

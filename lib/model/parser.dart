@@ -51,6 +51,12 @@ class SheetParser{
 
   static int _getIntCellData(List<Data?> row, int colIndex, {int defaultValue = 0}) {
     if (colIndex < row.length && row[colIndex]?.value != null) {
+      if (row[colIndex]!.value.runtimeType == FormulaCellValue){
+        //FormulaCellValue? value = row[colIndex]!.value as FormulaCellValue;
+        throw Exception("Formulaes aren't supported rn");
+        //print(value.formula);
+      }
+      print("${row[colIndex]!.value.runtimeType}");
       return int.tryParse(row[colIndex]!.value.toString().trim()) ?? defaultValue;
     }
     return defaultValue;
