@@ -1,6 +1,10 @@
-# mobinsa
+# Mob'INSA
 
-Une application flutter pour étudier les mobilités
+Une application flutter pour étudier les mobilités.
+
+## Quel est le but ?
+
+Cette application a pour but d'aider les différents responsables 
 
 ## Getting Started
 

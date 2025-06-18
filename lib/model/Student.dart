@@ -130,7 +130,7 @@ class Student {
 
   Map<int, Choice> diff_interrankings(List<Student> allStudents) {
     Map<int, Choice> problematicChoices = {};
-    for (int i = 0; i < choices.length; i++) {
+    for (int i = 1; i <= choices.length; i++) {
       if (!choices.containsKey(i)) {
         throw Exception();
       }
