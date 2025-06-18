@@ -129,31 +129,65 @@ class Student {
   }
 
   Map<int, Choice> diff_interrankings() {
-    Map<int, Choice> differentInterrankings = {};
-    // Récupérer tous les interclassements des vœux
-    Set<double> allInterranks =
-    choices.values.map((choice) => choice.interranking).toSet();
-    // S’il y a plusieurs interclassements distincts
-    if (allInterranks.length <= 1) return {}; // Rien à signaler
-    // Comparer chaque vœu aux autres
+    Map<int, Choice> diff_dict = {};
+    if (choices.isEmpty) return {};
+    // Compter la fréquence de chaque interclassement
+    Map<double, int> interrankFrequencies = {};
+    for (var choice in choices.values) {
+      interrankFrequencies.update(
+        choice.interranking,
+            (count) => count + 1,
+        ifAbsent: () => 1,
+      );
+    }
+    // Trouver l'interclassement le plus fréquent
+    double reference_Rank;
+    List<double> mostCommonRanks = interrankFrequencies.entries
+        .where((e) => e.value > 1)
+        .map((e) => e.key)
+        .toList();
+    if (mostCommonRanks.isNotEmpty) {
+      // Si des interclassements sont communs, choisir le plus fréquent
+      reference_Rank = mostCommonRanks.first;
+      int maxFreq = interrankFrequencies[reference_Rank]!;
+      for (var rank in mostCommonRanks) {
+        if (interrankFrequencies[rank]! > maxFreq) {
+          reference_Rank = rank;
+          maxFreq = interrankFrequencies[rank]!;
+        }
+      }
+    } else {
+      // Sinon, prendre le plus élevé
+      reference_Rank = interrankFrequencies.keys.reduce((a, b) => a > b ? a : b);
+    }
+
+    // Comparer les autres vœux au reference_Rank
     for (var entry in choices.entries) {
       double currentRank = entry.value.interranking;
-      // S'il existe un autre interclassement différent
-      if (allInterranks.any((rank) => (rank - currentRank).abs() > 1e-6)) {
-        differentInterrankings[entry.key] = entry.value;
+      if ((currentRank - reference_Rank).abs() > 1e-6) {
+        diff_dict[entry.key] = entry.value;
       }
     }
-    return differentInterrankings;
+
+    return diff_dict;
   }
 
   Map<int, List<Student>> ladder_interranking(
       List<Student> allStudents) {
+    /// Construit une "échelle" (ladder) des étudiants qui ont obtenu une meilleure
+    /// position (interclassement) que l'étudiant courant pour un même établissement,
+    /// uniquement pour les vœux dont l'interclassement diffère du rang de référence.
+    ///
+    /// Retourne une map où la clé est la position du vœu dans `choices`
+    /// et la valeur est la liste des étudiants ayant un interclassement plus favorable
+    /// pour la même école.
     Map<int, List<Student>> ladder = {};
     Map<int, Choice> diffDict = diff_interrankings();
+    print("Here is the diff_dict ${diffDict}");
     if (diffDict.isEmpty) return {};
     for (var entry in diffDict.entries) {
-      Choice c = entry.value;
-      int key = entry.key;
+      Choice c = entry.value; // Le choix problématique
+      int key = entry.key; // Son index dans la liste des vœux
       ladder[key] = [];
       for (Student other in allStudents) {
         if (other.id == id) continue;
