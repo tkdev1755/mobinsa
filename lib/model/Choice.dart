@@ -18,6 +18,17 @@ class Choice {
     return false;
   }
 
+  void refuse() {
+    //refuser un choix et l'ajouter à la liste des choix refusés
+    student.addRefusedChoice(this);
+    // Retirer le choix de la liste des choix actifs
+    if(student.accepted == this){
+      remove_choice();
+    }
+    print("REFUSED CHOICE");
+    print(student.refused);
+  }
+
   void remove_choice() {
     student.accepted = null;
     school.add_slots(student);

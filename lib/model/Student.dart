@@ -14,6 +14,7 @@ class Student {
   String lang_lvl;
   double missed_hours;
   String comment;
+  
 
   late int year;
   late String departement;
@@ -72,6 +73,18 @@ class Student {
   void removeRefusedChoice(Choice choice){
     refused.remove(choice);
   }
+
+  void restoreRefusedChoice(Choice choice, int choiceKey) {
+    // Restaurer un choix refusé dans la liste des choix actifs
+    
+    if (refused.contains(choice)) {
+      refused.remove(choice);
+      choices[choiceKey] = choice;
+      print("CHOICE RESTORED");
+    }
+    print(refused);
+  }
+
   void add_post_comment(int selectedChoice , String new_comment ) {
     if (choices.containsKey(selectedChoice)){
       this.choices[selectedChoice]!.post_comment =  new_comment;
@@ -91,6 +104,7 @@ class Student {
   @override
   String toString() {
     String choicesString = choices.entries.map((entry) => '\n    Vœu ${entry.key}: ${entry.value}').join('');
+    String refusedChoicesString = refused.isNotEmpty ? refused.map((choice) => '\n    Refusé: ${choice}').join('') : '\n    Aucun refus';
     return 'Étudiant {\n'
         '  ID: $id,\n'
         '  Nom: $name,\n'
@@ -103,6 +117,7 @@ class Student {
         '  Post-Commentaire: "${'N/A'}",\n'
         '  Vœux: $choicesString\n'
         '  Vœu Accepté: ${accepted ?? 'Aucun'}\n'
+        '  Vœux Refusés: $refusedChoicesString\n'
         '}';
   }
 
@@ -124,7 +139,7 @@ class Student {
   Map<(Student,int),List<Student>> ladder_interrankigs(List<Student> init_list) {
     // Cette fonction construit une map associant, pour chaque étudiant et chaque vœu problématique (où un autre étudiant a un meilleur interclassement sur la même école),
     // la liste des étudiants mieux classés sur ce même vœu.
-    // Elle permet ainsi d’identifier les cas où un étudiant est dépassé par d’autres candidats pour un vœu donné.
+    // Elle permet ainsi d'identifier les cas où un étudiant est dépassé par d'autres candidats pour un vœu donné.
 
     Map<int,List<Choice>> diff_dict = diff_interrankings(init_list);
     Map<(Student,int),List<Student>> ladder_map = {};

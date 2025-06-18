@@ -557,9 +557,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                             if (choice.student.accepted == choice) {
                               choice.remove_choice();
                             }
-                            // Remettre le choix si il avait été retiré
-                            if (!choice.student.choices.containsValue(choice)) {
-                              choice.student.choices[index] = choice;
+                            // Restaurer le choix si il avait été refusé
+                            if (choice.student.refused.contains(choice)) {
+                              choice.student.restoreRefusedChoice(choice, index);
                             }
                           });
                         },
@@ -591,11 +591,11 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                             onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () {
                               setState(() {
                                 schoolChoices[index] = false;
-                                choice.remove_choice();
+                                choice.refuse();
                                 showCancelButton[index] = true;
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text("Choix retiré"),
+                                    content: Text("Choix refusé"),
                                     backgroundColor: Colors.red,
                                   ),
                                 );
@@ -717,9 +717,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                   if (choice.student.accepted == choice) {
                                     choice.remove_choice();
                                   }
-                                  // Remettre le choix si il avait été retiré
-                                  if (!choice.student.choices.containsValue(choice)) {
-                                    choice.student.choices[index] = choice;
+                                  // Restaurer le choix si il avait été refusé
+                                  if (choice.student.refused.contains(choice)) {
+                                    choice.student.restoreRefusedChoice(choice, index);
                                   }
                                 });
                               },
@@ -751,11 +751,11 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                   onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () {
                                     setState(() {
                                       schoolChoices[index] = false;
-                                      choice.remove_choice();
+                                      choice.refuse();
                                       showCancelButton[index] = true;
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
-                                          content: Text("Choix retiré"),
+                                          content: Text("Choix refusé"),
                                           backgroundColor: Colors.red,
                                         ),
                                       );
