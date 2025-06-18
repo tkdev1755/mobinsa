@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/parser.dart';
+import 'package:mobinsa/view/debugPage.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../model/School.dart';
 
@@ -67,7 +68,11 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
             ),
             IconButton(
               icon: Icon(PhosphorIcons.gear(PhosphorIconsStyle.regular), size: 32.0),
-              onPressed: null,
+              onPressed: (){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DebugPage(student: widget.students, schools: widget.schools)),);
+              },
               tooltip: "Cette fonctionnalité n'est pas encore disponible",
             ),
             IconButton(
