@@ -105,27 +105,47 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                   itemBuilder: (context, index) {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 8.0),
-                      color: currentStudentIndex == index ? Colors.blue[100] : (widget.students[index].accepted != null ? Colors.green[700] : Colors.grey[300]),
+                      color: currentStudentIndex == index
+                          ? Colors.blue[100]
+                          : (widget.students[index].accepted != null
+                          ? Colors.green[700]
+                          : Colors.grey[300]),
                       child: ListTile(
-                        title: Text(
-                          widget.students[index].name, //Max demande humblement de rajouter widget.students[index].ranking_s1.toString()
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: currentStudentIndex == index ? Colors.blue[900] : Colors.black,
-                          ),
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              widget.students[index].name,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: currentStudentIndex == index
+                                    ? Colors.blue[900]
+                                    : Colors.black,
+                              ),
+                            ),
+                            Text(
+                              widget.students[index].choices[0]?.interranking?.toString() ?? "Err",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: currentStudentIndex == index
+                                    ? Colors.blue[900]
+                                    : Colors.black,
+                              ),
+                            ),
+                          ],
                         ),
                         onTap: () {
                           setState(() {
                             selectedStudent = widget.students[index];
                             currentStudentIndex = index;
                             schoolChoices.clear();
-                            // Initialiser showCancelButton pour chaque choix en fonction de l'état actuel
+
                             showCancelButton.clear();
                             widget.students[index].choices.forEach((key, choice) {
-                              // Afficher le bouton annuler si le choix est accepté ou refusé
-                              showCancelButton[key] = (choice.student.accepted == choice) || 
-                                                      choice.student.refused.contains(choice);
-                              // Initialiser schoolChoices en fonction de l'état
+                              showCancelButton[key] = (choice.student.accepted == choice) ||
+                                  choice.student.refused.contains(choice);
+
                               if (choice.student.accepted == choice) {
                                 schoolChoices[key] = true;
                               } else if (choice.student.refused.contains(choice)) {
@@ -139,8 +159,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                   },
                 ),
               ),
-            ),
-            // Contenu principal (80% de la largeur)
+            ),// Contenu principal (80% de la largeur)
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.8,
               child: selectedStudent != null
@@ -193,6 +212,35 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    const Text("Classement S1",),
+                                    Text("${selectedStudent!.ranking_s1}",
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                Padding(padding: EdgeInsets.only(right: 20)),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text("Crédits ECTS",),
+                                    Text("${selectedStudent!.ects_number}",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                        color : (selectedStudent!.ects_number < 30 ?
+                                        Colors.orange :
+                                        Colors.black),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                Padding(padding: EdgeInsets.only(right: 20)),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     const Text("Niveau d'anglais",),
                                     Text(selectedStudent!.lang_lvl,
                                       style: const TextStyle(
@@ -208,22 +256,12 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                   children: [
                                     const Text("Heures d'absences",),
                                     Text("${selectedStudent!.missed_hours}",
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w500,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Padding(padding: EdgeInsets.only(right: 20)),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text("Classement S1",),
-                                    Text("${selectedStudent!.ranking_s1}",
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
+                                        color : (selectedStudent!.missed_hours >= 5 ?
+                                        (selectedStudent!.missed_hours >= 10 ? Colors.red : Colors. orange) :
+                                        Colors.black),
                                       ),
                                     )
                                   ],
