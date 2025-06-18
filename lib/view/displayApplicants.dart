@@ -389,6 +389,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
            (choice.school.remaining_slots == 0 && choice.student.accepted == null);
   }
 
+  bool disableChoiceByRanking(Choice choice){
+    return choice.student.ladder_interrankigs(widget.students).isNotEmpty;
+  }
+
 
   Widget choiceCard(Choice choice, int index) {
     print(" is the output disabled ? ${disbaleChoice(choice)}");
