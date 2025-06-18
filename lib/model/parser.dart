@@ -395,106 +395,165 @@ class SheetParser{
     }
     return spez;
   }
-  static List<int> exportResult(List<Student> students, List<School> schools){
-    Map<int,String> indexes = {
-      0 : "Nom",
-      1 : "Voeu",
-      2 : "Pays",
-      3 : "Etablissement",
-      4 : "Département",
-      5 : "Interclassement",
-      6 : "Nb ECTS",
-      7 : "Niveau Anglais",
-      8 : "Absences",
-      9 : "Nbre de Places",
-      10 : "Commentaires",
-      11 : "Commentaires post-jury"
+  static List<int> exportResult(List<Student> students, List<School> schools) {
+    Map<int, String> indexes = {
+      0: "Nom",
+      1: "Voeu",
+      2: "Pays",
+      3: "Etablissement",
+      4: "Département",
+      5: "Interclassement",
+      6: "Nb ECTS",
+      7: "Niveau Anglais",
+      8: "Absences",
+      9: "Nbre de Places",
+      10: "Commentaires",
+      11: "Commentaires post-jury"
     };
-    const studentNameColumn = (0,"Nom");
-    const studentWishColumn = (1,"Voeu");
-    const studentCountryColumn = (2,"Pays");
-    const studentSchoolColumn = (3,"Etablissement");
-    const studentDepartmentColumn = (4,"Département");
-    const studentInterRankingColumn = (5,"Interclassement");
-    const studentCreditsColumn = (6,"Nb ECTS");
-    const studentEngLVLColumn = (7,"Niveau Anglais");
-    const studentMissedHoursColumn = (8,"Absences");
-    const studentPlacesColumn = (9,"Nbre de Places");
-    const studentCommentColumn = (10,"Commentaire");
-    const studentAfterCommentColumn = (11,"Commentaire post-jury");
 
-    List<(int,int,Choice)> allChoices = [];
-    for (var s in students){
-      for (var c in s.choices.entries){
-       allChoices.add((s.id, c.key,c.value));
+    // Create separate lists for different sheets
+    List<(int, int, Choice)> allChoices = [];
+    List<(int, int, Choice)> acceptedChoices = [];
+    List<(int, int, Choice)> rejectedChoices = [];
+    List<(int, int, Choice)> noResponseChoices = [];
+    
+    // First pass - identify students with responses and collect all choices
+    Map<int, bool> studentHasResponse = {};
+    
+    for (var s in students) {
+      // Initialize all students as having no responses
+      studentHasResponse[s.id] = false;
+      
+      for (var c in s.choices.entries) {
+        // Add to all choices list
+        allChoices.add((s.id, c.key, c.value));
+        
+        // Check acceptance status
+        if (s.accepted != null && s.accepted!.school.id == c.value.school.id) {
+          acceptedChoices.add((s.id, c.key, c.value));
+          studentHasResponse[s.id] = true; // Mark student has a response
+        }
+        // Check rejection status
+        else if (s.refused.any((choice) => choice.school.id == c.value.school.id)) {
+          rejectedChoices.add((s.id, c.key, c.value));
+          studentHasResponse[s.id] = true; // Mark student has a response
+        }
       }
     }
-    allChoices.sort((a,b) => b.$3.interranking.compareTo(a.$3.interranking));
+    
+    // Second pass - add all choices from students with no responses to noResponseChoices
+    for (var s in students) {
+      if (studentHasResponse[s.id] == false && s.choices.isNotEmpty) {
+        // This student has NO responses on ANY choice - add ALL their choices
+        for (var c in s.choices.entries) {
+          noResponseChoices.add((s.id, c.key, c.value));
+        }
+      }
+    }
+
+    // Sort all lists by interranking
+    allChoices.sort((a, b) => b.$3.interranking.compareTo(a.$3.interranking));
+    acceptedChoices.sort((a, b) => b.$3.interranking.compareTo(a.$3.interranking));
+    rejectedChoices.sort((a, b) => b.$3.interranking.compareTo(a.$3.interranking));
+    noResponseChoices.sort((a, b) => b.$3.interranking.compareTo(a.$3.interranking));
+
+    // Create Excel workbook
     Excel exportedExcel = Excel.createExcel();
-    Sheet resultSheet = exportedExcel.sheets["Sheet1"]!;
-    // Colonne N°1 : Ajoute le nom des étudiants
-    List<CellValue?> test = [];
-    for (int i = 0; i < 12; i++){
-      resultSheet.insertColumn(i);
-      CellValue value = TextCellValue(indexes[i]!);
-      test.add(value);
-    }
-    resultSheet.appendRow(test);
-    int i = 0;
-    for (var c in allChoices){
-      List<CellValue?> studentValues = [];
-      Choice currentChoice = c.$3;
-      Student? currentStudent = students.where((e) => e.id == c.$1).firstOrNull;
-      if (currentStudent == null){
-        throw Exception("The current student doesn't exist ????");
-      }
-      int choiceNumber = c.$2;
-      TextCellValue studentName = TextCellValue(currentStudent.name);
-      IntCellValue studentWish = IntCellValue(choiceNumber);
-      TextCellValue studentCountry = TextCellValue(currentChoice.school.country);
-      TextCellValue studentSchool = TextCellValue(currentChoice.school.name);;
-      TextCellValue studentDepartment = TextCellValue(currentChoice.student.departement);
-      DoubleCellValue studentInterRanking = DoubleCellValue(currentChoice.interranking);;
-      IntCellValue studentCredits = IntCellValue(currentChoice.student.ects_number);
-      TextCellValue studentEngLVL = TextCellValue(currentChoice.student.lang_lvl);
-      DoubleCellValue studentMissedHours = DoubleCellValue(currentChoice.student.missed_hours);
-      IntCellValue studentPlaces = IntCellValue(currentChoice.school.available_slots);
-      TextCellValue studentComment = TextCellValue(currentChoice.student.comment);
-      TextCellValue studentPostComment = TextCellValue(currentChoice.post_comment ??  " - ");
-      studentValues = [
-        studentName,
-        studentWish,
-        studentCountry,
-        studentSchool,
-        studentDepartment,
-        studentInterRanking,
-        studentCredits,
-        studentEngLVL, studentMissedHours,studentPlaces, studentComment,studentPostComment];
-      resultSheet.appendRow(studentValues);
-      List<Data?> currentRow = resultSheet.row(i+1);
-      print("Right now student has the following wish accepted ${currentStudent.accepted_school}");
-      if ( currentStudent.accepted != null &&  currentStudent.accepted!.school.id == c.$3.school.id
-      ){
-        print("The voeu was accepted ! Painting it in green");
-        for (var data in currentRow){
-          data?.cellStyle = CellStyle(
-            backgroundColorHex: ExcelColor.green200
-          );
-        }
-      }
-      else if (currentStudent.refused.any((choice) => choice.school.id == c.$3.school.id)) {
-        print("The voeu was rejected! Painting it in red");
-        for (var data in currentRow){
-          data?.cellStyle = CellStyle(
-            backgroundColorHex: ExcelColor.red200
-          );
-        }
-      }
-      i++;
-    }
+    
+    // Get default sheet name
+    String defaultSheetName = exportedExcel.getDefaultSheet() ?? "Sheet1";
+    
+    // Create additional sheets by copying the default one
+    exportedExcel.copy(defaultSheetName, "Choix acceptés");
+    exportedExcel.copy(defaultSheetName, "Choix refusés");
+    exportedExcel.copy(defaultSheetName, "Second tour "); // New sheet for no response
+    
+    // Rename default sheet and get sheet references
+    exportedExcel.rename(defaultSheetName, "Tous les choix");
+    Sheet allSheet = exportedExcel.sheets["Tous les choix"]!;
+    Sheet acceptedSheet = exportedExcel.sheets["Choix acceptés"]!;
+    Sheet rejectedSheet = exportedExcel.sheets["Choix refusés"]!;
+    Sheet noResponseSheet = exportedExcel.sheets["Second tour "]!; // Reference to new sheet
+    
+    // Clear copied content
+    //acceptedSheet.clear();
+    //rejectedSheet.clear();
+    //noResponseSheet.clear();
+    
+    // Add headers to each sheet
+    setupSheetHeaders(allSheet, indexes);
+    setupSheetHeaders(acceptedSheet, indexes);
+    setupSheetHeaders(rejectedSheet, indexes);
+    setupSheetHeaders(noResponseSheet, indexes); // Add headers to new sheet
+    
+    // Fill each sheet with data
+    fillSheetWithChoices(allSheet, allChoices, students, true);
+    fillSheetWithChoices(acceptedSheet, acceptedChoices, students, false);
+    fillSheetWithChoices(rejectedSheet, rejectedChoices, students, false);
+    fillSheetWithChoices(noResponseSheet, noResponseChoices, students, false); // Fill new sheet
+    
     return exportedExcel.save() ?? [];
+  }
 
-    return [];
+  // Helper method to set up sheet headers
+  static void setupSheetHeaders(Sheet sheet, Map<int, String> indexes) {
+    List<CellValue?> headerRow = [];
+    for (int i = 0; i < indexes.length; i++) {
+      sheet.insertColumn(i);
+      headerRow.add(TextCellValue(indexes[i]!));
+    }
+    sheet.appendRow(headerRow);
+  }
+
+  // Helper method to fill a sheet with choice data
+  static void fillSheetWithChoices(Sheet sheet, List<(int, int, Choice)> choices, List<Student> students, bool applyColors) {
+    int rowIndex = 1; // Start after header
+    
+    for (var c in choices) {
+      Student? currentStudent = students.where((e) => e.id == c.$1).firstOrNull;
+      if (currentStudent == null) continue;
+      
+      Choice currentChoice = c.$3;
+      int choiceNumber = c.$2;
+      
+      // Create cell values for this row
+      List<CellValue?> studentValues = [
+        TextCellValue(currentStudent.name),
+        IntCellValue(choiceNumber),
+        TextCellValue(currentChoice.school.country),
+        TextCellValue(currentChoice.school.name),
+        TextCellValue(currentStudent.departement),
+        DoubleCellValue(currentChoice.interranking),
+        IntCellValue(currentStudent.ects_number),
+        TextCellValue(currentStudent.lang_lvl),
+        DoubleCellValue(currentStudent.missed_hours),
+        IntCellValue(currentChoice.school.available_slots),
+        TextCellValue(currentStudent.comment),
+        TextCellValue(currentChoice.post_comment ?? " - ")
+      ];
+      
+      sheet.appendRow(studentValues);
+      
+      // Apply color coding if needed (only for the main sheet)
+      if (applyColors) {
+        List<Data?> currentRow = sheet.row(rowIndex);
+        
+        // Green for accepted choices
+        if (currentStudent.accepted != null && currentStudent.accepted!.school.id == currentChoice.school.id) {
+          for (var data in currentRow) {
+            data?.cellStyle = CellStyle(backgroundColorHex: ExcelColor.green200);
+          }
+        }
+        // Red for rejected choices
+        else if (currentStudent.refused.any((choice) => choice.school.id == currentChoice.school.id)) {
+          for (var data in currentRow) {
+            data?.cellStyle = CellStyle(backgroundColorHex: ExcelColor.red200);
+          }
+        }
+      }
+      
+      rowIndex++;
+    }
   }
 
   static int saveExcelToDisk(String path, List<int> bytes){
