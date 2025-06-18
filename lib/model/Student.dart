@@ -112,21 +112,21 @@ class Student {
   String toString() {
     String choicesString = choices.entries.map((entry) => '\n    Vœu ${entry.key}: ${entry.value}').join('');
     String refusedChoicesString = refused.isNotEmpty ? refused.map((choice) => '\n    Refusé: $choice').join('') : '\n    Aucun refus';
-    // return this.name;
-    return 'Étudiant {\n'
-        '  ID: $id,\n'
-        '  Nom: $name,\n'
-        '  Spécialisation: $specialization (Année: $year, Département: $departement),\n'
-        '  Classement S1: $ranking_s1,\n'
-        '  Crédits ECTS: $ects_number,\n'
-        '  Niveau Langue: $lang_lvl,\n'
-        '  Heures Manquées: $missed_hours,\n'
-        '  Commentaire: "$comment",\n'
-        '  Post-Commentaire: "${'N/A'}",\n'
-        '  Vœux: $choicesString\n'
-        '  Vœu Accepté: ${accepted ?? 'Aucun'}\n'
-        '  Vœux Refusés: $refusedChoicesString\n'
-        '}';
+    return this.name;
+    // return 'Étudiant {\n'
+    //     '  ID: $id,\n'
+    //     '  Nom: $name,\n'
+    //     '  Spécialisation: $specialization (Année: $year, Département: $departement),\n'
+    //     '  Classement S1: $ranking_s1,\n'
+    //     '  Crédits ECTS: $ects_number,\n'
+    //     '  Niveau Langue: $lang_lvl,\n'
+    //     '  Heures Manquées: $missed_hours,\n'
+    //     '  Commentaire: "$comment",\n'
+    //     '  Post-Commentaire: "${'N/A'}",\n'
+    //     '  Vœux: $choicesString\n'
+    //     '  Vœu Accepté: ${accepted ?? 'Aucun'}\n'
+    //     '  Vœux Refusés: $refusedChoicesString\n'
+    //     '}';
   }
 
   Map<int, Choice> diff_interrankings() {

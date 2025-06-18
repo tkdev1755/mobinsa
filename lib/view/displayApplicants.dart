@@ -429,6 +429,17 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
   bool disableChoiceByRanking(Student student_f,int choiceNumber){
     Map<int, List<Student>> ladder = student_f.ladder_interranking(widget.students);
     bool atLeastOneNotAccepted = false; 
+    print("meilleur: ${ladder}");
+    print("-----------------------------------------------------------------");
+    for (var entry in ladder.entries){
+      for (var student in entry.value){
+        print("student: ${student.name}");
+        print("accepted: ${student.accepted}");
+        print("refused: ${student.refused}");
+        print("choice_f: ${student_f.choices[choiceNumber]}");
+      }
+    }
+    print("-----------------------------------------------------------------");
     //pour s'il y a au moins un étudiant mieux classé qui n'est pas accepté.
     for (var entry in ladder.entries){
       if (entry.value.any((student) => student.accepted == null && !student.refused.contains(student_f.choices[choiceNumber]))){
