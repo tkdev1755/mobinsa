@@ -390,7 +390,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
   }
 
   bool disableChoiceByRanking(Choice choice){
-    return choice.student.ladder_interrankigs(widget.students).isNotEmpty;
+    return choice.student.ladder_interranking(widget.students).isNotEmpty;
   }
 
 
@@ -555,7 +555,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           width: 40,
                           height: 40,
                           child: Tooltip(
-                            message: "Refuser ce choix (avec commentaire)",
+                            message: "Refuser ce choix",
                             child: ElevatedButton(
                               onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () async {
                                 // Ouvrir le modal de commentaire pour le refus
@@ -730,7 +730,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                 width: 40,
                                 height: 40,
                                 child: Tooltip(
-                                  message: "Refuser ce choix (avec commentaire)",
+                                  message: "Refuser ce choix",
                                   child: ElevatedButton(
                                     onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () async {
                                       // Ouvrir le modal de commentaire pour le refus
