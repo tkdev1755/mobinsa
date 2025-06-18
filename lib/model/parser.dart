@@ -290,33 +290,33 @@ class SheetParser{
           String contract = sheet.rows[row][2]?.value.toString() ??
               "PROBLEM CONTRACT_TYPE";
           int slots = int.parse(sheet.rows[row][3]?.value.toString() ?? "-1");
-          int b_slots = int.parse(sheet.rows[row][4]?.value.toString() ?? "-1");
-          int m_slots = int.parse(sheet.rows[row][5]?.value.toString() ?? "-1");
+          int bSlots = int.parse(sheet.rows[row][4]?.value.toString() ?? "-1");
+          int mSlots = int.parse(sheet.rows[row][5]?.value.toString() ?? "-1");
           List<String> specialization = specializationStringToList(
               sheet.rows[row][6]?.value.toString() ?? "PROBLEM SPECIALIZATION");
-          String graduation_level = sheet.rows[row][7]?.value.toString() ??
+          String graduationLevel = sheet.rows[row][7]?.value.toString() ??
               "PROBLEM GRADUATION_LEVEL";
           String program = sheet.rows[row][8]?.value.toString() ??
               "PROBLEM PROGRAM";
-          String use_language = sheet.rows[row][9]?.value.toString() ??
+          String useLanguage = sheet.rows[row][9]?.value.toString() ??
               "PROBLEM USE_LANGUAGE";
-          String req_lang_level = sheet.rows[row][10]?.value.toString() ??
+          String reqLangLevel = sheet.rows[row][10]?.value.toString() ??
               "PROBLEM REQ_LANG_LEVEL";
-          String academic_level = sheet.rows[row][11]?.value.toString() ??
+          String academicLevel = sheet.rows[row][11]?.value.toString() ??
               "PROBLEM ACADEMIC_LEVEL";
           School school = School(
               name,
               country,
               contract,
               slots,
-              b_slots,
-              m_slots,
+              bSlots,
+              mSlots,
               specialization,
-              graduation_level,
+              graduationLevel,
               program,
-              use_language,
-              req_lang_level,
-              academic_level
+              useLanguage,
+              reqLangLevel,
+              academicLevel
           );
           schools.add(school);
         }
@@ -327,33 +327,33 @@ class SheetParser{
           String contract = sheet.rows[row][2]?.value.toString() ??
               "PROBLEM CONTRACT_TYPE";
           int slots = int.parse(sheet.rows[row][3]?.value.toString() ?? "-1");
-          int b_slots = slots;
-          int m_slots = slots;
+          int bSlots = slots;
+          int mSlots = slots;
           List<String> specialization = specializationStringToList(
               sheet.rows[row][5]?.value.toString() ?? "PROBLEM SPECIALIZATION");
-          String graduation_level = sheet.rows[row][6]?.value.toString() ??
+          String graduationLevel = sheet.rows[row][6]?.value.toString() ??
               "PROBLEM GRADUATION_LEVEL";
           String program = sheet.rows[row][7]?.value.toString() ??
               "PROBLEM PROGRAM";
-          String use_language = sheet.rows[row][8]?.value.toString() ??
+          String useLanguage = sheet.rows[row][8]?.value.toString() ??
               "PROBLEM USE_LANGUAGE";
-          String req_lang_level = sheet.rows[row][9]?.value.toString() ??
+          String reqLangLevel = sheet.rows[row][9]?.value.toString() ??
               "PROBLEM REQ_LANG_LEVEL";
-          String academic_level = sheet.rows[row][10]?.value.toString() ??
+          String academicLevel = sheet.rows[row][10]?.value.toString() ??
               "PROBLEM ACADEMIC_LEVEL";
           School school = School(
               name,
               country,
               contract,
               slots,
-              b_slots,
-              m_slots,
+              bSlots,
+              mSlots,
               specialization,
-              graduation_level,
+              graduationLevel,
               program,
-              use_language,
-              req_lang_level,
-              academic_level
+              useLanguage,
+              reqLangLevel,
+              academicLevel
           );
           schools.add(school);
         }
@@ -380,12 +380,12 @@ class SheetParser{
       for (String prog in ["ENP", "ENR", "GSI", "MRI", "STI"]) {
         if (substring.contains(prog)) {
           program.add(prog);
-          print(prog + " DETECTÉ");
+          print("$prog DETECTÉ");
         }
       }
       for (String yea in ["2A", "3A", "4A", "5A"]) {
         if (substring.contains(yea)) {
-          print(yea + " DETECTÉ");
+          print("$yea DETECTÉ");
           for (String prog in program) {
             spez.add(
                 "$prog $yea"); //used interpolation, avoids concatenation (prog+" "+yea)
@@ -557,7 +557,7 @@ class SheetParser{
   }
 
   static int saveExcelToDisk(String path, List<int> bytes){
-    File excelFile = File("$path");
+    File excelFile = File(path);
     excelFile.createSync();
     excelFile.writeAsBytes(bytes);
     return 1;

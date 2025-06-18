@@ -25,38 +25,39 @@ class School {
       this.b_slots, this.m_slots, this.specialization, this.graduation_level,
       this.program, this.use_langage, this.req_lang_level,
       this.academic_level) {
-    this.id = global_id;
-    this.remaining_slots = this.available_slots;
+    id = global_id;
+    remaining_slots = available_slots;
     global_id++;
   }
 
 
   void reduce_slots(Student s) {
     //réduire le nombre de places d'une offre de séjour si on affecté une mobilité à un étudiant
-    if (this.remaining_slots > 0) {
-      this.remaining_slots--;
+    if (remaining_slots > 0) {
+      remaining_slots--;
       // this.available_slots--;
       if (s.year > 2) {
-        this.m_slots--;
+        m_slots--;
         print("SLOT SUCCESSFULLY REMOVED MASTER");
-        if (this.m_slots == 0) this.is_full_m = true;
+        if (m_slots == 0) is_full_m = true;
       }
       else if (s.year == 2) {
-        this.b_slots--;
+        b_slots--;
         print("SLOT SUCCESSFULLY REMOVED LICENCE");
-        if (this.b_slots == 0) this.is_full_b = true;
+        if (b_slots == 0) is_full_b = true;
       }
     }
-    if (this.remaining_slots == 0)
-      this.is_full = true;
+    if (remaining_slots == 0) {
+      is_full = true;
+    }
   }
 
   void add_slots(Student s) {
     //augmenter le nombre de places si on décide d'enlever une mobilité à un élève
-    if(this.remaining_slots < this.available_slots){
-      this.remaining_slots++;
-      if (s.year > 2) this.m_slots++;
-      if (s.year == 2) this.b_slots++;
+    if(remaining_slots < available_slots){
+      remaining_slots++;
+      if (s.year > 2) m_slots++;
+      if (s.year == 2) b_slots++;
     }
     else{
       print("NO MORE SLOTS AVAILABLE");
@@ -66,17 +67,17 @@ class School {
   bool accepted(Student s) {
     //affectation d'une offre de séjour à un élève
     print("s.year : ${s.year}");
-    print("this.b_slots : ${this.b_slots}");
-    print("this.specialization : ${this.specialization}");
+    print("this.b_slots : ${b_slots}");
+    print("this.specialization : ${specialization}");
     print("s.get_next_year() : ${s.get_next_year()}");
-    if (s.year == 2 && this.b_slots > 0 && this.specialization.contains(s.get_next_year())) {
+    if (s.year == 2 && b_slots > 0 && specialization.contains(s.get_next_year())) {
       print("ACCEPTED SCHOOL LICENCE");
-      this.reduce_slots(s);
+      reduce_slots(s);
       return true;
     }
-    else if (s.year > 2 && this.m_slots > 0 && this.specialization.contains(s.get_next_year())) {
+    else if (s.year > 2 && m_slots > 0 && specialization.contains(s.get_next_year())) {
       print("ACCEPTED SCHOOL MASTER");
-      this.reduce_slots(s);
+      reduce_slots(s);
       return true;
     }
     return false;

@@ -10,7 +10,7 @@ class Choice {
 
   bool accepted(Student s) {
     //affectation d'une offre de séjour à un élève
-    if (this.school.accepted(s)) {
+    if (school.accepted(s)) {
       student.accepted = this;
       print("ACCEPTED CHOICE");
       return true;

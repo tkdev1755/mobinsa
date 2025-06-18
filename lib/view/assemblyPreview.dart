@@ -14,7 +14,7 @@ import 'package:file_picker/file_picker.dart';
 class AssemblyPreview extends StatefulWidget {
   List<Student> students;
   List<School> schools;
-  AssemblyPreview({Key? key, required this.students, required this.schools}) : super(key: key);
+  AssemblyPreview({super.key, required this.students, required this.schools});
 
   @override
   State<AssemblyPreview> createState() => _AssemblyPreviewState();
@@ -24,20 +24,21 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
 
   Stats stats = Stats();
   @override
-  List<(double, Student)> sort_student(List<Student> lst_student) {
-    List<(double, Student)> my_list = [];
-    for (var el in lst_student) {
+  List<(double, Student)> sort_student(List<Student> lstStudent) {
+    List<(double, Student)> myList = [];
+    for (var el in lstStudent) {
       double ranking = el.choices[1]!.interranking;
-      my_list.add((ranking, el));
+      myList.add((ranking, el));
     }
-    my_list.sort((a, b) => b.$1.compareTo(a.$1));
-    return my_list;
+    myList.sort((a, b) => b.$1.compareTo(a.$1));
+    return myList;
   }
   List<Student> export_list = [];
   Map<School,List<int>> concerned_school = {};
+  @override
   void initState() {
-    List<Student> cpy_students_list = widget.students.map((e) => e.clone()).toList();
-    for (var st in cpy_students_list){
+    List<Student> cpyStudentsList = widget.students.map((e) => e.clone()).toList();
+    for (var st in cpyStudentsList){
       for(var c in st.choices.values){
         if (!(concerned_school.containsKey(c.school))) {
           concerned_school[c.school] = [c.school.b_slots, c.school.m_slots];
@@ -47,13 +48,13 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
 
 
     //print(concerned_school);
-    List<(double, Student)> lst = sort_student(cpy_students_list);
+    List<(double, Student)> lst = sort_student(cpyStudentsList);
 
     print (lst);
     for (var element in lst) {
       Student student = element.$2;
       //print(student.choices);
-      int nb_voeux_student = student.choices.keys.reduce((a, b) => a > b ? a : b);
+      int nbVoeuxStudent = student.choices.keys.reduce((a, b) => a > b ? a : b);
       //print(nb_voeux_student);
       //print(concerned_school[student.choices[1]!.school]);
       if (student.year == 2) {
@@ -64,7 +65,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
           export_list.add(student);
           stats.add_c1();
         }
-        else if (nb_voeux_student >= 2
+        else if (nbVoeuxStudent >= 2
             && student.choices[2]!.school.specialization.contains(student.get_next_year())
             && concerned_school[student.choices[2]!.school]![0] > 0) {
           concerned_school[student.choices[2]!.school]?[0] --;
@@ -73,7 +74,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
           export_list.add(student);
           stats.add_c2();
         }
-        else if (nb_voeux_student == 3
+        else if (nbVoeuxStudent == 3
             && student.choices[3]!.school.specialization.contains(student.get_next_year())
             && concerned_school[student.choices[3]!.school]![0] > 0) {
           concerned_school[student.choices[3]!.school]?[0] --;
@@ -86,9 +87,9 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
         else {
           stats.add_r();
           student.refused.add(student.choices[1]!);
-          if (nb_voeux_student >= 2){
+          if (nbVoeuxStudent >= 2){
             student.refused.add(student.choices[2]!);}
-          if (nb_voeux_student == 3 ){
+          if (nbVoeuxStudent == 3 ){
             student.refused.add(student.choices[3]!);
           }
           export_list.add(student);
@@ -103,7 +104,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
           export_list.add(student);
           stats.add_c1();
         }
-        else if (nb_voeux_student >= 2
+        else if (nbVoeuxStudent >= 2
             && student.choices[2]!.school.specialization.contains(student.get_next_year())
             && concerned_school[student.choices[2]!.school]![1] > 0) {
           concerned_school[student.choices[2]!.school]?[1] --;
@@ -112,7 +113,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
           export_list.add(student);
           stats.add_c2();
         }
-        else if (nb_voeux_student == 3
+        else if (nbVoeuxStudent == 3
             && student.choices[3]!.school.specialization.contains(student.get_next_year())
             && concerned_school[student.choices[3]!.school]![1] > 0) {
           concerned_school[student.choices[3]!.school]?[1] --;
@@ -125,9 +126,9 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
         else {
           stats.add_r();
           student.refused.add(student.choices[1]!);
-          if (nb_voeux_student >= 2){
+          if (nbVoeuxStudent >= 2){
             student.refused.add(student.choices[2]!);}
-          if (nb_voeux_student == 3 ) {
+          if (nbVoeuxStudent == 3 ) {
             student.refused.add(student.choices[3]!);
           }
           export_list.add(student);

@@ -10,7 +10,7 @@ import '../model/Student.dart';
 class DebugPage extends StatefulWidget {
   List<Student> student;
   List<School> schools;
-   DebugPage({Key? key, required this.student, required this.schools}) : super(key: key);
+   DebugPage({super.key, required this.student, required this.schools});
 
   @override
   State<DebugPage> createState() => _DebugPageState();

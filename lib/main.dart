@@ -81,6 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       print('Aucun fichier sélectionné');
     }
+    return null;
   }
 
   void showErrorDialog(BuildContext context, String title, String message) {
@@ -210,7 +211,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         }, child: Text("Importez les écoles"),
                       ),
                       Padding(padding: EdgeInsets.only(bottom: 10)),
-                      Visibility(child: Text("Fichier Choisi : $selectedFilenameSchools"), visible: selectedFilenameSchools != null,),
+                      Visibility(visible: selectedFilenameSchools != null,child: Text("Fichier Choisi : $selectedFilenameSchools"),),
                       Padding(padding: EdgeInsets.only(bottom: 10)),
                       /// BOUTON POUR LES ETUDIANTS
                       ElevatedButton(
@@ -271,7 +272,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Text("Importez les étudiants")
                       ),
                       Padding(padding: EdgeInsets.only(bottom: 10)),
-                      Visibility(child: Text("Fichier Choisi : $selectedFilenameStudents"), visible: selectedFilenameStudents != null,),
+                      Visibility(visible: selectedFilenameStudents != null,child: Text("Fichier Choisi : $selectedFilenameStudents"),),
                       Padding(padding: EdgeInsets.only(bottom: 10)),
                       ElevatedButton(
                         style: customButtonStyle,

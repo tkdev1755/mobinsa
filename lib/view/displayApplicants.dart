@@ -20,7 +20,7 @@ import '../model/School.dart';
 class DisplayApplicants extends StatefulWidget {
   List<School> schools;
   List<Student> students;
-  DisplayApplicants({Key? key, required this.schools, required this.students}) : super(key: key);
+  DisplayApplicants({super.key, required this.schools, required this.students});
 
   @override
   State<DisplayApplicants> createState() => _DisplayApplicantsState();
@@ -141,7 +141,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
               ),
             ),
             // Contenu principal (80% de la largeur)
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.8,
               child: selectedStudent != null
                   ? SingleChildScrollView(
@@ -194,7 +194,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Text("Niveau d'anglais",),
-                                    Text("${selectedStudent!.lang_lvl}",
+                                    Text(selectedStudent!.lang_lvl,
                                       style: const TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w500,
@@ -249,10 +249,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                               // Liste des écoles
                               ...selectedStudent!.choices.entries.map((entry) {
                                 int index = entry.key;
-                                print(index);
                                 //Map<String, String> school = entry.value;
                                 return choiceCard(entry.value, index);
-                              }).toList(),
+                              }),
                             ],
                           ),
                         ),
@@ -319,7 +318,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                               ),
 
                               // Bouton Passer à l'étudiant suivant
-                              Container(
+                              SizedBox(
                                 width: double.infinity,
                                 height: 50,
                                 child: ElevatedButton(
@@ -389,22 +388,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
            (choice.school.remaining_slots == 0 && choice.student.accepted == null);
   }
 
-  bool disableChoiceByRanking(Choice choice){
-    // print("ladder_interranking : ${choice.student.ladder_interranking(widget.students)}");
-    // print(choice.student.ladder_interranking(widget.students).keys.toList());
-
-    Map<(Choice, int), List<Student>> ladder = choice.student.ladder_interranking(widget.students);
-    
-    // Vérifier si la map n'est pas vide et si le choix actuel correspond au premier élément de la clé
-    if (ladder.isNotEmpty) {
-      var firstKey = ladder.keys.first;
-      Choice firstChoice = firstKey.$1; // Premier élément du tuple (Choice)
-      
-      // Retourner true si le choix actuel correspond au premier choix de la clé
-      return firstChoice == choice;
-    }
-    
-    return false;
+  bool disableChoiceByRanking(Student student,int choiceNumber){
+    Map<int, List<Student>> ladder = student.ladder_interranking(widget.students);
+    print(" ladder.keys: ${ladder.keys}");
+    return ladder.containsKey(choiceNumber);
   }
 
 
@@ -470,7 +457,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           Text("Niveau académique requis"),
                           SizedBox(
                             width: MediaQuery.sizeOf(context).width*0.5*0.4,
-                            child: Text("${choice.school.academic_level}",
+                            child: Text(choice.school.academic_level,
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w500,
@@ -479,10 +466,14 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           ),
                           Text("Langue d'enseignement",
                           ),
-                          Text("${choice.school.use_langage}",
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
+                          SizedBox(
+                            width: MediaQuery.sizeOf(context).width*0.5*0.4,
+                            child: Text(choice.school.use_langage,
+                              maxLines: 3,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                           Text("Niveau de langue"),
@@ -508,7 +499,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           Text("Discipline"),
                           SizedBox(
                             width : MediaQuery.sizeOf(context).width*0.5*0.3,
-                            child: Text("${choice.school.specialization.toString().replaceAll("[", "").replaceAll("]", "")}",
+                            child: Text(choice.school.specialization.toString().replaceAll("[", "").replaceAll("]", ""),
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w500,
@@ -529,7 +520,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                   Spacer(),
                   // Afficher le bouton annuler ou les boutons accepter/refuser
                   if (showCancelButton[index] == true)
-                    Container(
+                    SizedBox(
                       width: 80,
                       height: 40,
                       child: Tooltip(
@@ -571,7 +562,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                     Row(
                       children: [
                         // Bouton Refuser (X)
-                        Container(
+                        SizedBox(
                           width: 40,
                           height: 40,
                           child: Tooltip(
@@ -615,13 +606,13 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                         ),
                         const SizedBox(width: 8),
                         // Bouton Accepter (✓)
-                        Container(
+                        SizedBox(
                           width: 40,
                           height: 40,
                           child: Tooltip(
                             message: choice.school.remaining_slots == 0 ? "Plus de places disponibles" : "Accepter ce choix",
                             child: ElevatedButton(
-                              onPressed: disableChoiceByRanking(choice) || choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
+                              onPressed: disableChoiceByRanking(selectedStudent!, index) || choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
                                 setState(() {
                                   schoolChoices[index] = true;
                                   choice.accepted(choice.student);
@@ -668,7 +659,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
+                    SizedBox(
                       width: MediaQuery.sizeOf(context).width*0.35,
                       child: Text(
                         choice.school.name,
@@ -704,7 +695,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                       children: [
                         // Afficher le bouton annuler ou les boutons accepter/refuser
                         if (showCancelButton[index] == true)
-                          Container(
+                          SizedBox(
                             width: 80,
                             height: 40,
                             child: Tooltip(
@@ -746,7 +737,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           Row(
                             children: [
                               // Bouton Refuser (X)
-                              Container(
+                              SizedBox(
                                 width: 40,
                                 height: 40,
                                 child: Tooltip(
@@ -790,13 +781,13 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                               ),
                               const SizedBox(width: 8),
                               // Bouton Accepter (✓)
-                              Container(
+                              SizedBox(
                                 width: 40,
                                 height: 40,
                                 child: Tooltip(
                                   message: choice.school.remaining_slots == 0 ? "Plus de places disponibles" : "Accepter ce choix",
                                   child: ElevatedButton(
-                                    onPressed: disableChoiceByRanking(choice) || choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
+                                    onPressed: disableChoiceByRanking(selectedStudent!, index) || choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
                                       setState(() {
                                         schoolChoices[index] = true;
                                         choice.accepted(choice.student);
@@ -846,7 +837,7 @@ class CommentModal extends StatefulWidget {
   final Student student;
   final Choice? choice; // null pour commentaire général, non-null pour commentaire sur un choix spécifique
 
-  const CommentModal({Key? key, required this.student, this.choice}) : super(key: key);
+  const CommentModal({super.key, required this.student, this.choice});
 
   @override
   State<CommentModal> createState() => _CommentModalState();
