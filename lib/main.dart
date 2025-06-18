@@ -105,6 +105,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+
+
+
+
   Widget build(BuildContext context) {
     // Keep your existing button style definition
     final ButtonStyle customButtonStyle = ElevatedButton.styleFrom(
@@ -277,6 +281,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ElevatedButton(
                         style: customButtonStyle,
                         onPressed: (schoolsLoaded && studentsLoaded) ? () {
+                          students.sort((a,b) => b.get_max_rank().compareTo(a.get_max_rank()));
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => AssemblyPreview(students: students, schools: schools)),);

@@ -27,7 +27,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
   List<(double, Student)> sort_student(List<Student> lstStudent) {
     List<(double, Student)> myList = [];
     for (var el in lstStudent) {
-      double ranking = el.choices[1]!.interranking;
+      double ranking = el.get_max_rank();
       myList.add((ranking, el));
     }
     myList.sort((a, b) => b.$1.compareTo(a.$1));
