@@ -193,11 +193,10 @@ class Student {
         if (other.id == id) continue;
         for (Choice otherChoice in other.choices.values) {
           if (otherChoice.school.id == c.school.id &&
-              otherChoice.interranking < c.interranking) {
+              otherChoice.interranking > c.interranking) {
             ladder.putIfAbsent(key, () => []);
             ladder[key]!.add(other);
           }
-          if (ladder.containsKey(key)) break;
         }
       }
     }
