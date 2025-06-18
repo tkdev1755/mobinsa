@@ -263,65 +263,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                 margin: const EdgeInsets.only(bottom: 16),
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    int selectedChoice = 1;
-                                    String comment = "";
                                     showDialog(
                                       context: context,
-                                      builder: (BuildContext dialogContext) => StatefulBuilder(
-                                        builder: (BuildContext context, StateSetter setDialogState) {
-                                          return AlertDialog(
-                                            title: Text("Laisser un commentaire"),
-                                            content: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                DropdownButton<int>(
-                                                  value: selectedChoice,
-                                                  items: [1, 2, 3].map((int value) {
-                                                    return DropdownMenuItem<int>(
-                                                      value: value,
-                                                      child: Text("Choix $value"),
-                                                    );
-                                                  }).toList(),
-                                                  onChanged: (int? newValue) {
-                                                    setDialogState(() {
-                                                      selectedChoice = newValue!;
-                                                    });
-                                                  },
-                                                ),
-                                                SizedBox(height: 16),
-                                                TextField(
-                                                  onChanged: (value) {
-                                                    comment = value;
-                                                  },
-                                                  decoration: InputDecoration(
-                                                    hintText: "Entrez votre commentaire",
-                                                    border: OutlineInputBorder(),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text("Annuler"),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  setState(() {
-                                                    selectedStudent?.add_post_comment(selectedChoice, comment);
-                                                    print("selectedChoice: $selectedChoice");
-                                                    print("comment: $comment");
-                                                  });
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text("Valider"),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      ),
+                                      builder: (BuildContext dialogContext) => CommentModal(student: selectedStudent!, choice: null),
                                     );
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -591,9 +535,15 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           width: 40,
                           height: 40,
                           child: Tooltip(
-                            message: "Refuser ce choix",
+                            message: "Refuser ce choix (avec commentaire)",
                             child: ElevatedButton(
-                              onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () {
+                              onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () async {
+                                // Ouvrir le modal de commentaire pour le refus
+                                await showDialog(
+                                  context: context,
+                                  builder: (BuildContext dialogContext) => CommentModal(student: choice.student, choice: choice),
+                                );
+                                
                                 setState(() {
                                   schoolChoices[index] = false;
                                   choice.refuse();
@@ -760,9 +710,15 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                 width: 40,
                                 height: 40,
                                 child: Tooltip(
-                                  message: "Refuser ce choix",
+                                  message: "Refuser ce choix (avec commentaire)",
                                   child: ElevatedButton(
-                                    onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () {
+                                    onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () async {
+                                      // Ouvrir le modal de commentaire pour le refus
+                                      await showDialog(
+                                        context: context,
+                                        builder: (BuildContext dialogContext) => CommentModal(student: choice.student, choice: choice),
+                                      );
+                                      
                                       setState(() {
                                         schoolChoices[index] = false;
                                         choice.refuse();
@@ -841,6 +797,94 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
           ),
         ),
       ),
+    );
+  }
+}
+
+// Widget modal pour les commentaires
+class CommentModal extends StatefulWidget {
+  final Student student;
+  final Choice? choice; // null pour commentaire général, non-null pour commentaire sur un choix spécifique
+
+  const CommentModal({Key? key, required this.student, this.choice}) : super(key: key);
+
+  @override
+  State<CommentModal> createState() => _CommentModalState();
+}
+
+class _CommentModalState extends State<CommentModal> {
+  int selectedChoice = 1;
+  String comment = "";
+
+  @override
+  void initState() {
+    super.initState();
+    // Si un choix est spécifié, utiliser son index
+    if (widget.choice != null) {
+      widget.student.choices.forEach((key, value) {
+        if (value == widget.choice) {
+          selectedChoice = key;
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.choice != null ? "Commentaire sur le refus" : "Laisser un commentaire"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (widget.choice == null) // Afficher le dropdown seulement pour les commentaires généraux
+            DropdownButton<int>(
+              value: selectedChoice,
+              items: [1, 2, 3].map((int value) {
+                return DropdownMenuItem<int>(
+                  value: value,
+                  child: Text("Choix $value"),
+                );
+              }).toList(),
+              onChanged: (int? newValue) {
+                setState(() {
+                  selectedChoice = newValue!;
+                });
+              },
+            ),
+          if (widget.choice == null) SizedBox(height: 16),
+          TextField(
+            onChanged: (value) {
+              comment = value;
+            },
+            decoration: InputDecoration(
+              hintText: widget.choice != null ? "Expliquez pourquoi ce choix a été refusé" : "Entrez votre commentaire",
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 3,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text("Annuler"),
+        ),
+        TextButton(
+          onPressed: () {
+            if (widget.choice != null) {
+              // Ajouter le commentaire au choix refusé
+              widget.choice!.post_comment = comment;
+            } else {
+              // Ajouter le commentaire général
+              widget.student.add_post_comment(selectedChoice, comment);
+            }
+            Navigator.pop(context);
+          },
+          child: Text("Valider"),
+        ),
+      ],
     );
   }
 }
