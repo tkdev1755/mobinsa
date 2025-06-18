@@ -579,9 +579,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           width: 40,
                           height: 40,
                           child: Tooltip(
-                            message: "Accepter ce choix",
+                            message: choice.school.remaining_slots == 0 ? "Plus de places disponibles" : "Accepter ce choix",
                             child: ElevatedButton(
-                              onPressed: choice.student.accepted != null ? null : () {
+                              onPressed: choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
                                 setState(() {
                                   schoolChoices[index] = true;
                                   choice.accepted(choice.student);
@@ -754,9 +754,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                 width: 40,
                                 height: 40,
                                 child: Tooltip(
-                                  message: "Accepter ce choix",
+                                  message: choice.school.remaining_slots == 0 ? "Plus de places disponibles" : "Accepter ce choix",
                                   child: ElevatedButton(
-                                    onPressed: choice.student.accepted != null ? null : () {
+                                    onPressed: choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
                                       setState(() {
                                         schoolChoices[index] = true;
                                         choice.accepted(choice.student);
