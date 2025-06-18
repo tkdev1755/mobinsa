@@ -58,22 +58,24 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
       //print(concerned_school[student.choices[1]!.school]);
       if (student.year == 2) {
 
-        if (concerned_school[student.choices[1]!.school]![0] > 0) {
+        if (concerned_school[student.choices[1]!.school]![0] > 0 && student.choices[1]!.school.specialization.contains(student.get_next_year())) {
           concerned_school[student.choices[1]!.school]?[0] --;
           student.accepted = student.choices[1];
           export_list.add(student);
           stats.add_c1();
         }
-        else if (nb_voeux_student >= 2 &&
-            concerned_school[student.choices[2]!.school]![0] > 0) {
+        else if (nb_voeux_student >= 2
+            && student.choices[2]!.school.specialization.contains(student.get_next_year())
+            && concerned_school[student.choices[2]!.school]![0] > 0) {
           concerned_school[student.choices[2]!.school]?[0] --;
           student.accepted = student.choices[2];
           student.refused.add(student.choices[1]!);
           export_list.add(student);
           stats.add_c2();
         }
-        else if (nb_voeux_student == 3 &&
-            concerned_school[student.choices[3]!.school]![0] > 0) {
+        else if (nb_voeux_student == 3
+            && student.choices[3]!.school.specialization.contains(student.get_next_year())
+            && concerned_school[student.choices[3]!.school]![0] > 0) {
           concerned_school[student.choices[3]!.school]?[0] --;
           student.accepted = student.choices[3];
           student.refused.add(student.choices[1]!);
@@ -90,22 +92,26 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
         }
       }
       else if (student.year > 2) {
-        if (concerned_school[student.choices[1]!.school]![1] > 0) {
+        if (concerned_school[student.choices[1]!.school]![1] > 0
+            && student.choices[1]!.school.specialization.contains(student.get_next_year())
+        ) {
           concerned_school[student.choices[1]!.school]?[1] --;
           student.accepted = student.choices[1];
           export_list.add(student);
           stats.add_c1();
         }
-        else if (nb_voeux_student >= 2 &&
-            concerned_school[student.choices[2]!.school]![1] > 0) {
+        else if (nb_voeux_student >= 2
+            && student.choices[2]!.school.specialization.contains(student.get_next_year())
+            && concerned_school[student.choices[2]!.school]![1] > 0) {
           concerned_school[student.choices[2]!.school]?[1] --;
           student.accepted = student.choices[2];
           student.refused.add(student.choices[1]!);
           export_list.add(student);
           stats.add_c2();
         }
-        else if (nb_voeux_student == 3 &&
-            concerned_school[student.choices[3]!.school]![1] > 0) {
+        else if (nb_voeux_student == 3
+            && student.choices[3]!.school.specialization.contains(student.get_next_year())
+            && concerned_school[student.choices[3]!.school]![1] > 0) {
           concerned_school[student.choices[3]!.school]?[1] --;
           student.accepted = student.choices[3];
           student.refused.add(student.choices[1]!);
