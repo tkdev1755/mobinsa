@@ -6,6 +6,10 @@ import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/School.dart';
 import 'package:mobinsa/view/uiElements.dart';
 import 'package:mobinsa/view/displayApplicants.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:mobinsa/model/parser.dart';
+import 'package:file_picker/file_picker.dart';
+
 
 class AssemblyPreview extends StatefulWidget {
   List<Student> students;
@@ -29,10 +33,10 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
     my_list.sort((a, b) => b.$1.compareTo(a.$1));
     return my_list;
   }
-
+  List<Student> export_list = [];
   Map<School,List<int>> concerned_school = {};
   void initState() {
-    List<Student> cpy_students_list = widget.students;
+    List<Student> cpy_students_list = widget.students.map((e) => e.clone()).toList();
     for (var st in cpy_students_list){
       for(var c in st.choices.values){
         if (!(concerned_school.containsKey(c.school))) {
@@ -41,57 +45,87 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
       }
     }
 
-    print(concerned_school);
+
+    //print(concerned_school);
     List<(double, Student)> lst = sort_student(cpy_students_list);
+
+    print (lst);
     for (var element in lst) {
       Student student = element.$2;
-      print(student.choices);
+      //print(student.choices);
       int nb_voeux_student = student.choices.keys.reduce((a, b) => a > b ? a : b);
-      print(nb_voeux_student);
-      print("\n");
-      print(concerned_school[student.choices[1]!.school]);
+      //print(nb_voeux_student);
+      //print(concerned_school[student.choices[1]!.school]);
       if (student.year == 2) {
 
         if (concerned_school[student.choices[1]!.school]![0] > 0) {
           concerned_school[student.choices[1]!.school]?[0] --;
+          student.accepted = student.choices[1];
+          export_list.add(student);
           stats.add_c1();
         }
         else if (nb_voeux_student >= 2 &&
             concerned_school[student.choices[2]!.school]![0] > 0) {
           concerned_school[student.choices[2]!.school]?[0] --;
+          student.accepted = student.choices[2];
+          student.refused.add(student.choices[1]!);
+          export_list.add(student);
           stats.add_c2();
         }
         else if (nb_voeux_student == 3 &&
             concerned_school[student.choices[3]!.school]![0] > 0) {
           concerned_school[student.choices[3]!.school]?[0] --;
+          student.accepted = student.choices[3];
+          student.refused.add(student.choices[1]!);
+          student.refused.add(student.choices[2]!);
+          export_list.add(student);
           stats.add_c3();
         }
         else {
           stats.add_r();
+          student.refused.add(student.choices[1]!);
+          student.refused.add(student.choices[2]!);
+          student.refused.add(student.choices[3]!);
+          export_list.add(student);
         }
       }
       else if (student.year > 2) {
         if (concerned_school[student.choices[1]!.school]![1] > 0) {
           concerned_school[student.choices[1]!.school]?[1] --;
+          student.accepted = student.choices[1];
+          export_list.add(student);
           stats.add_c1();
         }
         else if (nb_voeux_student >= 2 &&
-            concerned_school[student.choices[2]!.school]![0] > 0) {
+            concerned_school[student.choices[2]!.school]![1] > 0) {
           concerned_school[student.choices[2]!.school]?[1] --;
+          student.accepted = student.choices[2];
+          student.refused.add(student.choices[1]!);
+          export_list.add(student);
           stats.add_c2();
         }
         else if (nb_voeux_student == 3 &&
-            concerned_school[student.choices[3]!.school]![0] > 0) {
+            concerned_school[student.choices[3]!.school]![1] > 0) {
           concerned_school[student.choices[3]!.school]?[1] --;
+          student.accepted = student.choices[3];
+          student.refused.add(student.choices[1]!);
+          student.refused.add(student.choices[2]!);
+          export_list.add(student);
           stats.add_c3();
         }
         else {
           stats.add_r();
+          student.refused.add(student.choices[1]!);
+          student.refused.add(student.choices[2]!);
+          student.refused.add(student.choices[3]!);
+          export_list.add(student);
         }
       }
     }
 
     print(stats);
+
+    print(lst);
     super.initState();
   }
 
@@ -100,6 +134,32 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
     return MaterialApp(
       title: 'Welcome to Flutter',
       home: Scaffold(
+        appBar: AppBar(
+          actions: [
+            IconButton(
+              icon: Icon(
+                PhosphorIcons.export(PhosphorIconsStyle.regular),
+                size: 32.0,
+                ),
+              onPressed: () async {
+                List<int> bytes = SheetParser.exportResult(export_list, widget.schools);
+                String? path = await FilePicker.platform.saveFile(
+                    fileName: "PREVIEW_JURY_MOBILITE_${DateTime.now().year}",
+                    type: FileType.custom,
+                    allowedExtensions: ["xlsx"]
+                );
+                if (path != null){
+                  print("Now saving the excel file");
+                  SheetParser.saveExcelToDisk(path, bytes);
+                }
+                else{
+                  // TODO - Ajouter une gestion des erreurs
+                }
+                // TODO: Exporter en excel
+              },
+              tooltip: "Exporter vers excel",)
+                  ],
+                ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

@@ -84,6 +84,10 @@ class Student {
   String get_next_year (){
     return "$departement ${this.year + 1}A";
   }
+
+  Student clone(){
+    return Student(this.id, this.name,this.choices,this.specialization,this.ranking_s1,this.ects_number,this.lang_lvl,this.missed_hours,this.comment);
+  }
   @override
   String toString() {
     String choicesString = choices.entries.map((entry) => '\n    Vœu ${entry.key}: ${entry.value}').join('');
