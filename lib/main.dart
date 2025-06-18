@@ -281,6 +281,15 @@ class _MyHomePageState extends State<MyHomePage> {
                             MaterialPageRoute(builder: (context) => AssemblyPreview(students: students, schools: schools)),);
                         } : null,
                         child: Text("Génerer")
+                      ),
+                      Padding(padding: EdgeInsets.only(bottom: 10)),
+                      ElevatedButton(
+                        style: customButtonStyle,
+                        onPressed: () {
+                          // This button does nothing for now
+                          // Will implement save functionality later
+                        },
+                        child: Text("Sauvegarde")
                       )
                     ],
                   ),
