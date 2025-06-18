@@ -111,6 +111,21 @@ class Student {
     return Student(id, name,choices,specialization,ranking_s1,ects_number,lang_lvl,missed_hours,comment);
   }
 
+  double get_max_rank(){
+    List<double> lst = [];
+    for (var c in choices.values ){
+      lst.add(c.interranking);
+    }
+    double max = lst.reduce((a, b) => a > b ? a : b);
+    /*
+    List<Choice> Mmax = choices.values.toList();
+    Mmax.sort((a,b) => b.interranking.compareTo(a.interranking));
+    print(Mmax.map((e)=> e.interranking).toList());
+    */
+    return max;
+
+  }
+
   @override
   String toString() {
     String choicesString = choices.entries.map((entry) => '\n    Vœu ${entry.key}: ${entry.value}').join('');
