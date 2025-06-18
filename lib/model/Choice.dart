@@ -23,6 +23,18 @@ class Choice {
     school.add_slots(student);
   }
 
+  bool is_incoherent(){
+    if (!(school.specialization.contains(student.get_next_year()))){
+      return true;
+    }
+    else {
+      return false;
+    }
+
+  }
+
+
+
 
   @override
   String toString() {
