@@ -136,9 +136,9 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
       }
     }
 
-    print(stats);
+    //print(stats);
 
-    print(lst);
+    //print(lst);
     super.initState();
   }
 

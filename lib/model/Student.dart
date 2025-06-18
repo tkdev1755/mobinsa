@@ -108,6 +108,21 @@ class Student {
     return Student(id, name,choices,specialization,ranking_s1,ects_number,lang_lvl,missed_hours,comment);
   }
 
+  double get_max_rank(){
+    List<double> lst = [];
+    for (var c in choices.values ){
+      lst.add(c.interranking);
+    }
+    double max = lst.reduce((a, b) => a > b ? a : b);
+    /*
+    List<Choice> Mmax = choices.values.toList();
+    Mmax.sort((a,b) => b.interranking.compareTo(a.interranking));
+    print(Mmax.map((e)=> e.interranking).toList());
+    */
+    return max;
+
+  }
+
   @override
   String toString() {
     String choicesString = choices.entries.map((entry) => '\n    Vœu ${entry.key}: ${entry.value}').join('');
@@ -184,7 +199,6 @@ class Student {
     /// pour la même école.
     Map<int, List<Student>> ladder = {};
     Map<int, Choice> diffDict = diff_interrankings();
-    //print("Here is the diff_dict ${diffDict}");
     if (diffDict.isEmpty) return {};
     for (var entry in diffDict.entries) {
       Choice c = entry.value; // Le choix problématique
@@ -202,5 +216,24 @@ class Student {
       }
     }
     return ladder;
+  }
+
+  Map<int, List<Student>> equal_dict(List<Student> allStudent) {
+    Map<int, List<Student>> equal_dict = {};
+    for(var entry in choices.entries) {
+      int key = entry.key;
+      Choice c = entry.value;
+      equal_dict[key] = [];
+      for(Student other in allStudent) {
+        if(other.id == id) continue;
+        for(var otherChoice in other.choices.values) {
+          if (otherChoice.school.id == c.school.id && (otherChoice.interranking - c.interranking).abs() < 1e-6) {
+            equal_dict.putIfAbsent(key, () => []);
+            equal_dict[key]!.add(other);
+          }
+        }
+      }
+    }
+    return equal_dict;
   }
 }
