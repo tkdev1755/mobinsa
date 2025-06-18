@@ -70,12 +70,13 @@ class School {
     print("this.b_slots : ${b_slots}");
     print("this.specialization : ${specialization}");
     print("s.get_next_year() : ${s.get_next_year()}");
-    if (s.year == 2 && b_slots > 0 && specialization.contains(s.get_next_year())) {
+    //Les 2A ne pourront quand même pas prendre de formation en master !
+    if (s.year == 2 && this.b_slots > 0 ) {
       print("ACCEPTED SCHOOL LICENCE");
       reduce_slots(s);
       return true;
     }
-    else if (s.year > 2 && m_slots > 0 && specialization.contains(s.get_next_year())) {
+    else if (s.year > 2 && this.m_slots > 0 ) {
       print("ACCEPTED SCHOOL MASTER");
       reduce_slots(s);
       return true;
