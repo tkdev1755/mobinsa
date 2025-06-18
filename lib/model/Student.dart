@@ -128,47 +128,42 @@ class Student {
         '}';
   }
 
-  Map<int, Choice> diff_interrankings(List<Student> allStudents) {
-    Map<int, Choice> problematicChoices = {};
-    for (int i = 1; i <= choices.length; i++) {
-      if (!choices.containsKey(i)) {
-        throw Exception();
-      }
-      Choice myChoice = choices[i]!;
-      School school = myChoice.school;
-      double myRank = myChoice.interranking;
-      for (Student other in allStudents) {
-        if (other.id == this.id) continue;
-        for (Choice otherChoice in other.choices.values) {
-          if (otherChoice.school.id == school.id &&
-              otherChoice.interranking < myRank) {
-            problematicChoices[i] = myChoice;
-          }
-        }
-        if (problematicChoices.containsKey(i)) break;
+  Map<int, Choice> diff_interrankings() {
+    Map<int, Choice> differentInterrankings = {};
+    // Récupérer tous les interclassements des vœux
+    Set<double> allInterranks =
+    choices.values.map((choice) => choice.interranking).toSet();
+    // S’il y a plusieurs interclassements distincts
+    if (allInterranks.length <= 1) return {}; // Rien à signaler
+    // Comparer chaque vœu aux autres
+    for (var entry in choices.entries) {
+      double currentRank = entry.value.interranking;
+      // S'il existe un autre interclassement différent
+      if (allInterranks.any((rank) => (rank - currentRank).abs() > 1e-6)) {
+        differentInterrankings[entry.key] = entry.value;
       }
     }
-    return problematicChoices;
+    return differentInterrankings;
   }
 
-  Map<(Choice, int), List<Student>> ladder_interranking(
+  Map<int, List<Student>> ladder_interranking(
       List<Student> allStudents) {
-    Map<(Choice, int), List<Student>> ladder = {};
-    Map<int, Choice> diff_dict = diff_interrankings(allStudents);
+    Map<int, List<Student>> ladder = {};
+    Map<int, Choice> diff_dict = diff_interrankings();
     if (diff_dict.isEmpty) return {};
     for (var entry in diff_dict.entries) {
       Choice c = entry.value;
       int key = entry.key;
-      ladder[(c, key)] = [];
+      ladder[key] = [];
       for (Student other in allStudents) {
         if (other.id == this.id) continue;
         for (Choice otherChoice in other.choices.values) {
           if (otherChoice.school.id == c.school.id &&
               otherChoice.interranking < c.interranking) {
-            ladder.putIfAbsent((c, key), () => []);
-            ladder[(c, key)]!.add(other);
+            ladder.putIfAbsent(key, () => []);
+            ladder[key]!.add(other);
           }
-          if (ladder.containsKey((c, key))) break;
+          if (ladder.containsKey(key)) break;
         }
       }
     }

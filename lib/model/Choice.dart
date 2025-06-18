@@ -57,8 +57,10 @@ class Choice {
 
   @override
   bool operator ==(Object other) {
-    // TODO: implement ==
-    return super == other;
+    if (identical(this, other)) return true;
+    if (other is! Choice) return false;
+    return school.id == other.school.id &&
+        student.id == other.student.id;
   }
 
 
