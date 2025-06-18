@@ -390,7 +390,21 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
   }
 
   bool disableChoiceByRanking(Choice choice){
-    return choice.student.ladder_interranking(widget.students).isNotEmpty;
+    // print("ladder_interranking : ${choice.student.ladder_interranking(widget.students)}");
+    // print(choice.student.ladder_interranking(widget.students).keys.toList());
+
+    Map<(Choice, int), List<Student>> ladder = choice.student.ladder_interranking(widget.students);
+    
+    // Vérifier si la map n'est pas vide et si le choix actuel correspond au premier élément de la clé
+    if (ladder.isNotEmpty) {
+      var firstKey = ladder.keys.first;
+      Choice firstChoice = firstKey.$1; // Premier élément du tuple (Choice)
+      
+      // Retourner true si le choix actuel correspond au premier choix de la clé
+      return firstChoice == choice;
+    }
+    
+    return false;
   }
 
 
@@ -607,7 +621,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           child: Tooltip(
                             message: choice.school.remaining_slots == 0 ? "Plus de places disponibles" : "Accepter ce choix",
                             child: ElevatedButton(
-                              onPressed: choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
+                              onPressed: disableChoiceByRanking(choice) || choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
                                 setState(() {
                                   schoolChoices[index] = true;
                                   choice.accepted(choice.student);
@@ -782,7 +796,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                                 child: Tooltip(
                                   message: choice.school.remaining_slots == 0 ? "Plus de places disponibles" : "Accepter ce choix",
                                   child: ElevatedButton(
-                                    onPressed: choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
+                                    onPressed: disableChoiceByRanking(choice) || choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
                                       setState(() {
                                         schoolChoices[index] = true;
                                         choice.accepted(choice.student);
