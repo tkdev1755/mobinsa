@@ -482,14 +482,6 @@ class SheetParser{
           );
         }
       }
-      else if (currentStudent.refused.any((choice) => choice.school.id == c.$3.school.id)) {
-        print("The voeu was rejected! Painting it in red");
-        for (var data in currentRow){
-          data?.cellStyle = CellStyle(
-            backgroundColorHex: ExcelColor.red200
-          );
-        }
-      }
       i++;
     }
     return exportedExcel.save() ?? [];
