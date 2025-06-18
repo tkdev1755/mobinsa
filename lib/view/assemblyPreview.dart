@@ -86,8 +86,11 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
         else {
           stats.add_r();
           student.refused.add(student.choices[1]!);
-          student.refused.add(student.choices[2]!);
-          student.refused.add(student.choices[3]!);
+          if (nb_voeux_student >= 2){
+            student.refused.add(student.choices[2]!);}
+          if (nb_voeux_student == 3 ){
+            student.refused.add(student.choices[3]!);
+          }
           export_list.add(student);
         }
       }
@@ -122,8 +125,11 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
         else {
           stats.add_r();
           student.refused.add(student.choices[1]!);
-          student.refused.add(student.choices[2]!);
-          student.refused.add(student.choices[3]!);
+          if (nb_voeux_student >= 2){
+            student.refused.add(student.choices[2]!);}
+          if (nb_voeux_student == 3 ) {
+            student.refused.add(student.choices[3]!);
+          }
           export_list.add(student);
         }
       }
