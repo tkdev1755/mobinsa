@@ -140,7 +140,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                             selectedStudent = widget.students[index];
                             currentStudentIndex = index;
                             schoolChoices.clear();
-
+                            expandedStudentsChoice = List.generate(
+                              widget.students[index].choices.values.toList().length,
+                              (_) => false
+                            );
                             showCancelButton.clear();
                             widget.students[index].choices.forEach((key, choice) {
                               showCancelButton[key] = (choice.student.accepted == choice) ||
