@@ -178,11 +178,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
               },
               tooltip: "Exporter vers excel",
             ),
-            IconButton(
-              icon: Icon(PhosphorIcons.gear(PhosphorIconsStyle.regular), size: 32.0),
-              onPressed: null,
-              tooltip: "Cette fonctionnalité n'est pas encore disponible",
-            ),
+
             IconButton(
               icon: Icon(PhosphorIcons.house(PhosphorIconsStyle.regular), size: 32.0),
               onPressed: () => {
