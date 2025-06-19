@@ -124,7 +124,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                               ),
                             ),
                             Text(
-                              widget.students[index].get_max_rank().toString() ?? "Err",
+                              widget.students[index].get_max_rank().toStringAsFixed(2),
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
