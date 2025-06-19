@@ -6,13 +6,8 @@ import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/School.dart';
 
-/*
-
-
-  16/06/2025@tahakhetib : J'ai apporté les modification suivantes
-    - Mis à jour la fonction de Mehdi des étudiants pour récupérer l'école à partir d'un voeu
-    - Corrigé la fonction de Max des
- */
+/// Exception personnalisée levée lors d'une erreur dans le parsing d'un fichier Excel.
+/// Contient un message explicite pour aider au diagnostic.
 class ExcelParsingException implements Exception {
   final String message;
   
@@ -24,24 +19,49 @@ class ExcelParsingException implements Exception {
   }
 }
 
-
+/// Classe utilitaire pour lire et extraire des données depuis un fichier Excel.
+/// Elle contient les constantes de colonnes attendues et les fonctions de parsing.
 class SheetParser{
   // --- Constantes pour les indices de colonnes (À AJUSTER SELON VOTRE FICHIER EXCEL) ---
   // Rappel : les indices sont 0-basés pour l'accès aux données de la ligne
-  static const int _colStudentName = 0;     // Colonne 1 dans Excel
-  static const int _colWishOrder = 1;       // Colonne 2
-  static const int _colCountry = 2;         // Colonne 3
-  static const int _colSchoolName = 3;      // Colonne 4
-  static const int _colSpecialization = 4;  // Colonne 5
-  static const int _colInterRanking = 5;    // Colonne 6
-  static const int _colRankingS1 = 6;       // Colonne 7
-  static const int _colEctsNumber = 7;      // Colonne 8
-  static const int _colLangLvl = 8;         // Colonne 9
-  static const int _colMissedHours = 9;     // Colonne 10
-  static const int _colComment = 10;        // Colonne 11
+
+  /// Nom de l'étudiant (Colonne 1 dans Excel).
+  static const int _colStudentName = 0;
+
+  /// Ordre du vœu (Colonne 2).
+  static const int _colWishOrder = 1;
+
+  /// Pays de l'école (Colonne 3).
+  static const int _colCountry = 2;
+
+  /// Nom de l'école (Colonne 4).
+  static const int _colSchoolName = 3;
+
+  /// Spécialisation de l'école (Colonne 5).
+  static const int _colSpecialization = 4;
+
+  /// Classement international du vœu (Colonne 6).
+  static const int _colInterRanking = 5;
+
+  /// Classement S1 de l'étudiant (Colonne 7).
+  static const int _colRankingS1 = 6;
+
+  /// Nombre d'ECTS obtenus (Colonne 8).
+  static const int _colEctsNumber = 7;
+
+  /// Niveau de langue (Colonne 9).
+  static const int _colLangLvl = 8;
+
+  /// Heures manquées (Colonne 10).
+  static const int _colMissedHours = 9;
+
+  /// Commentaire éventuel (Colonne 11).
+  static const int _colComment = 10;
 
 
   // --- Fonctions d'aide pour l'extraction sécurisée des données de cellules ---
+
+  /// Récupère une donnée texte depuis une cellule. Retourne une valeur par défaut si absente.
   static String _getStringCellData(List<Data?> row, int colIndex, {String defaultValue = ""}) {
     if (colIndex < row.length && row[colIndex]?.value != null) {
       return row[colIndex]!.value.toString().trim();
@@ -49,6 +69,7 @@ class SheetParser{
     return defaultValue;
   }
 
+  /// Récupère un entier depuis une cellule. Retourne une valeur par défaut si vide ou invalide.
   static int _getIntCellData(List<Data?> row, int colIndex, {int defaultValue = 0}) {
     if (colIndex < row.length && row[colIndex]?.value != null) {
       if (row[colIndex]!.value.runtimeType == FormulaCellValue){
@@ -62,6 +83,7 @@ class SheetParser{
     return defaultValue;
   }
 
+  /// Récupère un nombre décimal depuis une cellule. Retourne une valeur par défaut si vide ou invalide.
   static double _getDoubleCellData(List<Data?> row, int colIndex, {double defaultValue = 0.0}) {
     if (colIndex < row.length && row[colIndex]?.value != null) {
       return double.tryParse(row[colIndex]!.value.toString().trim()) ?? defaultValue;
@@ -69,8 +91,8 @@ class SheetParser{
     return defaultValue;
   }
 
-
-
+  /// Charge un fichier Excel à partir de son chemin et retourne un objet [Excel].
+  /// Lève une exception personnalisée si le fichier est invalide.
   static Excel parseExcel(String path) {
   try {
     File newFile = File(path);
@@ -102,12 +124,12 @@ class SheetParser{
   }
 }
 
-
-
-
   // --- Méthode principale pour extraire les étudiants ---
 
-
+  // Extrait une liste d'étudiants depuis un fichier Excel déjà chargé.
+  /// Associe les écoles aux choix de chaque étudiant via la liste [schools].
+  ///
+  /// Lève une [ExcelParsingException] si la liste d'écoles est vide.
   static List<Student> extractStudents(Excel excel, List<School> schools) {
   // Check if schools list is empty
   if (schools.isEmpty) {

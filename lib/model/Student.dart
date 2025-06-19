@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/School.dart';
 
+/// Classe représentant un étudiant avec ses vœux de mobilité, ses résultats
+/// académiques, et ses choix acceptés ou refusés.
 class Student {
+  /// Clés JSON utilisées pour la sérialisation/désérialisation.
   static String jsonId = "id";
   static String jsonName = "name";
   static String jsonChoices = "choices";
@@ -16,32 +19,56 @@ class Student {
   static String jsonMissedHours = "missed_hours";
   static String jsonComment = "comment";
 
+  /// Identifiant unique de l'étudiant.
   int id;
 
+  /// Nom de l'étudiant.
   String name;
+
+  /// Dictionnaire des choix de mobilité, indexés par ordre de préférence.
   Map <int, Choice> choices;
+
+  /// Choix accepté, s'il y en a un.
   Choice? accepted;
+
+  /// Liste des choix explicitement refusés.
   List<Choice> refused = [];
+
+  /// École acceptée (dépend de `accepted`).
   School? accepted_school;
+
+  /// Spécialisation de l'étudiant (ex: MRI3, STI2...).
   String specialization;
+
+  /// Classement au semestre 1.
   int ranking_s1;
 
+  /// Nombre de crédits ECTS.
   int ects_number;
-  String lang_lvl;
-  double missed_hours;
-  String comment;
-  
 
+  /// Niveau de langue (ex: B1, C1...).
+  String lang_lvl;
+
+  /// Nombre d’heures manquées.
+  double missed_hours;
+
+  /// Commentaire général sur l'étudiant.
+  String comment;
+
+  /// Année déterminée à partir de la spécialisation.
   late int year;
+
+  /// Département déterminé à partir de la spécialisation.
   late String departement;
 
-
+  /// Constructeur principal du modèle `Student`.
   Student(this.id, this.name, this.choices, this.specialization,
       this.ranking_s1, this.ects_number, this.lang_lvl, this.missed_hours,
       this.comment) {
     year_departement(specialization);
   }
 
+  /// Méthode d’ajout ou de modification des informations d’un étudiant.
   void add_student(id, name, choices, specialization, rankingS1, ectsNumber,
       langLvl, missedHours, comment) {
     this.id = id;
@@ -60,6 +87,7 @@ class Student {
     accepted_school = null;
   }
 
+  /// Détermine l’année et le département à partir de la spécialisation.
   void year_departement(String specialization) {
     if (specialization.contains("2")) {
       year = 2;
@@ -88,14 +116,17 @@ class Student {
     }
   }
 
+  /// Ajoute un choix à la liste des choix refusés.
   void addRefusedChoice(Choice choice) {
     refused.add(choice);
   }
 
+  /// Supprime un choix de la liste des choix refusés.
   void removeRefusedChoice(Choice choice) {
     refused.remove(choice);
   }
 
+  /// Restaure un choix refusé dans la liste des choix actifs.
   void restoreRefusedChoice(Choice choice, int choiceKey) {
     // Restaurer un choix refusé dans la liste des choix actifs
     
@@ -107,6 +138,7 @@ class Student {
     print(refused);
   }
 
+  /// Ajoute un commentaire posté à un choix existant.
   void add_post_comment(int selectedChoice , String new_comment ) {
     if (choices.containsKey(selectedChoice)){
       this.choices[selectedChoice]!.post_comment =  new_comment;
@@ -116,14 +148,17 @@ class Student {
     }
   }
 
+  /// Retourne l’année prochaine au format `"DEPARTEMENT XAnnée"`.
   String get_next_year() {
     return "$departement ${year + 1}A";
   }
 
+  /// Crée une copie (clone) de l’objet `Student`.
   Student clone(){
     return Student(id, name,choices,specialization,ranking_s1,ects_number,lang_lvl,missed_hours,comment);
   }
 
+  /// Retourne l'interclassement maximum parmi tous les choix.
   double get_max_rank(){
     List<double> lst = [];
     for (var c in choices.values ){
@@ -139,8 +174,7 @@ class Student {
 
   }
 
-  // return true si l'étudiant va au second tour et false sinon
-  // elle regarde si tout les voeux de l'étudiant sont présent dans refused
+  /// Indique si l'étudiant passe au second tour (tous les choix refusés).
   bool get_second_tour (){
     for (var c in choices.values){
       if (!refused.contains(c)){
@@ -150,6 +184,7 @@ class Student {
     return true;
   }
 
+  /// Retourne une chaîne de caractères représentant l'étudiant.
   @override
   String toString() {
     String choicesString = choices.entries.map((entry) => '\n    Vœu ${entry.key}: ${entry.value}').join('');
@@ -171,6 +206,7 @@ class Student {
     //     '}';
   }
 
+  /// Identifie les choix dont l’interclassement diffère du plus fréquent.
   Map<int, Choice> diff_interrankings() {
     Map<int, Choice> diff_dict = {};
     if (choices.isEmpty) return {};
@@ -215,15 +251,10 @@ class Student {
     return diff_dict;
   }
 
+  /// Retourne une carte des étudiants mieux classés pour les mêmes écoles
+  /// sur les vœux dont l’interclassement diffère.
   Map<int, List<Student>> ladder_interranking(
       List<Student> allStudents) {
-    /// Construit une "échelle" (ladder) des étudiants qui ont obtenu une meilleure
-    /// position (interclassement) que l'étudiant courant pour un même établissement,
-    /// uniquement pour les vœux dont l'interclassement diffère du rang de référence.
-    ///
-    /// Retourne une map où la clé est la position du vœu dans `choices`
-    /// et la valeur est la liste des étudiants ayant un interclassement plus favorable
-    /// pour la même école.
     Map<int, List<Student>> ladder = {};
     Map<int, Choice> diffDict = diff_interrankings();
     if (diffDict.isEmpty) return {};
@@ -245,6 +276,8 @@ class Student {
     return ladder;
   }
 
+  /// Retourne une carte des étudiants ayant un classement égal
+  /// pour les mêmes écoles.
   Map<int, List<Student>> equal_dict(List<Student> allStudent) {
     Map<int, List<Student>> equal_dict = {};
     for(var entry in choices.entries) {
@@ -264,6 +297,7 @@ class Student {
     return equal_dict;
   }
 
+  /// Sérialise l’étudiant en format JSON.
   Map<String, dynamic> toJson(){
     Map<String,dynamic> choicesMap = choices.map((k,v) => MapEntry(k.toString(), v.toJson()));
     List<dynamic> refusedChoiceList = refused.map((e)=> e.toJson()).toList();
@@ -281,6 +315,8 @@ class Student {
       jsonComment : comment,
     };
   }
+
+  /// Construit un étudiant à partir d’un objet JSON.
   factory Student.fromJson(Map<String, dynamic> json){
     Map<int, Choice> deserializedChoices = {};
     Student student = Student(

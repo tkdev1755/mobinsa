@@ -1,10 +1,12 @@
 import 'package:mobinsa/model/Student.dart';
 
+/// Classe représentant une école ou une offre de séjour.
+/// Contient toutes les informations nécessaires pour une affectation de mobilité (niveau académique, langue d’enseignement, etc.)
 class School {
-  //classe définissant les écoles/offres de séjours présentant toutes les informations importantes (niveau acad&miqu, langue d'ensignement,...)
+  /// Identifiant global auto-incrémenté pour chaque instance.
   static int global_id = 0;
 
-  /// static string to use when parsing the json, or serializing the class
+  /// Clés utilisées pour la (dé)sérialisation JSON.
   static String jsonId = "id";
   static String jsonName = "name";
   static String jsonCountry  = "country";
@@ -23,24 +25,58 @@ class School {
   static String jsonIsFull_b = "is_full_b";
   static String jsonIsFull_m = "is_full_m";
 
+  /// Identifiant unique de l’école.
   late int id;
-  String name; //string définissant l'initulé de l'offre de séjour
+
+  /// Nom de l’offre de séjour.
+  String name;
+
+  /// Pays de l’établissement.
   String country;
+
+  /// Type de contenu (par ex. programme, université...).
   String content_type;
-  int available_slots; //nombre de places disponible
-  late int remaining_slots; //nombres de places restantes
-  int b_slots; //nombre de place disponible en bachelor
-  int m_slots; //nombre de place disponible en master
-  List<String> specialization; //liste des spécialisations qui peuvent postuler à cette offre de séjour
+
+  /// Nombre total de places disponibles.
+  int available_slots;
+
+  /// Nombre de places restantes.
+  late int remaining_slots;
+
+  /// Nombre de places en Bachelor.
+  int b_slots;
+
+  /// Nombre de places en Master.
+  int m_slots;
+
+  /// Spécialisations acceptées pour cette offre.
+  List<String> specialization;
+
+  /// Niveau de diplôme requis (Bachelor/Master).
   String graduation_level;
-  String program; // Formation concernée par l'offre de séjour
-  String use_langage; // langue d'enseignement
-  String req_lang_level; //niveau minimum de langue souhaité
-  String academic_level; //niveau académque souhaité
+
+  /// Programme concerné par l’offre.
+  String program;
+
+  /// Langue d’enseignement.
+  String use_langage;
+
+  /// Niveau requis dans la langue d’enseignement.
+  String req_lang_level;
+
+  /// Niveau académique requis.
+  String academic_level;
+
+  /// Indique si toutes les places sont prises.
   bool is_full = false;
+
+  /// Indique si toutes les places en Bachelor sont prises.
   bool is_full_b = false;
+
+  /// Indique si toutes les places en Master sont prises.
   bool is_full_m = false;
 
+  /// Constructeur de la classe School. Initialise les champs et génère un identifiant unique.
   School(this.name, this.country, this.content_type, this.available_slots,
       this.b_slots, this.m_slots, this.specialization, this.graduation_level,
       this.program, this.use_langage, this.req_lang_level,
@@ -50,14 +86,17 @@ class School {
     global_id++;
   }
 
+  /// Définit une nouvelle valeur pour l’identifiant global.
   static void setGlobalID(int globalID){
     global_id = globalID;
   }
 
+  /// Définit l’identifiant de l’instance.
   void setId(int id){
     this.id = id;
   }
 
+  /// Réduit le nombre de places disponibles après affectation d’un étudiant.
   void reduce_slots(Student s) {
     //réduire le nombre de places d'une offre de séjour si on affecté une mobilité à un étudiant
     if (remaining_slots > 0) {
@@ -79,6 +118,7 @@ class School {
     }
   }
 
+  /// Augmente le nombre de places disponibles si on retire un étudiant affecté.
   void add_slots(Student s) {
     //augmenter le nombre de places si on décide d'enlever une mobilité à un élève
     if(remaining_slots < available_slots){
@@ -91,6 +131,8 @@ class School {
     }
   }
 
+  /// Tente d’affecter un étudiant à cette offre.
+  /// Retourne `true` si l’affectation est réussie, sinon `false`.
   bool accepted(Student s) {
     //affectation d'une offre de séjour à un élève
     print("s.year : ${s.year}");
@@ -110,11 +152,14 @@ class School {
     }
     return false;
   }
+
+  /// Retourne une représentation textuelle de l’école.
   @override
   String toString() {
     return "Ecole : $name - $country - $specialization";
   }
 
+  /// Sérialise l’objet School en JSON.
   Map<String,dynamic> toJson(){
     return {
       jsonId : id,
@@ -137,6 +182,7 @@ class School {
     };
   }
 
+  /// Crée une instance de School à partir d’un objet JSON.
   factory School.fromJson(Map<String, dynamic> json) {
     School school = School(
       json[jsonName],                          // name
