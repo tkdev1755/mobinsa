@@ -616,10 +616,14 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                   ),
                                 ),
                                 Text("Niveau de langue"),
-                                Text("${choice.school.req_lang_level} | ",
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
+                                SizedBox(
+                                  width: MediaQuery.sizeOf(context).width*0.5*0.4,
+                                  child: Text("${choice.school.req_lang_level}",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 18,
+                                    ),
+                                      maxLines: 4,
                                   ),
                                 ),
                               ],
@@ -655,7 +659,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                     fontSize: 18,
                                     fontWeight: FontWeight.w500,
                                   ),
-                                ),
+                                ),  
                               ],
                             ),
                           ],
