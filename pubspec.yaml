@@ -45,6 +45,14 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  msix: ^3.16.9
+msix_config:
+  display_name: Mobinsa
+  publisher_display_name: Mobinsa
+  identity_name: com.insa-cvl.mobinsa
+  msix_version: 1.0.0.0
+  logo_path: assets/images/Logo_MOBINSA.png
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

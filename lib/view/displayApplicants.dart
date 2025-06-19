@@ -7,8 +7,6 @@ import 'package:mobinsa/view/debugPage.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../model/School.dart';
 
-import 'dart:math';
-
 //TODO: faire en sorte que le bouton retirer marcher pour retirer et pour refuser un choix
 
 /*
@@ -54,7 +52,6 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
     }
     return Colors.black;
   }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -194,8 +191,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
-                                color: sameRanksColor(index)
-                                ,
+                                color: currentStudentIndex == index
+                                    ? Colors.blue[900]
+                                    : Colors.black,
                               ),
                             ),
                           ],
