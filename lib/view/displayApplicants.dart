@@ -4,6 +4,7 @@ import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/parser.dart';
 import 'package:mobinsa/model/sessionStorage.dart';
+import 'package:mobinsa/view/uiElements.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../model/School.dart';
 
@@ -37,6 +38,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
   String comment = "";
   bool hasSaved = false;
   String? currentSaveName;
+  bool _showSaveMessage = false;
   Color sameRanksColor(int index){
     if(index!=0){
       if(widget.students[index].get_max_rank()==widget.students[index-1].get_max_rank()){
@@ -94,6 +96,22 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
           ),
           
           actions: [
+            AnimatedOpacity(
+              opacity: _showSaveMessage ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              child: Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: UiShapes().frameRadius,
+                ),
+                child: const Text(
+                  "Fichier enregistré !",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            Padding(padding: EdgeInsets.only(left: 10)),
             IconButton(onPressed: () async {
               String savePath = "";
               String saveName = "";
@@ -125,6 +143,16 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
               catch(e,s){
                 print("$s , $e -> There was a problem while writing the data to disk");
               }
+              setState(() {
+                _showSaveMessage = true;
+              });
+              Future.delayed(const Duration(seconds: 2), () {
+                if (mounted) {
+                  setState(() {
+                    _showSaveMessage = false;
+                  });
+                }
+              });
               
             }, icon: Icon(PhosphorIcons.floppyDisk(PhosphorIconsStyle.regular))),
             IconButton(
@@ -143,6 +171,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                   print("Now saving the excel file");
                   SheetParser.saveExcelToDisk(path, bytes);
                 }
+                else{
+                  // TODO - Ajouter une gestion des erreurs
+                }
+                // TODO: Exporter en excel
               },
               tooltip: "Exporter vers excel",
             ),
@@ -210,52 +242,57 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                               : widget.students[index].refused.length == 3
                                   ? const Color.fromARGB(255, 213, 62, 35)
                                   : Colors.white),
-                      child: ListTile(
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              widget.students[index].name,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: currentStudentIndex == index
-                                    ? const Color.fromARGB(255, 242, 244, 246)
-                                    : Colors.black,
-                                fontWeight: currentStudentIndex == index ? FontWeight.bold : FontWeight.normal,
-                              ),
-                            ),
-                            Text(
-                              widget.students[index].get_max_rank().toStringAsFixed(2),
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: sameRanksColor(index),
-                              ),
-                            ),
-                          ],
-                        ),
-                        onTap: () {
-                          setState(() {
-                            selectedStudent = widget.students[index];
-                            currentStudentIndex = index;
-                            schoolChoices.clear();
-                            expandedStudentsChoice = List.generate(
-                              widget.students[index].choices.values.toList().length,
-                              (_) => false
-                            );
-                            showCancelButton.clear();
-                            widget.students[index].choices.forEach((key, choice) {
-                              showCancelButton[key] = (choice.student.accepted == choice) ||
-                                  choice.student.refused.contains(choice);
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: (){
+                          {
+                            setState(() {
+                              selectedStudent = widget.students[index];
+                              currentStudentIndex = index;
+                              schoolChoices.clear();
+                              expandedStudentsChoice = List.generate(
+                                  widget.students[index].choices.values.toList().length,
+                                      (_) => false
+                              );
+                              showCancelButton.clear();
+                              widget.students[index].choices.forEach((key, choice) {
+                                showCancelButton[key] = (choice.student.accepted == choice) ||
+                                    choice.student.refused.contains(choice);
 
-                              if (choice.student.accepted == choice) {
-                                schoolChoices[key] = true;
-                              } else if (choice.student.refused.contains(choice)) {
-                                schoolChoices[key] = false;
-                              }
+                                if (choice.student.accepted == choice) {
+                                  schoolChoices[key] = true;
+                                } else if (choice.student.refused.contains(choice)) {
+                                  schoolChoices[key] = false;
+                                }
+                              });
                             });
-                          });
+                          }
                         },
+                        child: ListTile(
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                widget.students[index].name,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: currentStudentIndex == index
+                                      ? const Color.fromARGB(255, 242, 244, 246)
+                                      : Colors.black,
+                                  fontWeight: currentStudentIndex == index ? FontWeight.bold : FontWeight.normal,
+                                ),
+                              ),
+                              Text(
+                                widget.students[index].get_max_rank().toStringAsFixed(2),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: sameRanksColor(index),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -313,73 +350,81 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                 const SizedBox(width: 20),
                                 // Informations sur l'élève à droite
                                 Expanded(
-                                  flex: 2,
+                                  flex: 1,
                                   child: Container(
                                     padding: const EdgeInsets.all(16.0),
                                     decoration: BoxDecoration(
                                       color: Colors.grey[300],
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                    child: Column(
                                       children: [
-                                        Column(
+                                        Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            const Text("Classement S1",),
-                                            Text("${selectedStudent!.ranking_s1}",
-                                              style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            )
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                const Text("Classement S1",),
+                                                Text("${selectedStudent!.ranking_s1}",
+                                                  style: const TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                            Padding(padding: EdgeInsets.only(right: 20)),
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                const Text("Crédits ECTS",),
+                                                Text("${selectedStudent!.ects_number}",
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w500,
+                                                    color : (selectedStudent!.ects_number < 30 ?
+                                                    Colors.orange :
+                                                    Colors.black),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                            Padding(padding: EdgeInsets.only(right: 20)),
                                           ],
                                         ),
-                                        Padding(padding: EdgeInsets.only(right: 20)),
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                        Row(
                                           children: [
-                                            const Text("Crédits ECTS",),
-                                            Text("${selectedStudent!.ects_number}",
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w500,
-                                                color : (selectedStudent!.ects_number < 30 ?
-                                                Colors.orange :
-                                                Colors.black),
-                                              ),
-                                            )
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                const Text("Niveau d'anglais",),
+                                                Text(selectedStudent!.lang_lvl,
+                                                  style: const TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                            Padding(padding: EdgeInsets.only(right: 20)),
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                const Text("Heures d'absences",),
+                                                Text("${selectedStudent!.missed_hours}",
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w500,
+                                                    color : (selectedStudent!.missed_hours >= 5 ?
+                                                    (selectedStudent!.missed_hours >= 10 ? Colors.red : Colors. orange) :
+                                                    Colors.black),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
                                           ],
-                                        ),
-                                        Padding(padding: EdgeInsets.only(right: 20)),
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            const Text("Niveau d'anglais",),
-                                            Text(selectedStudent!.lang_lvl,
-                                              style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                        Padding(padding: EdgeInsets.only(right: 20)),
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            const Text("Heures d'absences",),
-                                            Text("${selectedStudent!.missed_hours}",
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w500,
-                                                color : (selectedStudent!.missed_hours >= 5 ?
-                                                (selectedStudent!.missed_hours >= 10 ? Colors.red : Colors. orange) :
-                                                Colors.black),
-                                              ),
-                                            )
-                                          ],
-                                        ),
+                                        )
                                       ],
                                     ),
                                   ),
@@ -566,7 +611,6 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
 
 
   Widget choiceCard(Choice choice, int index) {
-    print(" is the output disabled ? ${disbaleChoice(choice)}");
     return Card(
       margin: const EdgeInsets.only(bottom: 8.0),
       color: disbaleChoice(choice) ? disabledColor : Colors.grey[300],
