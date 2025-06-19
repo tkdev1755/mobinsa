@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/parser.dart';
+import 'package:mobinsa/model/sessionStorage.dart';
 import 'package:mobinsa/view/debugPage.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../model/School.dart';
@@ -20,7 +21,8 @@ import '../model/School.dart';
 class DisplayApplicants extends StatefulWidget {
   List<School> schools;
   List<Student> students;
-  DisplayApplicants({super.key, required this.schools, required this.students});
+  (String,String)? loadedSave;
+  DisplayApplicants({super.key, required this.schools, required this.students, this.loadedSave});
 
   @override
   State<DisplayApplicants> createState() => _DisplayApplicantsState();
@@ -35,7 +37,8 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
   List<bool> expandedStudentsChoice = [false,false,false];
   Color disabledColor = Colors.grey[100]!;
   String comment = "";
-
+  bool hasSaved = false;
+  String? currentSaveName;
   Color sameRanksColor(int index){
     if(index!=0){
       if(widget.students[index].get_max_rank()==widget.students[index-1].get_max_rank()){
@@ -51,6 +54,18 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
       return Colors.blue[900] ?? Colors.blue;
     }
     return Colors.black;
+  }
+
+  // Execute code on startup of the page
+  @override
+  void initState() {
+    // TODO: implement initState
+    if (widget.loadedSave != null){
+      hasSaved = true;
+      currentSaveName = widget.loadedSave!.$2;
+    }
+
+    super.initState();
   }
   @override
   Widget build(BuildContext context) {
@@ -81,6 +96,39 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
           ),
           
           actions: [
+            IconButton(onPressed: () async {
+              String savePath = "";
+              String saveName = "";
+              try {
+                if (hasSaved && currentSaveName != null){
+                  saveName = currentSaveName!;
+                }
+                else{
+                  saveName = await SessionStorage.getSaveName();
+                  currentSaveName = saveName;
+                  hasSaved = true;
+                }
+                savePath = await SessionStorage.askForSavePath(saveName);
+              } catch (e, s) {
+                print("$s , $e -> the directory is null ");
+              }
+              Map<String, dynamic> serializedData = {};
+              
+              try {
+                serializedData = SessionStorage.serializeData(widget.students, widget.schools);
+              }
+              catch (e,s){
+                print("$s , $e -> There was a problem while serializing the data");
+              }
+              
+              try{
+                SessionStorage.saveData(serializedData, savePath);
+              }
+              catch(e,s){
+                print("$s , $e -> There was a problem while writing the data to disk");
+              }
+              
+            }, icon: Icon(PhosphorIcons.floppyDisk(PhosphorIconsStyle.regular))),
             IconButton(
               icon: Icon(
                 PhosphorIcons.export(PhosphorIconsStyle.regular),

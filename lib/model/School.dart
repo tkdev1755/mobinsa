@@ -3,6 +3,26 @@ import 'package:mobinsa/model/Student.dart';
 class School {
   //classe définissant les écoles/offres de séjours présentant toutes les informations importantes (niveau acad&miqu, langue d'ensignement,...)
   static int global_id = 0;
+
+  /// static string to use when parsing the json, or serializing the class
+  static String jsonId = "id";
+  static String jsonName = "name";
+  static String jsonCountry  = "country";
+  static String jsonContent_type = "content_type";
+  static String jsonAvailable_slots = "available_slots";
+  static String jsonRemaining_slots = "remaining_slots";
+  static String jsonB_slots = "b_slots";
+  static String jsonM_slots = "m_slots";
+  static String jsonSpecialization = "specialization";
+  static String jsonGraduationLVL = "graduation_level";
+  static String jsonProgram = "program";
+  static String jsonUseLanguage = "use_language";
+  static String jsonReq_lang_lvl = "req_lang_lvl";
+  static String json_academic_lvl = "academic_lvl";
+  static String jsonIsFull = "is_full";
+  static String jsonIsFull_b = "is_full_b";
+  static String jsonIsFull_m = "is_full_m";
+
   late int id;
   String name; //string définissant l'initulé de l'offre de séjour
   String country;
@@ -30,6 +50,13 @@ class School {
     global_id++;
   }
 
+  static void setGlobalID(int globalID){
+    global_id = globalID;
+  }
+
+  void setId(int id){
+    this.id = id;
+  }
 
   void reduce_slots(Student s) {
     //réduire le nombre de places d'une offre de séjour si on affecté une mobilité à un étudiant
@@ -86,6 +113,52 @@ class School {
   @override
   String toString() {
     // TODO: implement toString
-    return "Ecole : $name - $country - $specialization";
+    return "Ecole : $id - $name - $country - $specialization";
   }
+
+  Map<String,dynamic> toJson(){
+    return {
+      jsonId : id,
+      jsonName : name,
+      jsonCountry : country,
+      jsonContent_type : content_type,
+      jsonAvailable_slots : available_slots,
+      jsonRemaining_slots : remaining_slots,
+      jsonB_slots : b_slots,
+      jsonM_slots : m_slots,
+      jsonSpecialization : specialization,
+      jsonGraduationLVL : graduation_level,
+      jsonProgram : program,
+      jsonUseLanguage : use_langage,
+      jsonReq_lang_lvl : req_lang_level,
+      json_academic_lvl : academic_level,
+      jsonIsFull : is_full,
+      jsonIsFull_b : is_full_b,
+      jsonIsFull_m : is_full_m,
+    };
+  }
+
+  factory School.fromJson(Map<String, dynamic> json) {
+    School school = School(
+      json[jsonName],                          // name
+      json[jsonCountry],                       // country
+      json[jsonContent_type],                  // content_type
+      json[jsonAvailable_slots],               // available_slots
+      json[jsonB_slots],                       // b_slots
+      json[jsonM_slots],                       // m_slots
+      List<String>.from(json[jsonSpecialization]), // specialization
+      json[jsonGraduationLVL],                 // graduation_level
+      json[jsonProgram],
+      json[jsonUseLanguage],                   // use_langage
+      json[jsonReq_lang_lvl],                  // req_lang_level
+      json[json_academic_lvl],                 // academic_level
+    );
+    school.setId(json[jsonId]);
+    school.remaining_slots = json[jsonRemaining_slots];
+    school.is_full = json[jsonIsFull];
+    school.is_full_b = json[jsonIsFull_b];
+    school.is_full_m = json[jsonIsFull_m];
+    return  school;
+  }
+
 }

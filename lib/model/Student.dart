@@ -1,8 +1,21 @@
-
+import 'package:flutter/material.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/School.dart';
 
 class Student {
+  static String jsonId = "id";
+  static String jsonName = "name";
+  static String jsonChoices = "choices";
+  static String jsonAccepted = "accepted";
+  static String jsonAccepted_school = "accepted_school";
+  static String jsonRefused = "refused";
+  static String jsonSpec = "specialization";
+  static String jsonRanking = "ranking_s1";
+  static String jsonEcts = "ects_number";
+  static String jsonLang_lvl = "lang_lvl";
+  static String jsonMissedHours = "missed_hours";
+  static String jsonComment = "comment";
+
   int id;
 
   String name;
@@ -94,9 +107,9 @@ class Student {
     print(refused);
   }
 
-  void add_post_comment(int selectedChoice , String newComment ) {
+  void add_post_comment(int selectedChoice , String new_comment ) {
     if (choices.containsKey(selectedChoice)){
-      choices[selectedChoice]!.post_comment =  newComment;
+      this.choices[selectedChoice]!.post_comment =  new_comment;
     }
     else {
       throw Exception("The selected choice doesn't exists");
@@ -249,5 +262,50 @@ class Student {
       }
     }
     return equal_dict;
+  }
+
+  Map<String, dynamic> toJson(){
+    Map<String,dynamic> choicesMap = choices.map((k,v) => MapEntry(k.toString(), v.toJson()));
+    List<dynamic> refusedChoiceList = refused.map((e)=> e.toJson()).toList();
+    return {
+      jsonId : id,
+      jsonName : name,
+      jsonChoices : choicesMap,
+      jsonAccepted : accepted?.toJson() ?? "null",
+      jsonRefused : refusedChoiceList,
+      jsonSpec : "",
+      jsonRanking : ranking_s1,
+      jsonEcts : ects_number,
+      jsonLang_lvl : lang_lvl,
+      jsonMissedHours : missed_hours,
+      jsonComment : comment,
+    };
+  }
+  factory Student.fromJson(Map<String, dynamic> json){
+    Map<int, Choice> deserializedChoices = {};
+    Student student = Student(
+        json[jsonId],
+        json[jsonName],
+        deserializedChoices,
+        json[jsonSpec],
+        json[jsonRanking],
+        json[jsonEcts],
+        json[jsonLang_lvl],
+        json[jsonMissedHours],
+        json[jsonComment]);
+    Map<String, dynamic> serializedChoices = json[jsonChoices];
+    List<Choice> refusedChoices = [];
+    for (var c in serializedChoices.entries){
+      deserializedChoices[int.parse(c.key)] = Choice.fromJson(c.value, student);
+    }
+    for (var c in deserializedChoices.entries){
+      deserializedChoices[c.key]?.student.choices[c.key] = deserializedChoices[c.key]!;
+    }
+    for (var rc in json[jsonRefused]){
+      refusedChoices.add(Choice.fromJson(rc, student));
+    }
+    student.accepted = json[jsonAccepted] != "null" ? Choice.fromJson(json[jsonAccepted], student) : null;
+    student.refused = refusedChoices;
+    return student;
   }
 }
