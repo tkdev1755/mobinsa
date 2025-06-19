@@ -7,6 +7,7 @@ import 'package:mobinsa/model/School.dart';
 import 'package:mobinsa/model/parser.dart';
 import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/view/assemblyPreview.dart';
+import 'package:mobinsa/view/modalPages/saveDialog.dart';
 
 void main() {
   runApp(const MyApp());
@@ -73,7 +74,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<String?> pickFile() async {
     final result = await FilePicker.platform.pickFiles();
-
     if (result != null && result.files.isNotEmpty) {
       final file = result.files.first;
 
@@ -292,10 +292,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       ElevatedButton(
                         style: customButtonStyle,
                         onPressed: () {
-                          // This button does nothing for now
-                          // Will implement save functionality later
+                          showDialog(context: context, builder: (context){
+                            return SaveDialog();
+                          });
+
                         },
-                        child: Text("Sauvegarde")
+                        child: Text("Générer depuis une sauvegarde")
                       )
                     ],
                   ),

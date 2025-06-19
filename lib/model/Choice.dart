@@ -2,6 +2,10 @@ import 'package:mobinsa/model/School.dart';
 import 'package:mobinsa/model/Student.dart';
 
 class Choice {
+  static String jsonSchool = "school";
+  static String jsonInterranking = "interranking";
+  static String jsonStudent = "student";
+  static String jsonPostComment = "post_comment";
   School school;
   double interranking;
   Student student;
@@ -44,8 +48,19 @@ class Choice {
 
   }
 
-
-
+  Map<String, dynamic> toJson(){
+    return {
+      "school" : school.toJson(),
+      "interranking" : interranking,
+      "student" : student.id,
+      "post_comment" : post_comment ?? "null",
+    };
+  }
+  
+  factory Choice.fromJson(Map<String,dynamic> json, Student student){
+    School school = School.fromJson(json[jsonSchool]);
+    return Choice(school, json[jsonInterranking], student);
+  }
 
   @override
   String toString() {
@@ -62,6 +77,8 @@ class Choice {
     if (other is! Choice) return false;
     return school.id == other.school.id;
   }
+
+
 
 
 }
