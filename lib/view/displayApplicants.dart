@@ -7,6 +7,7 @@ import 'package:mobinsa/model/sessionStorage.dart';
 import 'package:mobinsa/view/uiElements.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../model/School.dart';
+import 'dart:io';
 
 
 /*
@@ -56,7 +57,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
     return Colors.black;
   }
 
-  // Execute code on startup of the page
+  // Execute gtcode on startup of the page
   @override
   void initState() {
     // TODO: implement initState
@@ -163,7 +164,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
               onPressed: () async {
                 List<int> bytes = SheetParser.exportResult(widget.students, widget.schools);
                 String? path = await FilePicker.platform.saveFile(
-                  fileName: "CR_JURY_MOBILITE_${DateTime.now().year}",
+                  fileName: Platform.isMacOS ? "CR_JURY_MOBILITE_${DateTime.now().year}" : "CR_JURY_MOBILITE_${DateTime.now().year}.xlsx",
                   type: FileType.custom,
                   allowedExtensions: ["xlsx"]
                 );
@@ -178,11 +179,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
               },
               tooltip: "Exporter vers excel",
             ),
-            IconButton(
-              icon: Icon(PhosphorIcons.gear(PhosphorIconsStyle.regular), size: 32.0),
-              onPressed: null,
-              tooltip: "Cette fonctionnalité n'est pas encore disponible",
-            ),
+
             IconButton(
               icon: Icon(PhosphorIcons.house(PhosphorIconsStyle.regular), size: 32.0),
               onPressed: () => {

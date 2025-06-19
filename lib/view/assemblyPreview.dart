@@ -10,6 +10,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:mobinsa/model/parser.dart';
 import 'package:file_picker/file_picker.dart';
 
+import 'dart:io';
 
 class AssemblyPreview extends StatefulWidget {
   List<Student> students;
@@ -157,7 +158,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
               onPressed: () async {
                 List<int> bytes = SheetParser.exportResult(export_list, widget.schools);
                 String? path = await FilePicker.platform.saveFile(
-                    fileName: "PREVIEW_JURY_MOBILITE_${DateTime.now().year}",
+                    fileName: Platform.isMacOS ? "Preview_JURY_MOBILITE_${DateTime.now().year}" : "Preview_JURY_MOBILITE_${DateTime.now().year}.xlsx",
                     type: FileType.custom,
                     allowedExtensions: ["xlsx"]
                 );
