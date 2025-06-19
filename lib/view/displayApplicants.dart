@@ -109,7 +109,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                           ? Colors.blue[100]
                           : (widget.students[index].accepted != null
                           ? Colors.green[700]
-                          : Colors.grey[300]),
+                          : widget.students[index].refused.length == 3 ? Colors.red[700] : Colors.grey[300]),
                       child: ListTile(
                         title: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
