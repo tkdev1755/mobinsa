@@ -29,7 +29,7 @@ puis se laisser guider par la notice utilisateur : //Mettre lien vers le guide u
 
 ✅ - Possibilité de laisser un commentaire pour un voeu d'un étudiant
 
-✅ - Poissibilité de passer à l'étudiant suivant ou de revenir à l'étudiant précédent à partir d'une page d'un étudiant
+✅ - Possibilité de passer à l'étudiant suivant ou de revenir à l'étudiant précédent à partir d'une page d'un étudiant
 
 ✅ - Génération de tableaux excel à partir des résultats que le jury à fixé avec l'outil Mob'INSA (tableau récapitulatif général, tableau récapitulatif pour les étudiants ayant un voeu accepté, tableau récapitulatif pour les étudants n'ayant eu aucune proposition de voeu)
 
