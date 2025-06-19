@@ -85,7 +85,6 @@ class School {
   }
   @override
   String toString() {
-    // TODO: implement toString
     return "Ecole : $name - $country - $specialization";
   }
 }

@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/parser.dart';
-import 'package:mobinsa/view/debugPage.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../model/School.dart';
 
-//TODO: faire en sorte que le bouton retirer marcher pour retirer et pour refuser un choix
 
 /*
 
@@ -97,20 +95,12 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                   print("Now saving the excel file");
                   SheetParser.saveExcelToDisk(path, bytes);
                 }
-                else{
-                  // TODO - Ajouter une gestion des erreurs
-                }
-                // TODO: Exporter en excel
               },
               tooltip: "Exporter vers excel",
             ),
             IconButton(
               icon: Icon(PhosphorIcons.gear(PhosphorIconsStyle.regular), size: 32.0),
-              onPressed: (){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => DebugPage(student: widget.students, schools: widget.schools)),);
-              },
+              onPressed: null,
               tooltip: "Cette fonctionnalité n'est pas encore disponible",
             ),
             IconButton(
@@ -498,8 +488,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
   }
 
   bool disbaleChoice(Choice choice){
-    //TODO: check if the student rank is the best
-    return (choice.student.accepted != null && choice.student.accepted != choice) || 
+    return (choice.student.accepted != null && choice.student.accepted != choice) ||
            (choice.school.remaining_slots == 0 && choice.student.accepted == null);
   }
 

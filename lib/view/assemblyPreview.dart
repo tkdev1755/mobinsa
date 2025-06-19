@@ -165,10 +165,6 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
                   print("Now saving the excel file");
                   SheetParser.saveExcelToDisk(path, bytes);
                 }
-                else{
-                  // TODO - Ajouter une gestion des erreurs
-                }
-                // TODO: Exporter en excel
               },
               tooltip: "Exporter vers excel",)
                   ],
