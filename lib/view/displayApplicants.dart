@@ -136,19 +136,45 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
             // Sidebar (20% de la largeur)
             Container(
               width: MediaQuery.of(context).size.width * 0.2,
-              color: Colors.white,
+              decoration: BoxDecoration(
+                color: const Color(0xFFf5f6fa), // Couleur douce
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withAlpha((0.15 * 255).toInt()),
+                    spreadRadius: 2,
+                    blurRadius: 8,
+                    offset: const Offset(2, 0),
+                  ),
+                ],
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(12.0),
                 child: ListView.builder(
                   itemCount: widget.students.length,
                   itemBuilder: (context, index) {
                     return Card(
-                      margin: const EdgeInsets.only(bottom: 8.0),
+                      margin: const EdgeInsets.only(bottom: 12.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(
+                          color: currentStudentIndex == index
+                              ? Colors.blueAccent
+                              : Colors.grey[300]!,
+                          width: 2,
+                        ),
+                      ),
+                      elevation: currentStudentIndex == index ? 8 : 2,
                       color: currentStudentIndex == index
-                          ? Colors.blue[100]
+                          ? const Color.fromARGB(255, 120, 151, 211)
                           : (widget.students[index].accepted != null
-                          ? Colors.green[700]
-                          : widget.students[index].refused.length == 3 ? Colors.red[700] : Colors.grey[300]),
+                              ? const Color.fromARGB(255, 134, 223, 137)
+                              : widget.students[index].refused.length == 3
+                                  ? const Color.fromARGB(255, 213, 62, 35)
+                                  : Colors.white),
                       child: ListTile(
                         title: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -158,8 +184,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                               style: TextStyle(
                                 fontSize: 14,
                                 color: currentStudentIndex == index
-                                    ? Colors.blue[900]
+                                    ? const Color.fromARGB(255, 242, 244, 246)
                                     : Colors.black,
+                                fontWeight: currentStudentIndex == index ? FontWeight.bold : FontWeight.normal,
                               ),
                             ),
                             Text(
@@ -200,234 +227,247 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                   },
                 ),
               ),
-            ),// Contenu principal (80% de la largeur)
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.8,
-              child: selectedStudent != null
-                  ? SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Section nom/prénom/promo
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Nom et promo à gauche
-                        Expanded(
-                          flex: 2,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${selectedStudent?.name}',
-                                style: const TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                '${selectedStudent?.year}A ${selectedStudent?.departement}',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        // Informations sur l'élève à droite
-                        Expanded(
-                          flex: 2,
-                          child: Container(
-                            padding: const EdgeInsets.all(16.0),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text("Classement S1",),
-                                    Text("${selectedStudent!.ranking_s1}",
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Padding(padding: EdgeInsets.only(right: 20)),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text("Crédits ECTS",),
-                                    Text("${selectedStudent!.ects_number}",
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                        color : (selectedStudent!.ects_number < 30 ?
-                                        Colors.orange :
-                                        Colors.black),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Padding(padding: EdgeInsets.only(right: 20)),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text("Niveau d'anglais",),
-                                    Text(selectedStudent!.lang_lvl,
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Padding(padding: EdgeInsets.only(right: 20)),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text("Heures d'absences",),
-                                    Text("${selectedStudent!.missed_hours}",
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                        color : (selectedStudent!.missed_hours >= 5 ?
-                                        (selectedStudent!.missed_hours >= 10 ? Colors.red : Colors. orange) :
-                                        Colors.black),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Section Écoles (gauche)
-                        Expanded(
-                          flex: 2,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Liste des écoles
-                              ...selectedStudent!.choices.entries.map((entry) {
-                                int index = entry.key;
-                                //Map<String, String> school = entry.value;
-                                return choiceCard(entry.value, index);
-                              }),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(width: 20),
-
-                        // Section Boutons d'action (droite)
-                        Expanded(
-                          flex: 1,
-                          child: Column(
-                            children: [
-                              // Bouton Laisser un commentaire
-                              Container(
-                                width: double.infinity,
-                                height: 60,
-                                margin: const EdgeInsets.only(bottom: 16),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext dialogContext) => CommentModal(student: selectedStudent!, choice: null),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Laissez un commentaire',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              // Bouton Revenir à l'étudiant précédent
-                              Container(
-                                width: double.infinity,
-                                height: 50,
-                                margin: const EdgeInsets.only(bottom: 16),
-                                child: ElevatedButton(
-                                  onPressed: currentStudentIndex > 0
-                                      ? () => selectStudentByIndex(currentStudentIndex - 1)
-                                      : null, // Disable if we're at the first student
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.grey[300],
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Revenir à l\'étudiant précédent',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              // Bouton Passer à l'étudiant suivant
-                              SizedBox(
-                                width: double.infinity,
-                                height: 50,
-                                child: ElevatedButton(
-                                  onPressed: currentStudentIndex < widget.students.length - 1
-                                      ? () => selectStudentByIndex(currentStudentIndex + 1)
-                                      : null, // Disable if we're at the last student
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.grey[300],
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Passer à l\'étudiant Suivant',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+            ),
+            // Contenu principal (80% de la largeur)
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(255, 195, 188, 186).withAlpha((0.08 * 255).toInt()),
+                      spreadRadius: 2,
+                      blurRadius: 12,
+                      offset: const Offset(-2, 0),
                     ),
                   ],
                 ),
-              )
-                  : const Center(child: Text("Sélectionnez un étudiant")),
+                width: double.infinity, // Prend tout l'espace horizontal
+                child: selectedStudent != null
+                    ? SingleChildScrollView(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Section nom/prénom/promo
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Nom et promo à gauche
+                                Expanded(
+                                  flex: 2,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${selectedStudent?.name}',
+                                        style: const TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        '${selectedStudent?.year}A ${selectedStudent?.departement}',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                // Informations sur l'élève à droite
+                                Expanded(
+                                  flex: 2,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16.0),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[300],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const Text("Classement S1",),
+                                            Text("${selectedStudent!.ranking_s1}",
+                                              style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                        Padding(padding: EdgeInsets.only(right: 20)),
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const Text("Crédits ECTS",),
+                                            Text("${selectedStudent!.ects_number}",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500,
+                                                color : (selectedStudent!.ects_number < 30 ?
+                                                Colors.orange :
+                                                Colors.black),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                        Padding(padding: EdgeInsets.only(right: 20)),
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const Text("Niveau d'anglais",),
+                                            Text(selectedStudent!.lang_lvl,
+                                              style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                        Padding(padding: EdgeInsets.only(right: 20)),
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const Text("Heures d'absences",),
+                                            Text("${selectedStudent!.missed_hours}",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500,
+                                                color : (selectedStudent!.missed_hours >= 5 ?
+                                                (selectedStudent!.missed_hours >= 10 ? Colors.red : Colors. orange) :
+                                                Colors.black),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 30),
+
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Section Écoles (gauche)
+                                Expanded(
+                                  flex: 2,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Liste des écoles
+                                      ...selectedStudent!.choices.entries.map((entry) {
+                                        int index = entry.key;
+                                        //Map<String, String> school = entry.value;
+                                        return choiceCard(entry.value, index);
+                                      }),
+                                    ],
+                                  ),
+                                ),
+
+                                const SizedBox(width: 20),
+
+                                // Section Boutons d'action (droite)
+                                Expanded(
+                                  flex: 1,
+                                  child: Column(
+                                    children: [
+                                      // Bouton Laisser un commentaire
+                                      Container(
+                                        width: double.infinity,
+                                        height: 60,
+                                        margin: const EdgeInsets.only(bottom: 16),
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext dialogContext) => CommentModal(student: selectedStudent!, choice: null),
+                                            );
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Laissez un commentaire',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+
+                                      // Bouton Revenir à l'étudiant précédent
+                                      Container(
+                                        width: double.infinity,
+                                        height: 50,
+                                        margin: const EdgeInsets.only(bottom: 16),
+                                        child: ElevatedButton(
+                                          onPressed: currentStudentIndex > 0
+                                              ? () => selectStudentByIndex(currentStudentIndex - 1)
+                                              : null, // Disable if we're at the first student
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.grey[300],
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Revenir à l\'étudiant précédent',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+
+                                      // Bouton Passer à l'étudiant suivant
+                                      SizedBox(
+                                        width: double.infinity,
+                                        height: 50,
+                                        child: ElevatedButton(
+                                          onPressed: currentStudentIndex < widget.students.length - 1
+                                              ? () => selectStudentByIndex(currentStudentIndex + 1)
+                                              : null, // Disable if we're at the last student
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.grey[300],
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Passer à l\'étudiant Suivant',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      )
+                    : const Center(child: Text("Sélectionnez un étudiant")),
+              ),
             ),
           ],
         ),
