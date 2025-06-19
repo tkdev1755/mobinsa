@@ -32,6 +32,7 @@ class SessionStorage{
       throw Exception("No path was specified");
     }
     String path = result;*/
+    print("Fichier sauvegardé dans ${((await pp.getApplicationDocumentsDirectory()).path)}/$saveName");
     return "${(await pp.getApplicationDocumentsDirectory()).path}/$saveName";
   }
 
