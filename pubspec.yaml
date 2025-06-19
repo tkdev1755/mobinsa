@@ -45,6 +45,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  icons_launcher: ^3.0.0
   msix: ^3.16.9
 msix_config:
   display_name: Mobinsa
