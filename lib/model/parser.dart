@@ -419,10 +419,12 @@ class SheetParser{
     
     // First pass - identify students with responses and collect all choices
     Map<int, bool> studentHasResponse = {};
-    
+    Map<int, bool> studentAllChoicesRejected = {}; // New map to track fully rejected students
+
     for (var s in students) {
-      // Initialize all students as having no responses
+      // Initialize tracking variables
       studentHasResponse[s.id] = false;
+      studentAllChoicesRejected[s.id] = true; // Assume all choices rejected until proven otherwise
       
       for (var c in s.choices.entries) {
         // Add to all choices list
@@ -431,20 +433,32 @@ class SheetParser{
         // Check acceptance status
         if (s.accepted != null && s.accepted!.school.id == c.value.school.id) {
           acceptedChoices.add((s.id, c.key, c.value));
-          studentHasResponse[s.id] = true; // Mark student has a response
+          studentHasResponse[s.id] = true;
+          studentAllChoicesRejected[s.id] = false; // At least one choice is accepted
         }
         // Check rejection status
         else if (s.refused.any((choice) => choice.school.id == c.value.school.id)) {
           rejectedChoices.add((s.id, c.key, c.value));
-          studentHasResponse[s.id] = true; // Mark student has a response
+          studentHasResponse[s.id] = true;
+          // Note: We don't set studentAllChoicesRejected to false here
+          // because we're checking if ALL choices are rejected
+        } else {
+          studentAllChoicesRejected[s.id] = false; // Found a choice that's not rejected
         }
+      }
+      
+      // If the student has all choices rejected but has choices,
+      // confirm it by checking the get_second_tour() method
+      if ((studentAllChoicesRejected[s.id] ?? false) && s.choices.isNotEmpty) {
+        studentAllChoicesRejected[s.id] = s.get_second_tour();
       }
     }
     
-    // Second pass - add all choices from students with no responses to noResponseChoices
+    // Second pass - add students to noResponseChoices (now includes second tour students)
     for (var s in students) {
-      if (studentHasResponse[s.id] == false && s.choices.isNotEmpty) {
-        // This student has NO responses on ANY choice - add ALL their choices
+      if ((studentHasResponse[s.id] == false && s.choices.isNotEmpty) || 
+          (studentAllChoicesRejected[s.id] == true && s.choices.isNotEmpty)) {
+        // This student has NO responses OR all choices rejected - add ALL their choices
         for (var c in s.choices.entries) {
           noResponseChoices.add((s.id, c.key, c.value));
         }
@@ -466,14 +480,14 @@ class SheetParser{
     // Create additional sheets by copying the default one
     exportedExcel.copy(defaultSheetName, "Choix acceptés");
     exportedExcel.copy(defaultSheetName, "Choix refusés");
-    exportedExcel.copy(defaultSheetName, "Second tour "); // New sheet for no response
+    exportedExcel.copy(defaultSheetName, "Second Tour"); // Changed name
     
     // Rename default sheet and get sheet references
     exportedExcel.rename(defaultSheetName, "Tous les choix");
     Sheet allSheet = exportedExcel.sheets["Tous les choix"]!;
     Sheet acceptedSheet = exportedExcel.sheets["Choix acceptés"]!;
     Sheet rejectedSheet = exportedExcel.sheets["Choix refusés"]!;
-    Sheet noResponseSheet = exportedExcel.sheets["Second tour "]!; // Reference to new sheet
+    Sheet secondTourSheet = exportedExcel.sheets["Second Tour"]!; // Reference to new sheet
     
     // Clear copied content
     //acceptedSheet.clear();
@@ -484,13 +498,13 @@ class SheetParser{
     setupSheetHeaders(allSheet, indexes);
     setupSheetHeaders(acceptedSheet, indexes);
     setupSheetHeaders(rejectedSheet, indexes);
-    setupSheetHeaders(noResponseSheet, indexes); // Add headers to new sheet
+    setupSheetHeaders(secondTourSheet, indexes); // Add headers to new sheet
     
     // Fill each sheet with data
     fillSheetWithChoices(allSheet, allChoices, students, true);
     fillSheetWithChoices(acceptedSheet, acceptedChoices, students, false);
     fillSheetWithChoices(rejectedSheet, rejectedChoices, students, false);
-    fillSheetWithChoices(noResponseSheet, noResponseChoices, students, false); // Fill new sheet
+    fillSheetWithChoices(secondTourSheet, noResponseChoices, students, false); // Fill new sheet
     
     return exportedExcel.save() ?? [];
   }
