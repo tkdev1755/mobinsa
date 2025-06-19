@@ -67,6 +67,9 @@ class Student {
     else if (specialization.contains("STI")) {
       departement = "STI";
     }
+    else if (specialization.contains("ENP")) {
+      departement = "ENP";
+    }
     else {
       departement = "GSI";
     }
@@ -121,6 +124,17 @@ class Student {
     */
     return max;
 
+  }
+
+  // return true si l'étudiant va au second tour et false sinon
+  // elle regarde si tout les voeux de l'étudiant sont présent dans refused
+  bool get_second_tour (){
+    for (var c in choices.values){
+      if (!refused.contains(c)){
+        return false;
+      }
+    }
+    return true;
   }
 
   @override
