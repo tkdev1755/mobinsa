@@ -191,9 +191,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
-                                color: currentStudentIndex == index
-                                    ? Colors.blue[900]
-                                    : Colors.black,
+                                color: sameRanksColor(index),
                               ),
                             ),
                           ],
