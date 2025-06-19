@@ -41,19 +41,5 @@ puis se laisser guider par la notice utilisateur : //Mettre lien vers le guide u
 ----
 
 ### Pourquoi avoir développé en Dart et pas en python ?
-    - En majeure partie parce que c’est le langage que je maitrise le mieux et puis que je le trouvais le plus approprié pour développer ce genre d’outil. Cependant je peux comprendre pourquoi python peut être plus intéressant sur certains points (plus de librairies disponibles, connu de tous, et performances correctes)
-    - Également cela m’as permis de réutiliser le code développé intégralement dans le GUI que j’ai développé à l’aide du framework Flutter au lieu de devoir réécrire toute la logique de connexion
-
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+    - En majeure partie parce que c’est le langage que nous avons trouvé le plus approprié pour ce projet car il permet de compiler sur toutes les plateforms majeurs. 
+    - Ce choix est issu d'un vote où chacun a pu proposer un langage de programmation qui lui semblait adéquat pour le projet.
