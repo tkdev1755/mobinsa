@@ -28,7 +28,7 @@ class DisplayApplicants extends StatefulWidget {
   State<DisplayApplicants> createState() => _DisplayApplicantsState();
 }
 
-class _DisplayApplicantsState extends State<DisplayApplicants> {
+class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProviderStateMixin {
 
   Student? selectedStudent;
   Map<int, bool?> schoolChoices = {}; // null = pas de choix, true = accepté, false = refusé
@@ -502,274 +502,42 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Visibility(
-          visible: !expandedStudentsChoice[index-1],
-          replacement: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      choice.school.name,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Column(
-                    children: [
-                      IconButton(
-                          onPressed: (){
-                            setState(() {
-                              expandedStudentsChoice[index-1] = false;
-                            });
-                          },
-                          icon: Icon(PhosphorIcons.arrowUp()),
-                      ),
-                    ],
-                  )
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                choice.school.country,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Niveau académique requis"),
-                          SizedBox(
-                            width: MediaQuery.sizeOf(context).width*0.5*0.4,
-                            child: Text(choice.school.academic_level,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          Text("Langue d'enseignement",
-                          ),
-                          SizedBox(
-                            width: MediaQuery.sizeOf(context).width*0.5*0.4,
-                            child: Text(choice.school.use_langage,
-                              maxLines: 3,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          Text("Niveau de langue"),
-                          Text("${choice.school.req_lang_level} | ",
+        child: AnimatedSize(
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeInOut,
+          alignment: Alignment.topCenter,
+          // vsync: this,
+          child: expandedStudentsChoice[index-1]
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            choice.school.name,
                             style: const TextStyle(
                               fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Padding(padding: EdgeInsets.only(right: 20)),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Nombre de places"),
-                          Text("${choice.school.remaining_slots} | ${choice.school.b_slots} Bachelor, ${choice.school.m_slots} Master",
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Text("Discipline"),
-                          SizedBox(
-                            width : MediaQuery.sizeOf(context).width*0.5*0.3,
-                            child: Text("${choice.school.specialization.toString().replaceAll("[", "").replaceAll("]", "")}",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                color : (choice.is_incoherent() ?
-                                    Colors.orange :
-                                    Colors.black),
-
-                              ),
-                            ),
-                          ),
-                          Text("Interclassement"),
-                          Text("${choice.interranking}",
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Spacer(),
-                  // Afficher le bouton annuler ou les boutons accepter/refuser
-                  if (showCancelButton[index] == true)
-                    SizedBox(
-                      width: 80,
-                      height: 40,
-                      child: Tooltip(
-                        message: "Annuler l'action précédente",
-                        child: ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              showCancelButton[index] = false;
-                              schoolChoices[index] = null;
-                              // Annuler l'action précédente
-                              if (choice.student.accepted == choice) {
-                                choice.remove_choice();
-                              }
-                              // Restaurer le choix si il avait été refusé
-                              if (choice.student.refused.contains(choice)) {
-                                choice.student.restoreRefusedChoice(choice, index);
-                              }
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            padding: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                          ),
-                          child: const Text(
-                            "Annuler",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                      ),
-                    )
-                  else
-                    Row(
-                      children: [
-                        // Bouton Refuser (X)
-                        SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: Tooltip(
-                            message: "Refuser ce choix",
-                            child: ElevatedButton(
-                              onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () async {
-                                // Ouvrir le modal de commentaire pour le refus
-                                await showDialog(
-                                  context: context,
-                                  builder: (BuildContext dialogContext) => CommentModal(student: choice.student, choice: choice),
-                                );
-                                
-                                setState(() {
-                                  schoolChoices[index] = false;
-                                  choice.refuse();
-                                  showCancelButton[index] = true;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text("Choix refusé"),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                });
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: schoolChoices[index] == false
-                                    ? Colors.red[700]
-                                    : Colors.red,
-                                padding: EdgeInsets.zero,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.close,
-                                color: Colors.white,
-                                size: 20,
-                              ),
+                        Column(
+                          children: [
+                            IconButton(
+                                onPressed: (){
+                                  setState(() {
+                                    expandedStudentsChoice[index-1] = false;
+                                  });
+                                },
+                                icon: Icon(PhosphorIcons.arrowUp()),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        // Bouton Accepter (✓)
-                        SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: Tooltip(
-                            message: choice.school.remaining_slots == 0 ? "Plus de places disponibles" : disableChoiceByRanking(selectedStudent!, index) ? "Il y un étudiant avec un meilleur interclassement" : "Accepter ce choix",
-                            child: ElevatedButton(
-                              onPressed: disableChoiceByRanking(selectedStudent!, index) || choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
-                                setState(() {
-                                  schoolChoices[index] = true;
-                                  choice.accepted(choice.student);
-                                  showCancelButton[index] = true;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text("Choix accepté"),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
-                                });
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: schoolChoices[index] == true
-                                    ? Colors.green[700]
-                                    : Colors.green,
-                                padding: EdgeInsets.zero,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.check,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ),
+                          ],
+                        )
                       ],
                     ),
-                ],
-              ),
-            ],
-          ),
-          child: Container(
-            width: MediaQuery.sizeOf(context).width*0.4,
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.sizeOf(context).width*0.5,
-              minWidth: MediaQuery.sizeOf(context).width*0.5,
-            ),
-            child: Row(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.sizeOf(context).width*0.35,
-                      child: Text(
-                        choice.school.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                    const SizedBox(height: 4),
                     Text(
                       choice.school.country,
                       style: TextStyle(
@@ -777,23 +545,84 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                         color: Colors.grey[600],
                       ),
                     ),
-                  ],
-                ),
-                const Spacer(),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          expandedStudentsChoice[index-1] = true;
-                        });
-                      },
-                      icon: Icon(PhosphorIcons.arrowDown()),
-                    ),
-                    Padding(padding: EdgeInsets.only(bottom: 10)),
+                    const SizedBox(height: 16),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Niveau académique requis"),
+                                SizedBox(
+                                  width: MediaQuery.sizeOf(context).width*0.5*0.4,
+                                  child: Text(choice.school.academic_level,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                Text("Langue d'enseignement",
+                                ),
+                                SizedBox(
+                                  width: MediaQuery.sizeOf(context).width*0.5*0.4,
+                                  child: Text(choice.school.use_langage,
+                                    maxLines: 3,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                Text("Niveau de langue"),
+                                Text("${choice.school.req_lang_level} | ",
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Padding(padding: EdgeInsets.only(right: 20)),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Nombre de places"),
+                                Text("${choice.school.remaining_slots} | ${choice.school.b_slots} Bachelor, ${choice.school.m_slots} Master",
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Text("Discipline"),
+                                SizedBox(
+                                  width : MediaQuery.sizeOf(context).width*0.5*0.3,
+                                  child: Text("${choice.school.specialization.toString().replaceAll("[", "").replaceAll("]", "")}",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                      color : (choice.is_incoherent() ?
+                                          Colors.orange :
+                                          Colors.black),
+
+                                    ),
+                                  ),
+                                ),
+                                Text("Interclassement"),
+                                Text("${choice.interranking}",
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Spacer(),
                         // Afficher le bouton annuler ou les boutons accepter/refuser
                         if (showCancelButton[index] == true)
                           SizedBox(
@@ -923,10 +752,185 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                       ],
                     ),
                   ],
-                ),
-              ],
-            ),
-          ),
+                )
+              : Container(
+                  width: MediaQuery.sizeOf(context).width * 0.4,
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.sizeOf(context).width * 0.5,
+                    minWidth: MediaQuery.sizeOf(context).width * 0.5,
+                  ),
+                  child: Row(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: MediaQuery.sizeOf(context).width*0.35,
+                            child: Text(
+                              choice.school.name,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            choice.school.country,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                expandedStudentsChoice[index-1] = true;
+                              });
+                            },
+                            icon: Icon(PhosphorIcons.arrowDown()),
+                          ),
+                          Padding(padding: EdgeInsets.only(bottom: 10)),
+                          Row(
+                            children: [
+                              // Afficher le bouton annuler ou les boutons accepter/refuser
+                              if (showCancelButton[index] == true)
+                                SizedBox(
+                                  width: 80,
+                                  height: 40,
+                                  child: Tooltip(
+                                    message: "Annuler l'action précédente",
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          showCancelButton[index] = false;
+                                          schoolChoices[index] = null;
+                                          // Annuler l'action précédente
+                                          if (choice.student.accepted == choice) {
+                                            choice.remove_choice();
+                                          }
+                                          // Restaurer le choix si il avait été refusé
+                                          if (choice.student.refused.contains(choice)) {
+                                            choice.student.restoreRefusedChoice(choice, index);
+                                          }
+                                        });
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.orange,
+                                        padding: EdgeInsets.zero,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        "Annuler",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              else
+                                Row(
+                                  children: [
+                                    // Bouton Refuser (X)
+                                    SizedBox(
+                                      width: 40,
+                                      height: 40,
+                                      child: Tooltip(
+                                        message: "Refuser ce choix",
+                                        child: ElevatedButton(
+                                          onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () async {
+                                            // Ouvrir le modal de commentaire pour le refus
+                                            await showDialog(
+                                              context: context,
+                                              builder: (BuildContext dialogContext) => CommentModal(student: choice.student, choice: choice),
+                                            );
+                                            
+                                            setState(() {
+                                              schoolChoices[index] = false;
+                                              choice.refuse();
+                                              showCancelButton[index] = true;
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(
+                                                  content: Text("Choix refusé"),
+                                                  backgroundColor: Colors.red,
+                                                ),
+                                              );
+                                            });
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: schoolChoices[index] == false
+                                                ? Colors.red[700]
+                                                : Colors.red,
+                                            padding: EdgeInsets.zero,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.close,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    // Bouton Accepter (✓)
+                                    SizedBox(
+                                      width: 40,
+                                      height: 40,
+                                      child: Tooltip(
+                                        message: choice.school.remaining_slots == 0 ? "Plus de places disponibles" : disableChoiceByRanking(selectedStudent!, index) ? "Il y un étudiant avec un meilleur interclassement" : "Accepter ce choix",
+                                        child: ElevatedButton(
+                                          onPressed: disableChoiceByRanking(selectedStudent!, index)  || choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
+                                            setState(() {
+                                              schoolChoices[index] = true;
+                                              choice.accepted(choice.student);
+                                              showCancelButton[index] = true;
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(
+                                                  content: Text("Choix accepté"),
+                                                  backgroundColor: Colors.green,
+                                                ),
+                                              );
+                                            });
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: schoolChoices[index] == true
+                                                ? Colors.green[700]
+                                                : Colors.green,
+                                            padding: EdgeInsets.zero,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.check,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+              ),
         ),
       ),
     );
