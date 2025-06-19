@@ -7,6 +7,8 @@ import 'package:mobinsa/view/debugPage.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../model/School.dart';
 
+import 'dart:math';
+
 //TODO: faire en sorte que le bouton retirer marcher pour retirer et pour refuser un choix
 
 /*
@@ -35,6 +37,35 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
   List<bool> expandedStudentsChoice = [false,false,false];
   Color disabledColor = Colors.grey[100]!;
   String comment = "";
+
+  Color sameRanksColor(int index){
+    if(index!=0){
+      if(widget.students[index].get_max_rank()==widget.students[index-1].get_max_rank()){
+        return Colors.orange;
+      }
+    }
+    if(index!=widget.students.length-1){
+      if(widget.students[index].get_max_rank()==widget.students[index+1].get_max_rank()){
+        return Colors.orange;
+      }
+    }
+    if(currentStudentIndex==index){
+      return Colors.blue[900] ?? Colors.blue;
+    }
+    return Colors.black;
+    /*return index!=0 ?
+    (widget.students[index].get_max_rank()==widget.students[index-1].get_max_rank() ?
+    Colors.orange : (currentStudentIndex == index
+        ? Colors.blue[900]
+        : Colors.black)) :
+    (index!=widget.students.length-1 ?
+    (widget.students[index].get_max_rank()==widget.students[index+1].get_max_rank() ?
+    Colors.orange : (currentStudentIndex == index
+        ? ,Colors.blue[900]
+        : Colors.black))
+        : Colors.black) : Colors.black;*/
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -128,9 +159,8 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
-                                color: currentStudentIndex == index
-                                    ? Colors.blue[900]
-                                    : Colors.black,
+                                color: sameRanksColor(index)
+                                ,
                               ),
                             ),
                           ],

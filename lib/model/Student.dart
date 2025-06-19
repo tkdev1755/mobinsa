@@ -67,6 +67,9 @@ class Student {
     else if (specialization.contains("STI")) {
       departement = "STI";
     }
+    else if (specialization.contains("ENP")) {
+      departement = "ENP";
+    }
     else {
       departement = "GSI";
     }
