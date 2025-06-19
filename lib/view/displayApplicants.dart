@@ -53,17 +53,6 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
       return Colors.blue[900] ?? Colors.blue;
     }
     return Colors.black;
-    /*return index!=0 ?
-    (widget.students[index].get_max_rank()==widget.students[index-1].get_max_rank() ?
-    Colors.orange : (currentStudentIndex == index
-        ? Colors.blue[900]
-        : Colors.black)) :
-    (index!=widget.students.length-1 ?
-    (widget.students[index].get_max_rank()==widget.students[index+1].get_max_rank() ?
-    Colors.orange : (currentStudentIndex == index
-        ? ,Colors.blue[900]
-        : Colors.black))
-        : Colors.black) : Colors.black;*/
   }
 
   @override
@@ -71,10 +60,29 @@ class _DisplayApplicantsState extends State<DisplayApplicants> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text(
-            "Mob'INSA",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, ),
+          title: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: "Mob'",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 35,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextSpan(
+                  text: "INSA",
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 35,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
+          
           actions: [
             IconButton(
               icon: Icon(
