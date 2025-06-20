@@ -41,14 +41,20 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
   bool hasSaved = false;
   String? currentSaveName;
   bool _showSaveMessage = false;
-  Color sameRanksColor(int index){
+  Color interrankingColor(int index){
     if(index!=0){
-      if(widget.students[index].get_max_rank()==widget.students[index-1].get_max_rank()){
+      if(widget.students[index].get_min_rank()>widget.students[index-1].get_min_rank()){
+        return Colors.red;
+      }
+      if(widget.students[index].get_min_rank()==widget.students[index-1].get_min_rank()){
         return Colors.orange;
       }
     }
     if(index!=widget.students.length-1){
-      if(widget.students[index].get_max_rank()==widget.students[index+1].get_max_rank()){
+      if(widget.students[index].get_min_rank()<widget.students[index+1].get_min_rank()){
+        return Colors.red;
+      }
+      if(widget.students[index].get_min_rank()==widget.students[index+1].get_min_rank()){
         return Colors.orange;
       }
     }
@@ -280,7 +286,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                 style: GoogleFonts.montserrat(textStyle : TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
-                                  color: sameRanksColor(index),
+                                  color: interrankingColor(index),
                                 )),
                               ),
                             ],
