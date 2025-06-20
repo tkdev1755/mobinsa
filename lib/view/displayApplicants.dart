@@ -282,7 +282,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                 )),
                               ),
                               Text(
-                                widget.students[index].get_min_rank().toStringAsFixed(2),
+                                widget.students[index].get_max_rank().toStringAsFixed(2),
                                 style: GoogleFonts.montserrat(textStyle : TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
