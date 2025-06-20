@@ -8,6 +8,8 @@ import 'package:mobinsa/model/parser.dart';
 import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/view/assemblyPreview.dart';
 import 'package:mobinsa/view/modalPages/saveDialog.dart';
+import 'package:mobinsa/view/uiElements.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -41,7 +43,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
       ),
-      home: const MyHomePage(title: "Welcome to Mob'INSA"),
+      home: const MyHomePage(title: "Bienvenue sur Mob'INSA"),
     );
   }
 }
@@ -124,188 +126,200 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text(widget.title),
+        title: Text(widget.title,style: UiText(color: UiColors.white, weight: FontWeight.w600).mediumText,),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            // Logo at the top-left of the body (not centered)
-            Align(
-              alignment: Alignment.topLeft,
-              child: SizedBox(
-                height: 100,
-                child: Image.asset(
-                  'assets/images/logo.jpg', // Correct file extension
-                  fit: BoxFit.contain,
+      body: Stack(
+        children: [
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: FractionalTranslation(
+              translation: const Offset(-0.3, 0.3), // -0.1 => décalage à gauche, 0.2 => vers le bas
+              child: Opacity(
+                opacity: 0.03,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Adapte la taille du logo en fonction de la largeur de l'écran
+                    double width = constraints.maxWidth * 0.25; // 25% de la largeur
+                    return Icon(PhosphorIcons.globe(), size: MediaQuery.sizeOf(context).height*1.2,);
+                  },
                 ),
               ),
             ),
-            
-            const SizedBox(height: 24),
-            
-            // Center the content that follows but keep Column's crossAxisAlignment
-            Expanded(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 350), // Limit width for buttons
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Text('Importez vos fichiers'),
-                      const SizedBox(height: 16),
-                      
-                      /// BOUTON POUR LES ECOLES
-                      ElevatedButton(
-                        style: customButtonStyle,
-                        onPressed: () async {
-                          String? filePath = await pickFile();
-                          if (filePath != null) {
-                            try {
-                              setState(() {
-                                if(Platform.isWindows){
-                                  selectedFilenameSchools = filePath.split('\\').last;
-                                } else {
-                                  selectedFilenameSchools = filePath.split("/").last;
-                                }
-                              });
-                              
-                              // Try to parse Excel
-                              try {
-                                Excel schoolResult = SheetParser.parseExcel(filePath);
-                                
-                                // Try to extract schools
-                                try {
-                                  List<School> parsedSchools = SheetParser.parseSchools(schoolResult);
-                                  setState(() {
-                                    schools = parsedSchools;
-                                    schoolsLoaded = schools.isNotEmpty;
-                                  });
-                                  
-                                  // Show success message
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('${schools.length} écoles importées avec succès'),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
-                                } catch (e) {
-                                  // Error extracting schools from Excel
-                                  showErrorDialog(
-                                    context, 
-                                    "Erreur d'analyse des écoles", 
-                                    "Impossible de lire les données des écoles: ${e.toString()}"
-                                  );
-                                }
-                              } catch (e) {
-                                // Error parsing Excel file
-                                showErrorDialog(
-                                  context, 
-                                  "Erreur de format", 
-                                  "Le fichier n'est pas un fichier Excel valide: ${e.toString()}"
-                                );
-                              }
-                            } catch (e) {
-                              // General error
-                              showErrorDialog(context, "Erreur", e.toString());
-                            }
-                          }
-                        }, child: Text("Importez les écoles"),
-                      ),
-                      Padding(padding: EdgeInsets.only(bottom: 10)),
-                      Visibility(visible: selectedFilenameSchools != null,child: Text("Fichier Choisi : $selectedFilenameSchools"),),
-                      Padding(padding: EdgeInsets.only(bottom: 10)),
-                      /// BOUTON POUR LES ETUDIANTS
-                      ElevatedButton(
-                        style: customButtonStyle,
-                        onPressed: schoolsLoaded ? () async {
-                          String? filePath = await pickFile();
-                          if (filePath != null) {
-                            try {
-                              setState(() {
-                                if(Platform.isWindows){
-                                  selectedFilenameStudents = filePath.split('\\').last;
-                                } else {
-                                  selectedFilenameStudents = filePath.split("/").last;
-                                }
-                              });
-                              
-                              // Try to parse Excel
-                              try {
-                                Excel studentsResult = SheetParser.parseExcel(filePath);
-                                
-                                // Try to extract students
-                                try {
-                                  List<Student> parsedStudents = SheetParser.extractStudents(studentsResult, schools);
-                                  setState(() {
-                                    students = parsedStudents;
-                                    studentsLoaded = students.isNotEmpty;
-                                  });
-                                  
-                                  // Show success message
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('${students.length} étudiants importés avec succès'),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
-                                } catch (e) {
-                                  // Error extracting students from Excel
-                                  showErrorDialog(
-                                    context, 
-                                    "Erreur d'analyse des étudiants", 
-                                    "Impossible de lire les données des étudiants: ${e.toString()}"
-                                  );
-                                }
-                              } catch (e) {
-                                // Error parsing Excel file
-                                showErrorDialog(
-                                  context, 
-                                  "Erreur de format", 
-                                  "Le fichier n'est pas un fichier Excel valide: ${e.toString()}"
-                                );
-                              }
-                            } catch (e) {
-                              // General error
-                              showErrorDialog(context, "Erreur", e.toString());
-                            }
-                          }
-                        } : null,
-                        child: Text("Importez les étudiants")
-                      ),
-                      Padding(padding: EdgeInsets.only(bottom: 10)),
-                      Visibility(visible: selectedFilenameStudents != null,child: Text("Fichier Choisi : $selectedFilenameStudents"),),
-                      Padding(padding: EdgeInsets.only(bottom: 10)),
-                      ElevatedButton(
-                        style: customButtonStyle,
-                        onPressed: (schoolsLoaded && studentsLoaded) ? () {
-                          students.sort((a,b) => b.get_max_rank().compareTo(a.get_max_rank()));
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => AssemblyPreview(students: students, schools: schools)),);
-                        } : null,
-                        child: Text("Génerer")
-                      ),
-                      Padding(padding: EdgeInsets.only(bottom: 10)),
-                      ElevatedButton(
-                        style: customButtonStyle,
-                        onPressed: () {
-                          showDialog(context: context, builder: (context){
-                            return SaveDialog();
-                          });
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                // Logo at the top-left of the body (not centered)
 
-                        },
-                        child: Text("Générer depuis une sauvegarde")
-                      )
-                    ],
+
+                const SizedBox(height: 24),
+
+                // Center the content that follows but keep Column's crossAxisAlignment
+                Expanded(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: 350), // Limit width for buttons
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Importez vos fichiers', style: UiText(weight: FontWeight.w500).nText,),
+                          const SizedBox(height: 16),
+
+                          /// BOUTON POUR LES ECOLES
+                          ElevatedButton(
+                            style: customButtonStyle,
+                            onPressed: () async {
+                              String? filePath = await pickFile();
+                              if (filePath != null) {
+                                try {
+                                  setState(() {
+                                    if(Platform.isWindows){
+                                      selectedFilenameSchools = filePath.split('\\').last;
+                                    } else {
+                                      selectedFilenameSchools = filePath.split("/").last;
+                                    }
+                                  });
+
+                                  // Try to parse Excel
+                                  try {
+                                    Excel schoolResult = SheetParser.parseExcel(filePath);
+
+                                    // Try to extract schools
+                                    try {
+                                      List<School> parsedSchools = SheetParser.parseSchools(schoolResult);
+                                      setState(() {
+                                        schools = parsedSchools;
+                                        schoolsLoaded = schools.isNotEmpty;
+                                      });
+
+                                      // Show success message
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('${schools.length} écoles importées avec succès'),
+                                          backgroundColor: Colors.green,
+                                        ),
+                                      );
+                                    } catch (e) {
+                                      // Error extracting schools from Excel
+                                      showErrorDialog(
+                                          context,
+                                          "Erreur d'analyse des écoles",
+                                          "Impossible de lire les données des écoles: ${e.toString()}"
+                                      );
+                                    }
+                                  } catch (e) {
+                                    // Error parsing Excel file
+                                    showErrorDialog(
+                                        context,
+                                        "Erreur de format",
+                                        "Le fichier n'est pas un fichier Excel valide: ${e.toString()}"
+                                    );
+                                  }
+                                } catch (e) {
+                                  // General error
+                                  showErrorDialog(context, "Erreur", e.toString());
+                                }
+                              }
+                            }, child: Text("Importez les écoles", style: UiText().nsText,),
+                          ),
+                          Padding(padding: EdgeInsets.only(bottom: 10)),
+                          Visibility(visible: selectedFilenameSchools != null,child: Text("Fichier Choisi : $selectedFilenameSchools"),),
+                          Padding(padding: EdgeInsets.only(bottom: 10)),
+                          /// BOUTON POUR LES ETUDIANTS
+                          ElevatedButton(
+                              style: customButtonStyle,
+                              onPressed: schoolsLoaded ? () async {
+                                String? filePath = await pickFile();
+                                if (filePath != null) {
+                                  try {
+                                    setState(() {
+                                      if(Platform.isWindows){
+                                        selectedFilenameStudents = filePath.split('\\').last;
+                                      } else {
+                                        selectedFilenameStudents = filePath.split("/").last;
+                                      }
+                                    });
+
+                                    // Try to parse Excel
+                                    try {
+                                      Excel studentsResult = SheetParser.parseExcel(filePath);
+
+                                      // Try to extract students
+                                      try {
+                                        List<Student> parsedStudents = SheetParser.extractStudents(studentsResult, schools);
+                                        setState(() {
+                                          students = parsedStudents;
+                                          studentsLoaded = students.isNotEmpty;
+                                        });
+
+                                        // Show success message
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text('${students.length} étudiants importés avec succès'),
+                                            backgroundColor: Colors.green,
+                                          ),
+                                        );
+                                      } catch (e) {
+                                        // Error extracting students from Excel
+                                        showErrorDialog(
+                                            context,
+                                            "Erreur d'analyse des étudiants",
+                                            "Impossible de lire les données des étudiants: ${e.toString()}"
+                                        );
+                                      }
+                                    } catch (e) {
+                                      // Error parsing Excel file
+                                      showErrorDialog(
+                                          context,
+                                          "Erreur de format",
+                                          "Le fichier n'est pas un fichier Excel valide: ${e.toString()}"
+                                      );
+                                    }
+                                  } catch (e) {
+                                    // General error
+                                    showErrorDialog(context, "Erreur", e.toString());
+                                  }
+                                }
+                              } : null,
+                              child: Text("Importez les étudiants", style: UiText().nsText,)
+                          ),
+                          Padding(padding: EdgeInsets.only(bottom: 10)),
+                          Visibility(visible: selectedFilenameStudents != null,child: Text("Fichier Choisi : $selectedFilenameStudents"),),
+                          Padding(padding: EdgeInsets.only(bottom: 10)),
+                          ElevatedButton(
+                              style: customButtonStyle,
+                              onPressed: (schoolsLoaded && studentsLoaded) ? () {
+                                students.sort((a,b) => b.get_max_rank().compareTo(a.get_max_rank()));
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => AssemblyPreview(students: students, schools: schools)),);
+                              } : null,
+                              child: Text("Génerer",style: UiText().nsText,)
+                          ),
+                          Padding(padding: EdgeInsets.only(bottom: 10)),
+                          ElevatedButton(
+                              style: customButtonStyle,
+                              onPressed: () {
+                                showDialog(context: context, builder: (context){
+                                  return SaveDialog();
+                                });
+
+                              },
+                              child: Text("Générer depuis une sauvegarde",style: UiText().nsText,)
+                          )
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/parser.dart';
@@ -71,6 +72,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
+      ),
       home: Scaffold(
         appBar: AppBar(
           title: RichText(
@@ -78,19 +82,11 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
               children: [
                 TextSpan(
                   text: "Mob'",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 35,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: UiText(matColor: Colors.black, weight: FontWeight.bold).mLargeText
                 ),
                 TextSpan(
                   text: "INSA",
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 35,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: UiText(matColor: Colors.red).mLargeText
                 ),
               ],
             ),
@@ -106,9 +102,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                   color: Colors.green,
                   borderRadius: UiShapes().frameRadius,
                 ),
-                child: const Text(
+                child: Text(
                   "Fichier enregistré !",
-                  style: TextStyle(color: Colors.white),
+                  style: UiText(color: UiColors.white).smallText,
                 ),
               ),
             ),
@@ -155,7 +151,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                 }
               });
               
-            }, icon: Icon(PhosphorIcons.floppyDisk(PhosphorIconsStyle.regular))),
+            }, icon: Icon(PhosphorIcons.floppyDisk(PhosphorIconsStyle.regular)), tooltip: "Sauvegarder cette session",),
             IconButton(
               icon: Icon(
                 PhosphorIcons.export(PhosphorIconsStyle.regular),
@@ -271,21 +267,21 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                             children: [
                               Text(
                                 widget.students[index].name,
-                                style: TextStyle(
+                                style: GoogleFonts.montserrat(textStyle : TextStyle(
                                   fontSize: 14,
                                   color: currentStudentIndex == index
                                       ? const Color.fromARGB(255, 242, 244, 246)
                                       : Colors.black,
                                   fontWeight: currentStudentIndex == index ? FontWeight.bold : FontWeight.normal,
-                                ),
+                                )),
                               ),
                               Text(
                                 widget.students[index].get_max_rank().toStringAsFixed(2),
-                                style: TextStyle(
+                                style: GoogleFonts.montserrat(textStyle : TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
                                   color: sameRanksColor(index),
-                                ),
+                                )),
                               ),
                             ],
                           ),
@@ -328,18 +324,18 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                     children: [
                                       Text(
                                         '${selectedStudent?.name}',
-                                        style: const TextStyle(
+                                        style:  GoogleFonts.montserrat(textStyle: TextStyle(
                                           fontSize: 28,
                                           fontWeight: FontWeight.bold,
-                                        ),
+                                        )),
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
                                         '${selectedStudent?.year}A ${selectedStudent?.departement}',
-                                        style: const TextStyle(
+                                        style: GoogleFonts.montserrat(textStyle : TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.w500,
-                                        ),
+                                        )),
                                       ),
                                     ],
                                   ),
@@ -362,12 +358,12 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                             Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                const Text("Classement S1",),
+                                                Text("Classement S1", style: UiText().smallText,),
                                                 Text("${selectedStudent!.ranking_s1}",
-                                                  style: const TextStyle(
+                                                  style:  GoogleFonts.montserrat(textStyle: TextStyle(
                                                     fontSize: 18,
                                                     fontWeight: FontWeight.w500,
-                                                  ),
+                                                  )),
                                                 )
                                               ],
                                             ),
@@ -377,13 +373,13 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                               children: [
                                                 const Text("Crédits ECTS",),
                                                 Text("${selectedStudent!.ects_number}",
-                                                  style: TextStyle(
+                                                  style: GoogleFonts.montserrat(textStyle: TextStyle(
                                                     fontSize: 18,
                                                     fontWeight: FontWeight.w500,
                                                     color : (selectedStudent!.ects_number < 30 ?
                                                     Colors.orange :
                                                     Colors.black),
-                                                  ),
+                                                  )),
                                                 )
                                               ],
                                             ),
@@ -395,12 +391,12 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                             Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                const Text("Niveau d'anglais",),
+                                                Text("Niveau d'anglais",style: UiText().smallText,),
                                                 Text(selectedStudent!.lang_lvl,
-                                                  style: const TextStyle(
+                                                  style:  GoogleFonts.montserrat(textStyle: TextStyle(
                                                     fontSize: 18,
                                                     fontWeight: FontWeight.w500,
-                                                  ),
+                                                  )),
                                                 )
                                               ],
                                             ),
@@ -408,15 +404,15 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                             Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                const Text("Heures d'absences",),
+                                                Text("Heures d'absences", style : UiText().smallText),
                                                 Text("${selectedStudent!.missed_hours}",
-                                                  style: TextStyle(
+                                                  style: GoogleFonts.montserrat(textStyle: TextStyle(
                                                     fontSize: 18,
                                                     fontWeight: FontWeight.w500,
                                                     color : (selectedStudent!.missed_hours >= 5 ?
                                                     (selectedStudent!.missed_hours >= 10 ? Colors.red : Colors. orange) :
                                                     Colors.black),
-                                                  ),
+                                                  )),
                                                 )
                                               ],
                                             ),
@@ -475,13 +471,13 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                               borderRadius: BorderRadius.circular(8),
                                             ),
                                           ),
-                                          child: const Text(
+                                          child: Text(
                                             'Laissez un commentaire',
-                                            style: TextStyle(
+                                            style: GoogleFonts.montserrat( textStyle: TextStyle(
                                               color: Colors.white,
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
-                                            ),
+                                            )),
                                           ),
                                         ),
                                       ),
@@ -501,12 +497,12 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                               borderRadius: BorderRadius.circular(8),
                                             ),
                                           ),
-                                          child: const Text(
+                                          child: Text(
                                             'Revenir à l\'étudiant précédent',
-                                            style: TextStyle(
+                                            style: GoogleFonts.montserrat(textStyle: TextStyle(
                                               color: Colors.black,
                                               fontSize: 14,
-                                            ),
+                                            )),
                                           ),
                                         ),
                                       ),
@@ -525,12 +521,12 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                               borderRadius: BorderRadius.circular(8),
                                             ),
                                           ),
-                                          child: const Text(
+                                          child: Text(
                                             'Passer à l\'étudiant Suivant',
-                                            style: TextStyle(
+                                            style: GoogleFonts.montserrat(textStyle: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 14,
-                                            ),
+                                            )),
                                           ),
                                         ),
                                       ),
@@ -542,7 +538,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                           ],
                         ),
                       )
-                    : const Center(child: Text("Sélectionnez un étudiant")),
+                    :  Center(child: Text("Sélectionnez un étudiant",style: UiText().mediumText,)),
               ),
             ),
           ],
@@ -631,10 +627,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                         Expanded(
                           child: Text(
                             choice.school.name,
-                            style: const TextStyle(
+                            style:  GoogleFonts.montserrat(textStyle: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                            ),
+                            )),
                           ),
                         ),
                         Column(
@@ -654,10 +650,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                     const SizedBox(height: 4),
                     Text(
                       choice.school.country,
-                      style: TextStyle(
+                      style: GoogleFonts.montserrat(textStyle: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[600],
-                      ),
+                      )),
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -669,36 +665,38 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Niveau académique requis"),
+                                Text("Niveau académique requis",style: UiText().smallText,),
                                 SizedBox(
                                   width: MediaQuery.sizeOf(context).width*0.5*0.4,
                                   child: Text(choice.school.academic_level,
-                                    style: const TextStyle(
+                                    style:  GoogleFonts.montserrat(textStyle: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w500,
-                                    ),
+                                    )),
                                   ),
                                 ),
-                                Text("Langue d'enseignement",
+                                Padding(padding: EdgeInsets.only(bottom: 5)),
+                                Text("Langue d'enseignement", style: UiText().smallText,
                                 ),
                                 SizedBox(
                                   width: MediaQuery.sizeOf(context).width*0.5*0.4,
                                   child: Text(choice.school.use_langage,
                                     maxLines: 3,
-                                    style: const TextStyle(
+                                    style: GoogleFonts.montserrat(textStyle: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w500,
-                                    ),
+                                    )),
                                   ),
                                 ),
-                                Text("Niveau de langue"),
+                                Padding(padding: EdgeInsets.only(bottom: 5)),
+                                Text("Niveau de langue",style: UiText().smallText,),
                                 SizedBox(
                                   width: MediaQuery.sizeOf(context).width*0.5*0.4,
                                   child: Text("${choice.school.req_lang_level}",
-                                    style: const TextStyle(
+                                    style: GoogleFonts.montserrat(textStyle: TextStyle(
                                       fontWeight: FontWeight.w500,
                                       fontSize: 18,
-                                    ),
+                                    )),
                                       maxLines: 4,
                                   ),
                                 ),
@@ -708,33 +706,35 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Nombre de places"),
+                                Text("Nombre de places",style: UiText().smallText,),
                                 Text("${choice.school.remaining_slots} | ${choice.school.b_slots} Bachelor, ${choice.school.m_slots} Master",
-                                  style: const TextStyle(
+                                  style: GoogleFonts.montserrat(textStyle: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w500,
-                                  ),
+                                  )),
                                 ),
-                                Text("Discipline"),
+                                Padding(padding: EdgeInsets.only(bottom: 5)),
+                                Text("Discipline",style: UiText().smallText,),
                                 SizedBox(
                                   width : MediaQuery.sizeOf(context).width*0.5*0.3,
                                   child: Text("${choice.school.specialization.toString().replaceAll("[", "").replaceAll("]", "")}",
-                                    style: TextStyle(
+                                    style: GoogleFonts.montserrat(textStyle: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w500,
                                       color : (choice.is_incoherent() ?
                                           Colors.orange :
                                           Colors.black),
 
-                                    ),
+                                    )),
                                   ),
                                 ),
+                                Padding(padding: EdgeInsets.only(bottom: 5)),
                                 Text("Interclassement"),
                                 Text("${choice.interranking}",
-                                  style: const TextStyle(
+                                  style:  GoogleFonts.montserrat(textStyle: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w500,
-                                  ),
+                                  )),
                                 ),  
                               ],
                             ),
@@ -770,13 +770,13 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   "Annuler",
-                                  style: TextStyle(
+                                  style: GoogleFonts.montserrat(textStyle: TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                  ),
+                                  )),
                                 ),
                               ),
                             ),
@@ -886,18 +886,18 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                             width: MediaQuery.sizeOf(context).width*0.35,
                             child: Text(
                               choice.school.name,
-                              style: const TextStyle(
+                              style: GoogleFonts.montserrat(textStyle: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                              ),
+                              )),
                             ),
                           ),
                           Text(
                             choice.school.country,
-                            style: TextStyle(
+                            style: GoogleFonts.montserrat(textStyle: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[600],
-                            ),
+                            )),
                           ),
                         ],
                       ),
@@ -945,13 +945,13 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                           borderRadius: BorderRadius.circular(6),
                                         ),
                                       ),
-                                      child: const Text(
+                                      child: Text(
                                         "Annuler",
-                                        style: TextStyle(
+                                        style: GoogleFonts.montserrat(textStyle: TextStyle(
                                           color: Colors.white,
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
-                                        ),
+                                        )),
                                       ),
                                     ),
                                   ),

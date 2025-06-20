@@ -147,6 +147,9 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Welcome to Flutter',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
+      ),
       home: Scaffold(
         appBar: AppBar(
           actions: [

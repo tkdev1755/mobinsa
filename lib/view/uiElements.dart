@@ -26,6 +26,7 @@ class UiText{
   int? color;
   FontWeight? weight;
   int? alpha;
+  Color? matColor;
   late TextStyle vvLargeText;
   late TextStyle vLargeText;
   late TextStyle largeText;
@@ -33,7 +34,12 @@ class UiText{
   late TextStyle nText;
   late TextStyle nsText;
   late TextStyle smallText;
-  UiText({this.color, this.weight, this.alpha}) {
+  late TextStyle mLargeText;
+  late TextStyle mMediumText;
+  late TextStyle mNormalText;
+  late TextStyle mSmallText;
+  late TextStyle mSSmallText;
+  UiText({this.color, this.weight, this.alpha,this.matColor}) {
     vvLargeText = GoogleFonts.montserrat(textStyle: TextStyle(color: Color(color ?? UiColors.black).withAlpha(alpha ?? 1000),fontSize: 60,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
     vLargeText = GoogleFonts.montserrat(textStyle: TextStyle(color: Color(color ?? UiColors.black).withAlpha(alpha ?? 1000),fontSize: 35,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
     largeText = GoogleFonts.montserrat(textStyle: TextStyle(color: Color(color ?? UiColors.black).withAlpha(alpha ?? 1000),fontSize: 30,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
@@ -44,6 +50,12 @@ class UiText{
         color: Color(color ??  UiColors.black).withAlpha(alpha ?? 1000),
         fontSize: 15,
         overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400 ));
+    mLargeText = GoogleFonts.poppins(textStyle: TextStyle(color: (matColor ?? Color(UiColors.black)).withAlpha(alpha ?? 1000),fontSize: 35,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
+    mMediumText = GoogleFonts.montserrat(textStyle: TextStyle(color: (matColor ?? Color(UiColors.black)).withAlpha(alpha ?? 1000),fontSize: 35,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
+    mNormalText = GoogleFonts.montserrat(textStyle: TextStyle(color: (matColor ?? Color(UiColors.black)).withAlpha(alpha ?? 1000),fontSize: 14,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
+    mSmallText = GoogleFonts.montserrat(textStyle: TextStyle(color: (matColor ?? Color(UiColors.black)).withAlpha(alpha ?? 1000),fontSize: 35,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
+    mSSmallText = GoogleFonts.montserrat(textStyle: TextStyle(color: (matColor ?? Color(UiColors.black)).withAlpha(alpha ?? 1000),fontSize: 35,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
+
   }
 }
 

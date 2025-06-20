@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.7.0
+  sdk: ^3.8.1
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -42,17 +42,16 @@ dependencies:
   phosphor_flutter: ^2.0.0
   google_fonts: ^6.2.1
 
+
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
   icons_launcher: ^3.0.0
-  msix: ^3.16.9
-msix_config:
-  display_name: Mobinsa
-  publisher_display_name: Mobinsa
-  identity_name: com.insa-cvl.mobinsa
-  msix_version: 1.0.0.0
-  logo_path: assets/images/Logo_MOBINSA.png
+
+
 
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -90,11 +89,11 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
+  #fonts:
+  #   - family: Montserrat
   #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
+  #       - asset: assets/fonts/Montserrat-VariableFont_wght.ttf
+  #       - asset: assets/fonts/Montserrat-Italic-VariableFont_wght.ttf
   #         style: italic
   #   - family: Trajan Pro
   #     fonts:
@@ -104,3 +103,13 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+icons_launcher:
+  image_path: "assets/logo.png"
+  platforms:
+    macos:
+      enable: true
+    windows:
+      enable: true
+    linux:
+      enable: true

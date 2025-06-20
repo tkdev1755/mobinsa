@@ -4,11 +4,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobinsa/model/School.dart';
 import 'package:mobinsa/model/sessionStorage.dart';
 import 'package:mobinsa/view/displayApplicants.dart';
 import 'package:mobinsa/view/uiElements.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../model/Student.dart';
 
 
@@ -38,23 +40,42 @@ class _SaveDialogState extends State<SaveDialog> {
     return "${DateFormat("dd/MM/yyyy").format(date)} à ${DateFormat("HH:mm").format(date)}";
   }
 
+  String? tryParseSaveText(String filename){
+    String result = parseSaveText(filename);
+    if (result == "date inconnue"){
+      return null;
+    }
+    else{
+      return result;
+    }
+  }
+  Widget showErrorMessage(){
+    return AlertDialog(
+      title: Text("Une erreur s'est produite"),
+      content: Text("Le fichier que vous avez passé en paramètre semble être corrompu,veuillez en sélectionner un autre"),
+      actions: [TextButton(onPressed: (){
+        Navigator.pop(context);
+      }, child: Text("D'accord"))],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
       child: Container(
         padding: EdgeInsets.all(20),
-        width: MediaQuery.sizeOf(context).width*0.3,
+        width: MediaQuery.sizeOf(context).width*0.4,
         height: MediaQuery.sizeOf(context).height*0.4,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             Text("Sélectionnez la sauvegarde", style: UiText().mediumText,),
             FutureBuilder(future: saves, builder: (BuildContext context, AsyncSnapshot<List<(String,String)>> data){
               if (data.hasData){
                 List<(String,String)> saveList = data.data ?? [];
                 return Expanded(
                   child: ListView.builder(
+                      padding: EdgeInsets.zero,
                       itemCount: saveList.length,
                       scrollDirection: Axis.vertical,
                       itemBuilder: (BuildContext context, int index){
@@ -66,10 +87,53 @@ class _SaveDialogState extends State<SaveDialog> {
                 return Text("Loading saves");
               }
             }),
-            ElevatedButton(onPressed: () async {
+            Padding(padding: EdgeInsets.only(bottom: 10)),
+            TextButton(onPressed: ()async {
 
-            }, child: Text("Load save")),
+              Map<String, dynamic> encodedData = {};
+              (String,String)? saveInfo;
+              try {
+                saveInfo = await SessionStorage.loadExternalSave();
+              } catch (e, s) {
+                await showDialog(context: context, builder: (BuildContext context){
+                  return showErrorMessage();
+                });
+                return;
+              }
+              try {
+                encodedData =   SessionStorage.loadData(saveInfo.$1);
+              }
+              catch (e,s){
+                print("Something went wrong when reading the data \n Details : $e, $s");
+                await showDialog(context: context, builder: (BuildContext context){
+                  return showErrorMessage();
+                });
+                return;
+              }
+              List<Student> students = [];
+              List<School> schools = [];
+              Map<String, dynamic> decodedData = {};
 
+              try {
+                decodedData = SessionStorage.deserializeData(encodedData);
+              }
+              catch(e,s){
+                print("Something went wrong when deserializing the Data ?  the data \n Details : $e, $s");
+                await showDialog(context: context, builder: (BuildContext context){
+                  return showErrorMessage();
+                });
+                return;
+              }
+
+              schools = decodedData["schools"];
+              students = decodedData["students"];
+              if (tryParseSaveText(saveInfo.$2) == null){
+                saveInfo = null;
+              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => DisplayApplicants(schools: schools, students: students,loadedSave: saveInfo,)),);
+            }, child: Text("Charger une sauvegarde manuellement", style: GoogleFonts.montserrat(),))
           ],
         ),
       ),
@@ -115,6 +179,16 @@ class _SaveDialogState extends State<SaveDialog> {
           child: Row(
             children: [
               Text("Séance du ${parseSaveText(saveInfo.$2)}",style: UiText().nText,),
+              Spacer(),
+              IconButton(onPressed: () async {
+                final exportedPath = await SessionStorage.exportSave(saveInfo);
+              }, icon: Icon(PhosphorIcons.export())),
+              IconButton(onPressed: (){
+                SessionStorage.deleteSave(saveInfo);
+                saves = SessionStorage.askForLoadPath();
+                setState(() {
+                });
+              }, icon: Icon(PhosphorIcons.trash()))
             ],
           ),
         ),
