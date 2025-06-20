@@ -159,6 +159,15 @@ class Student {
     return true;
   }
 
+  String get_graduation_level (){
+    if (this.year == 2){
+      return "bachelor";
+    }
+    else {
+      return "master";
+    }
+  }
+
   @override
   String toString() {
     String choicesString = choices.entries.map((entry) => '\n    Vœu ${entry.key}: ${entry.value}').join('');
