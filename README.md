@@ -12,7 +12,8 @@ quand à l'attribution des mobilités mais seulement un accompagnement afin de g
 ## Comment utiliser Mob'INSA
 
 L'application Mob'INSA est très simple d'utilisation. Il suffit de cliquer sur l'icône correspondante
-puis se laisser guider par la notice utilisateur : //Mettre lien vers le guide utilisateur
+puis se laisser guider par la notice utilisateur : [Notice guide utilisateur](https://tkdocs.craft.me/cDa5md84MM1wgG )
+
 
 ## Quelles Fonctionnalités ?
 ### Fonctionnalités implémentées
