@@ -60,6 +60,8 @@ class Student {
     accepted_school = null;
   }
 
+  
+
   void year_departement(String specialization) {
     if (specialization.contains("2")) {
       year = 2;
@@ -148,6 +150,10 @@ class Student {
       }
     }
     return true;
+  }
+
+  String get_graduation_level (){
+    return this.year == 2 ? "bachelor" : "master";
   }
 
   @override

@@ -574,8 +574,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
   }
 
   bool disbaleChoice(Choice choice){
-    return (choice.student.accepted != null && choice.student.accepted != choice) ||
-           (choice.school.remaining_slots == 0 && choice.student.accepted == null);
+    int availableplaces = choice.student.get_graduation_level() == "master" ? choice.school.m_slots : choice.school.b_slots;
+    return (choice.student.accepted != null &&  choice.student.accepted != choice) ||
+           (availableplaces == 0 && choice.student.accepted == null);
   }
 
   bool disableChoiceByRanking(Student student_f,int choiceNumber){
@@ -604,6 +605,8 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
 
 
   Widget choiceCard(Choice choice, int index) {
+    int availableplaces = choice.student.get_graduation_level() == "master" ? choice.school.m_slots : choice.school.b_slots;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8.0),
       color: disbaleChoice(choice) ? disabledColor : Colors.grey[300],
@@ -833,9 +836,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                 width: 40,
                                 height: 40,
                                 child: Tooltip(
-                                  message: choice.school.remaining_slots == 0 ? "Plus de places disponibles" : disableChoiceByRanking(selectedStudent!, index) ? "Il y un étudiant avec un meilleur interclassement" : "Accepter ce choix",
+                                  message: availableplaces == 0 ? "Plus de places disponibles" : disableChoiceByRanking(selectedStudent!, index) ? "Il y un étudiant avec un meilleur interclassement" : "Accepter ce choix",
                                   child: ElevatedButton(
-                                    onPressed: disableChoiceByRanking(selectedStudent!, index)  || choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
+                                    onPressed: disableChoiceByRanking(selectedStudent!, index)  || choice.student.accepted != null || availableplaces == 0 ? null : () {
                                       setState(() {
                                         schoolChoices[index] = true;
                                         choice.accepted(choice.student);
@@ -1008,9 +1011,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                       width: 40,
                                       height: 40,
                                       child: Tooltip(
-                                        message: choice.school.remaining_slots == 0 ? "Plus de places disponibles" : disableChoiceByRanking(selectedStudent!, index) ? "Il y un étudiant avec un meilleur interclassement" : "Accepter ce choix",
+                                        message: availableplaces == 0 ? "Plus de places disponibles" : disableChoiceByRanking(selectedStudent!, index) ? "Il y un étudiant avec un meilleur interclassement" : "Accepter ce choix",
                                         child: ElevatedButton(
-                                          onPressed: disableChoiceByRanking(selectedStudent!, index)  || choice.student.accepted != null || choice.school.remaining_slots == 0 ? null : () {
+                                          onPressed: disableChoiceByRanking(selectedStudent!, index)  || choice.student.accepted != null || availableplaces == 0 ? null : () {
                                             setState(() {
                                               schoolChoices[index] = true;
                                               choice.accepted(choice.student);
