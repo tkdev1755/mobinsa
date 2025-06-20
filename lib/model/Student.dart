@@ -139,6 +139,15 @@ class Student {
 
   }
 
+  double get_min_rank (){
+    List<double> lst = [];
+    for (var c in choices.values ){
+      lst.add(c.interranking);
+    }
+    double min = lst.reduce((a, b) => a < b ? a : b);
+    return min;
+  }
+
   // return true si l'étudiant va au second tour et false sinon
   // elle regarde si tout les voeux de l'étudiant sont présent dans refused
   bool get_second_tour (){
