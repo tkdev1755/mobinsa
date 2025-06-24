@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>PROJ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #F56249, #ee9ca7);
+    }
+
+    .glass-container {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 3rem;
+      max-width: 1000px;
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-column {
+      flex: 1 1 600px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .image-column img {
+      max-width: 600px;
+      width: 100%;
+      height: auto;
+    }
+
+    .text-column {
+      flex: 1 1 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .text-column h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .text-column p {
+      font-size: 1.2rem;
+      font-weight: 400;
+      margin: 0;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+
+    .button-grid a {
+      display: flex; /* Définit un modèle flex */
+      justify-content: center; /* Centre horizontalement */
+      align-items: center; /* Centre verticalement */
+      text-align: center; /* Assure que le texte est centré si nécessaire */
+      padding: 0.5rem;
+      background: rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(6px);
+    }
+
+    .button-grid a:hover {
+      background: rgba(255, 255, 255, 0.5);
+      color: #000;
+    }
+
+    @media (max-width: 700px) {
+      .glass-container {
+        flex-direction: column;
+      }
+
+      .text-column h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="glass-container">
+    <div class="image-column">
+      <img src="img.png" alt="Aperçu du projet">
+    </div>
+
+    <div class="text-column">
+      <h1>PROJ</h1>
+      <p>Une explication claire et précise</p>
+
+      <div class="button-grid">
+        <a href="https://github.com/ton-utilisateur/ton-repo/releases" target="_blank">Télécharger</a>
+        <a href="http://monsite.fr" target="_blank">📖 Comment l'utiliser ?</a>
+        <a href="https://github.com/ton-utilisateur/ton-repo/wiki" target="_blank">🛠️ Comment le maintenir ?</a>
+        <a href="https://ton-utilisateur.github.io/ton-repo/dartdoc/" target="_blank">📚 Documentation</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
