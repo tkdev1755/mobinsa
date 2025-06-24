@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the equal_dict method from the Student class, for the Dart programming language.">
+  <title>equal_dict method - Student class - Student library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">mobinsa</a></li>
+    <li><a href="../../model_Student/">model\Student.dart</a></li>
+    <li><a href="../../model_Student/Student-class.html">Student</a></li>
+    <li class="self-crumb">equal_dict method</li>
+  </ol>
+  <div class="self-name">equal_dict</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="model_Student&#47;Student-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">equal_dict</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../model_Student/Student-class.html">Student</a></span>&gt;</span></span>&gt;</span></span>
+<span class="name ">equal_dict</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="equal_dict-param-allStudent"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../model_Student/Student-class.html">Student</a></span>&gt;</span></span> <span class="parameter-name">allStudent</span></span></li>
+</ol>)
+
+      
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Retourne une carte des étudiants ayant un classement égal
+pour les mêmes écoles.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Map&lt;int, List&lt;Student&gt;&gt; equal_dict(List&lt;Student&gt; allStudent) {
+  Map&lt;int, List&lt;Student&gt;&gt; equal_dict = {};
+  for(var entry in choices.entries) {
+    int key = entry.key;
+    Choice c = entry.value;
+    equal_dict[key] = [];
+    for(Student other in allStudent) {
+      if(other.id == id) continue;
+      for(var otherChoice in other.choices.values) {
+        if (otherChoice.school.id == c.school.id &amp;&amp; (otherChoice.interranking - c.interranking).abs() &lt; 1e-6) {
+          equal_dict.putIfAbsent(key, () =&gt; []);
+          equal_dict[key]!.add(other);
+        }
+      }
+    }
+  }
+  return equal_dict;
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">mobinsa</a></li>
+    <li><a href="../../model_Student/">Student</a></li>
+    <li><a href="../../model_Student/Student-class.html">Student</a></li>
+    <li class="self-crumb">equal_dict method</li>
+</ol>
+
+    <h5>Student class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    mobinsa
+      1.0.0+1
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+
