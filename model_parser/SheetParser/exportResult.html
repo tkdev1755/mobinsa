@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the exportResult method from the SheetParser class, for the Dart programming language.">
+  <title>exportResult method - SheetParser class - parser library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">mobinsa</a></li>
+    <li><a href="../../model_parser/">model\parser.dart</a></li>
+    <li><a href="../../model_parser/SheetParser-class.html">SheetParser</a></li>
+    <li class="self-crumb">exportResult static method</li>
+  </ol>
+  <div class="self-name">exportResult</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="model_parser&#47;SheetParser-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">exportResult</span> static method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+<span class="name ">exportResult</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="exportResult-param-students"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../model_Student/Student-class.html">Student</a></span>&gt;</span></span> <span class="parameter-name">students</span>, </span></li>
+<li><span class="parameter" id="exportResult-param-schools"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../model_School/School-class.html">School</a></span>&gt;</span></span> <span class="parameter-name">schools</span></span></li>
+</ol>)
+
+      
+
+    </section>
+    
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">static List&lt;int&gt; exportResult(List&lt;Student&gt; students, List&lt;School&gt; schools) {
+  Map&lt;int, String&gt; indexes = {
+    0: &quot;Nom&quot;,
+    1: &quot;Voeu&quot;,
+    2: &quot;Pays&quot;,
+    3: &quot;Etablissement&quot;,
+    4: &quot;Département&quot;,
+    5: &quot;Interclassement&quot;,
+    6: &quot;Nb ECTS&quot;,
+    7: &quot;Niveau Anglais&quot;,
+    8: &quot;Absences&quot;,
+    9: &quot;Nbre de Places&quot;,
+    10: &quot;Commentaires&quot;,
+    11: &quot;Commentaires post-jury&quot;
+  };
+
+  &#47;&#47; Create separate lists for different sheets
+  List&lt;(int, int, Choice)&gt; allChoices = [];
+  List&lt;(int, int, Choice)&gt; acceptedChoices = [];
+  List&lt;(int, int, Choice)&gt; rejectedChoices = [];
+  List&lt;(int, int, Choice)&gt; noResponseChoices = [];
+
+  &#47;&#47; First pass - identify students with responses and collect all choices
+  Map&lt;int, bool&gt; studentHasResponse = {};
+  Map&lt;int, bool&gt; studentAllChoicesRejected = {}; &#47;&#47; New map to track fully rejected students
+
+  for (var s in students) {
+    &#47;&#47; Initialize tracking variables
+    studentHasResponse[s.id] = false;
+    studentAllChoicesRejected[s.id] = true; &#47;&#47; Assume all choices rejected until proven otherwise
+
+    for (var c in s.choices.entries) {
+      &#47;&#47; Add to all choices list
+      allChoices.add((s.id, c.key, c.value));
+
+      &#47;&#47; Check acceptance status
+      if (s.accepted != null &amp;&amp; s.accepted!.school.id == c.value.school.id) {
+        acceptedChoices.add((s.id, c.key, c.value));
+        studentHasResponse[s.id] = true;
+        studentAllChoicesRejected[s.id] = false; &#47;&#47; At least one choice is accepted
+      }
+      &#47;&#47; Check rejection status
+      else if (s.refused.any((choice) =&gt; choice.school.id == c.value.school.id)) {
+        rejectedChoices.add((s.id, c.key, c.value));
+        studentHasResponse[s.id] = true;
+        &#47;&#47; Note: We don&#39;t set studentAllChoicesRejected to false here
+        &#47;&#47; because we&#39;re checking if ALL choices are rejected
+      } else {
+        studentAllChoicesRejected[s.id] = false; &#47;&#47; Found a choice that&#39;s not rejected
+      }
+    }
+
+    &#47;&#47; If the student has all choices rejected but has choices,
+    &#47;&#47; confirm it by checking the get_second_tour() method
+    if ((studentAllChoicesRejected[s.id] ?? false) &amp;&amp; s.choices.isNotEmpty) {
+      studentAllChoicesRejected[s.id] = s.get_second_tour();
+    }
+  }
+
+  &#47;&#47; Second pass - add students to noResponseChoices (now includes second tour students)
+  for (var s in students) {
+    if ((studentHasResponse[s.id] == false &amp;&amp; s.choices.isNotEmpty) ||
+        (studentAllChoicesRejected[s.id] == true &amp;&amp; s.choices.isNotEmpty)) {
+      &#47;&#47; This student has NO responses OR all choices rejected - add ALL their choices
+      for (var c in s.choices.entries) {
+        noResponseChoices.add((s.id, c.key, c.value));
+      }
+    }
+  }
+
+  &#47;&#47; Sort all lists by interranking
+  allChoices.sort((a, b) =&gt; b.$3.interranking.compareTo(a.$3.interranking));
+  acceptedChoices.sort((a, b) =&gt; b.$3.interranking.compareTo(a.$3.interranking));
+  rejectedChoices.sort((a, b) =&gt; b.$3.interranking.compareTo(a.$3.interranking));
+  noResponseChoices.sort((a, b) =&gt; b.$3.interranking.compareTo(a.$3.interranking));
+
+  &#47;&#47; Create Excel workbook
+  Excel exportedExcel = Excel.createExcel();
+
+  &#47;&#47; Get default sheet name
+  String defaultSheetName = exportedExcel.getDefaultSheet() ?? &quot;Sheet1&quot;;
+
+  &#47;&#47; Create additional sheets by copying the default one
+  exportedExcel.copy(defaultSheetName, &quot;Choix acceptés&quot;);
+  exportedExcel.copy(defaultSheetName, &quot;Choix refusés&quot;);
+  exportedExcel.copy(defaultSheetName, &quot;Second Tour&quot;); &#47;&#47; Changed name
+
+  &#47;&#47; Rename default sheet and get sheet references
+  exportedExcel.rename(defaultSheetName, &quot;Tous les choix&quot;);
+  Sheet allSheet = exportedExcel.sheets[&quot;Tous les choix&quot;]!;
+  Sheet acceptedSheet = exportedExcel.sheets[&quot;Choix acceptés&quot;]!;
+  Sheet rejectedSheet = exportedExcel.sheets[&quot;Choix refusés&quot;]!;
+  Sheet secondTourSheet = exportedExcel.sheets[&quot;Second Tour&quot;]!; &#47;&#47; Reference to new sheet
+
+  &#47;&#47; Clear copied content
+  &#47;&#47;acceptedSheet.clear();
+  &#47;&#47;rejectedSheet.clear();
+  &#47;&#47;noResponseSheet.clear();
+
+  &#47;&#47; Add headers to each sheet
+  setupSheetHeaders(allSheet, indexes);
+  setupSheetHeaders(acceptedSheet, indexes);
+  setupSheetHeaders(rejectedSheet, indexes);
+  setupSheetHeaders(secondTourSheet, indexes); &#47;&#47; Add headers to new sheet
+
+  &#47;&#47; Fill each sheet with data
+  fillSheetWithChoices(allSheet, allChoices, students, true);
+  fillSheetWithChoices(acceptedSheet, acceptedChoices, students, false);
+  fillSheetWithChoices(rejectedSheet, rejectedChoices, students, false);
+  fillSheetWithChoices(secondTourSheet, noResponseChoices, students, false); &#47;&#47; Fill new sheet
+
+  return exportedExcel.save() ?? [];
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">mobinsa</a></li>
+    <li><a href="../../model_parser/">parser</a></li>
+    <li><a href="../../model_parser/SheetParser-class.html">SheetParser</a></li>
+    <li class="self-crumb">exportResult static method</li>
+</ol>
+
+    <h5>SheetParser class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    mobinsa
+      1.0.0+1
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

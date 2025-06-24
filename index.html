@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="mobinsa API docs, for the Dart programming language.">
+  <title>mobinsa - Dart API docs</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="static-assets/github.css?v1">
+  <link rel="stylesheet" href="static-assets/styles.css?v1">
+  <link rel="icon" href="static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li class="self-crumb">mobinsa package</li>
+  </ol>
+  <div class="self-name">mobinsa</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+  <div id="dartdoc-main-content" class="main-content">
+      
+<section class="desc markdown">
+  <h1 id="mobinsa">Mob'INSA</h1>
+<p>Une application flutter pour étudier les mobilités.</p>
+<h2 id="quel-est-le-but-">Quel est le but ?</h2>
+<p>Cette application a pour but d'aider les différents responsables lors du jury d'attribution des mobilités.
+Pour concevoir cette application, nous avons utilisé le langage dart ainsi que le framework flutter qui permet d'utiliser la
+programmation orienté objet de manière simple et flexible. Cette application n'a pas pour but de fournir un résultat définitif au jury
+quand à l'attribution des mobilités mais seulement un accompagnement afin de gérer les attributions, refus, etc de manière plus souple et visuel.</p>
+<h2 id="comment-utiliser-mobinsa">Comment utiliser Mob'INSA</h2>
+<p>L'application Mob'INSA est très simple d'utilisation. Il suffit de cliquer sur l'icône correspondante
+puis se laisser guider par la notice utilisateur : //Mettre lien vers le guide utilisateur</p>
+<h2 id="quelles-fonctionnalits-">Quelles Fonctionnalités ?</h2>
+<h3 id="fonctionnalits-implmentes">Fonctionnalités implémentées</h3>
+<p>✅ - Gestion fluide de tous les étudiants avec une colonne permettant de passer à chaque étudiant très simplement</p>
+<p>✅ - Gestion de l'acceptation ou le refus de voeux pour un étudiant</p>
+<p>✅ - Ajustement automatique du nombre de place restante sur une offre de séjour en fonction du point précédent</p>
+<p>✅ - Récapitulatif des informations importantes sur l'étudiant (niveau d'anglais, heure d'absence,...)</p>
+<p>✅ - Récapitulatif des informations importantes sur une offre de séjour (pays, niveau académique,...)</p>
+<p>✅ - Possibilité de laisser un commentaire pour un voeu d'un étudiant</p>
+<p>✅ - Possibilité de passer à l'étudiant suivant ou de revenir à l'étudiant précédent à partir d'une page d'un étudiant</p>
+<p>✅ - Génération de tableaux excel à partir des résultats que le jury à fixé avec l'outil Mob'INSA (tableau récapitulatif général, tableau récapitulatif pour les étudiants ayant un voeu accepté, tableau récapitulatif pour les étudants n'ayant eu aucune proposition de voeu)</p>
+<h2 id="questions-frquentes">Questions fréquentes</h2>
+<h3 id="pourquoi-il-ya-des-fichiers-dll-dylib-so-avec-le-binaire-">Pourquoi il y’a des fichiers <code>.dll</code>, <code>.dylib</code>, <code>.so</code> avec le binaire ?</h3>
+<pre class="language-dart"><code>- Le langage de programmation utilisé (Dart) ne possède pas de librairie donnant accès au trousseau de clé du système d’exploitation, par conséquent j’ai du développer une "librairie" en C pour interagir avec le trousseau de clés, plus de détail sont donnés dans le wiki. Tout le code source de la «&nbsp;librairie&nbsp;» C est disponible sur le github dans le dossier lib/model/KeychainAPI/${votre_système_d’exploitation}/${votre_système_d’exploitation}keychainAPI.c
+</code></pre>
+<hr>
+<h3 id="pourquoi-avoir-dvelopp-en-dart-et-pas-en-python-">Pourquoi avoir développé en Dart et pas en python ?</h3>
+<pre class="language-dart"><code>- En majeure partie parce que c’est le langage que nous avons trouvé le plus approprié pour ce projet car il permet de compiler sur toutes les plateforms majeurs. 
+- Ce choix est issu d'un vote où chacun a pu proposer un langage de programmation qui lui semblait adéquat pour le projet.
+</code></pre>
+</section>
+
+
+      <section class="summary">
+          <h2>Libraries</h2>
+        <dl>
+          <dt id="main">
+  <span class="name"><a href="main/">main</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="Choice">
+  <span class="name"><a href="model_Choice/">model\Choice</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="parser">
+  <span class="name"><a href="model_parser/">model\parser</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="School">
+  <span class="name"><a href="model_School/">model\School</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="sessionStorage">
+  <span class="name"><a href="model_sessionStorage/">model\sessionStorage</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="Stats">
+  <span class="name"><a href="model_Stats/">model\Stats</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="Student">
+  <span class="name"><a href="model_Student/">model\Student</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="tests">
+  <span class="name"><a href="tests/">tests</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="assemblyPreview">
+  <span class="name"><a href="view_assemblyPreview/">view\assemblyPreview</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="displayApplicants">
+  <span class="name"><a href="view_displayApplicants/">view\displayApplicants</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="saveDialog">
+  <span class="name"><a href="view_modalPages_saveDialog/">view\modalPages\saveDialog</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="uiElements">
+  <span class="name"><a href="view_uiElements/">view\uiElements</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+        </dl>
+      </section>
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li class="self-crumb">mobinsa package</li>
+</ol>
+
+    <h5 class="hidden-xs"><span class="package-name">mobinsa</span> <span class="package-kind">package</span></h5>
+    <ol>
+      <li class="section-title">Libraries</li>
+      <li><a href="main/">main</a></li>
+      <li><a href="model_Choice/">model\Choice</a></li>
+      <li><a href="model_parser/">model\parser</a></li>
+      <li><a href="model_School/">model\School</a></li>
+      <li><a href="model_sessionStorage/">model\sessionStorage</a></li>
+      <li><a href="model_Stats/">model\Stats</a></li>
+      <li><a href="model_Student/">model\Student</a></li>
+      <li><a href="tests/">tests</a></li>
+      <li><a href="view_assemblyPreview/">view\assemblyPreview</a></li>
+      <li><a href="view_displayApplicants/">view\displayApplicants</a></li>
+      <li><a href="view_modalPages_saveDialog/">view\modalPages\saveDialog</a></li>
+      <li><a href="view_uiElements/">view\uiElements</a></li>
+</ol>
+
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div>
+</main>
+<footer>
+  <span class="no-break">
+    mobinsa
+      1.0.0+1
+  </span>
+  
+</footer>
+
+
+<script src="static-assets/highlight.pack.js?v1"></script>
+<script src="static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

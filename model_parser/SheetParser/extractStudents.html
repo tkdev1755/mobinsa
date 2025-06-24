@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the extractStudents method from the SheetParser class, for the Dart programming language.">
+  <title>extractStudents method - SheetParser class - parser library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">mobinsa</a></li>
+    <li><a href="../../model_parser/">model\parser.dart</a></li>
+    <li><a href="../../model_parser/SheetParser-class.html">SheetParser</a></li>
+    <li class="self-crumb">extractStudents static method</li>
+  </ol>
+  <div class="self-name">extractStudents</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="model_parser&#47;SheetParser-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">extractStudents</span> static method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../model_Student/Student-class.html">Student</a></span>&gt;</span></span>
+<span class="name ">extractStudents</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="extractStudents-param-excel"><span class="type-annotation"><a href="https://pub.dev/documentation/excel/4.0.6/excel/Excel-class.html">Excel</a></span> <span class="parameter-name">excel</span>, </span></li>
+<li><span class="parameter" id="extractStudents-param-schools"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../model_School/School-class.html">School</a></span>&gt;</span></span> <span class="parameter-name">schools</span></span></li>
+</ol>)
+
+      
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Associe les écoles aux choix de chaque étudiant via la liste <code>schools</code>.</p>
+<p>Lève une <a href="../../model_parser/ExcelParsingException-class.html">ExcelParsingException</a> si la liste d'écoles est vide.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">static List&lt;Student&gt; extractStudents(Excel excel, List&lt;School&gt; schools) {
+&#47;&#47; Check if schools list is empty
+if (schools.isEmpty) {
+  throw ExcelParsingException(&quot;La liste des écoles est vide. Importez d&#39;abord les écoles.&quot;);
+}
+
+Map&lt;String, Student&gt; tempStudentMap = {};
+  int nextStudentId=1;
+
+  if (excel.sheets.isEmpty) {
+    print(&quot;Information: Le fichier Excel ne contient aucune feuille.&quot;);
+
+    return [];
+  }
+  String sheetName = excel.sheets.keys.first; &#47;&#47; Prend la première feuille par défaut
+  var sheet = excel.tables[sheetName]; &#47;&#47; Utilisez .tables pour la nouvelle version de la lib excel
+
+  if (sheet == null) {
+    print(&quot;Erreur: La feuille &#39;$sheetName&#39; n&#39;a pas pu être chargée ou n&#39;existe pas dans les tables.&quot;);
+    return [];
+  }
+
+  if (sheet.maxRows &lt; 2) {
+    print(&quot;Information: La feuille &#39;$sheetName&#39; contient moins de 2 lignes (pas de données ou juste l&#39;en-tête).&quot;);
+    return [];
+  }
+  &#47;&#47; Itérer sur les lignes, en commençant par la deuxième (index 1) pour sauter l&#39;en-tête
+  for (int rowIndex = 1; rowIndex &lt; sheet.maxRows; rowIndex++) {
+    var rowData = sheet.row(rowIndex); &#47;&#47; Récupère les données de la ligne actuelle
+
+    &#47;&#47; Vérification minimale : le nom de l&#39;étudiant doit être présent
+    String studentName = _getStringCellData(rowData, _colStudentName);
+    if (studentName.isEmpty) {
+      &#47;&#47; print(&quot;Ligne ${rowIndex + 1}: Nom de l&#39;étudiant manquant, ligne ignorée.&quot;);
+      continue; &#47;&#47; Passer à la ligne suivante
+    }
+
+    &#47;&#47; --- Récupération&#47;Création de l&#39;objet Student ---
+    Student currentStudent;
+    if (!tempStudentMap.containsKey(studentName)) {
+      &#47;&#47; Nouvel étudiant : lire ses informations spécifiques et le créer
+      String specialization = _getStringCellData(rowData, _colSpecialization, defaultValue: &quot;Non spécifiée&quot;);
+      int rankingS1 = _getIntCellData(rowData, _colRankingS1);
+      int ectsNumber = _getIntCellData(rowData, _colEctsNumber);
+      String langLvl = _getStringCellData(rowData, _colLangLvl, defaultValue: &quot;N&#47;A&quot;);
+      double missedHours = _getDoubleCellData(rowData, _colMissedHours);
+      String comment = _getStringCellData(rowData, _colComment);
+      &#47;&#47; Lire d&#39;autres champs de Student si nécessaire (post_comment, etc.)
+      &#47;&#47; String? postComment = _getStringCellData(rowData, _colPostComment, defaultValue: null); &#47;&#47; Exemple
+
+      currentStudent = Student(
+          nextStudentId,
+          studentName,
+          {}, &#47;&#47; Initialiser avec une Map de choix vide
+          specialization,
+          rankingS1,
+          ectsNumber,
+          langLvl,
+          missedHours,
+          comment
+        &#47;&#47; post_comment: postComment, &#47;&#47; Si vous avez ce champ et l&#39;avez lu
+      );
+      tempStudentMap[studentName] = currentStudent;
+      nextStudentId++;
+    } else {
+      &#47;&#47; Étudiant existant : le récupérer
+      currentStudent = tempStudentMap[studentName]!;
+      &#47;&#47; Optionnel : mettre à jour des informations de l&#39;étudiant si elles sont plus complètes
+      &#47;&#47; sur cette ligne, mais attention à ne pas écraser des données valides.
+      &#47;&#47; Exemple : si la spécialisation était &quot;Non spécifiée&quot; et qu&#39;on en trouve une :
+      if (currentStudent.specialization == &quot;Non spécifiée&quot;) {
+        String newSpecialization = _getStringCellData(rowData, _colSpecialization, defaultValue: &quot;Non spécifiée&quot;);
+        if (newSpecialization != &quot;Non spécifiée&quot;) {
+          currentStudent.specialization = newSpecialization;
+          currentStudent.year_departement(newSpecialization); &#47;&#47; Mettre à jour année&#47;département
+        }
+      }
+    }
+
+    &#47;&#47; --- Traitement du Vœu pour l&#39;étudiant actuel ---
+    String rawWishOrder = _getStringCellData(rowData, _colWishOrder);
+    String country = _getStringCellData(rowData, _colCountry);
+    String schoolName = _getStringCellData(rowData, _colSchoolName);
+    String rawInterRanking = _getStringCellData(rowData, _colInterRanking);
+
+    &#47;&#47; Un vœu nécessite au moins un ordre, un nom d&#39;école et un pays
+    if (rawWishOrder.isEmpty || schoolName.isEmpty || country.isEmpty || rawInterRanking.isEmpty) {
+      &#47;&#47; print(&quot;Ligne ${rowIndex + 1} pour ${studentName}: Données de vœu incomplètes, vœu ignoré.&quot;);
+      continue; &#47;&#47; Passer si les informations essentielles du vœu sont manquantes
+    }
+
+    int? wishOrder = int.tryParse(rawWishOrder);
+    double? interRanking = double.tryParse(rawInterRanking); &#47;&#47; Votre Choice utilise double
+
+    if (wishOrder == null || interRanking == null) {
+      &#47;&#47; print(&quot;Ligne ${rowIndex + 1} pour ${studentName}: Format numérique invalide pour l&#39;ordre du vœu ou interRanking, vœu ignoré.&quot;);
+      continue;
+    }
+
+    &#47;&#47; Création de l&#39;objet School
+    School? school = schools.where((e) =&gt; e.name == schoolName).firstOrNull;
+    if (school == null){
+      print(&quot;The schools doesn&#39;t appear in the list of parsed school&quot;);
+      return [];
+    }
+    &#47;&#47; Création de l&#39;objet Choice (en passant l&#39;instance de Student, comme défini dans votre classe Choice)
+    Choice choice = Choice(school, interRanking, currentStudent);
+
+    &#47;&#47; Ajout du choix à la map de choix de l&#39;étudiant
+    currentStudent.choices[wishOrder] = choice;
+  }
+  &#47;&#47; Conversion de la map des étudiants en une liste triée par ID
+  List&lt;Student&gt; finalStudentList = tempStudentMap.values.toList();
+  finalStudentList.sort((a, b) =&gt; a.id.compareTo(b.id));
+
+  &#47;&#47; Add verification at specific points, for example:
+  if (tempStudentMap.isEmpty) {
+    throw ExcelParsingException(&quot;Aucun étudiant n&#39;a été trouvé dans le fichier&quot;);
+  }
+
+  &#47;&#47; Check if any student has no choices
+  for (var student in tempStudentMap.values) {
+    if (student.choices.isEmpty) {
+      throw ExcelParsingException(&quot;L&#39;étudiant ${student.name} n&#39;a aucun choix d&#39;école&quot;);
+    }
+  }
+
+  return finalStudentList;
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">mobinsa</a></li>
+    <li><a href="../../model_parser/">parser</a></li>
+    <li><a href="../../model_parser/SheetParser-class.html">SheetParser</a></li>
+    <li class="self-crumb">extractStudents static method</li>
+</ol>
+
+    <h5>SheetParser class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    mobinsa
+      1.0.0+1
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+
