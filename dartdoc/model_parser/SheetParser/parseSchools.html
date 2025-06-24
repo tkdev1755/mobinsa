@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the parseSchools method from the SheetParser class, for the Dart programming language.">
+  <title>parseSchools method - SheetParser class - parser library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">mobinsa</a></li>
+    <li><a href="../../model_parser/">model\parser.dart</a></li>
+    <li><a href="../../model_parser/SheetParser-class.html">SheetParser</a></li>
+    <li class="self-crumb">parseSchools static method</li>
+  </ol>
+  <div class="self-name">parseSchools</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="model_parser&#47;SheetParser-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">parseSchools</span> static method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../model_School/School-class.html">School</a></span>&gt;</span></span>
+<span class="name ">parseSchools</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="parseSchools-param-file"><span class="type-annotation"><a href="https://pub.dev/documentation/excel/4.0.6/excel/Excel-class.html">Excel</a></span> <span class="parameter-name">file</span></span></li>
+</ol>)
+
+      
+
+    </section>
+    
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">static List&lt;School&gt; parseSchools(Excel file) {
+  List&lt;School&gt; schools = [];
+
+  &#47;&#47; Basic validation for file structure
+  if (file.sheets.length &lt; 2) {
+    throw ExcelParsingException(&quot;Le fichier des écoles doit contenir au moins deux feuilles (Europe et Hors-Europe)&quot;);
+  }
+
+  &#47;&#47;Données Europe et Hors-Europe
+  for(int eu=0; eu&lt;2; eu++) {
+    String sheetName = file.sheets.keys.toList()[eu];
+    var sheet = file.sheets[sheetName];
+
+    if (sheet == null || sheet.maxRows &lt; 2) {
+      &#47;&#47; Ajouter une throw indiquant que le ficher n&#39;as pas été parsé correctement
+      return [];
+    }
+    &#47;&#47;Afficher la première colonne
+    &#47;&#47;int MAXCOLUMN = sheet.rows[0].length - 1;
+    String? colData = sheet.rows[0][0]?.value.toString();
+    int MAXCOLUMN = 1;
+    while (colData != &quot;&quot; &amp;&amp; colData != null){
+      print(colData);
+      colData = sheet.rows[0][MAXCOLUMN]?.value.toString();
+      MAXCOLUMN++;
+    }
+    MAXCOLUMN--;
+    &#47;*for (int col = 0; col &lt; MAXCOLUMN; col++) {
+      String value = sheet.rows[0][col]?.value.toString() ?? &quot;Problème 1ere colonne&quot; ;
+      stdout.write(&quot;$value; &quot;);
+    }*&#47;
+    print(&quot;&quot;);
+    &#47;&#47; Traiter chaque ligne à partir de la ligne 2 (index 1) qui contient les données
+    for (int row = 1; row &lt; sheet.maxRows; row++) {
+      &#47;&#47; Vérifiez si la ligne contient des données
+      if (sheet.rows[row].isEmpty || sheet.rows[row][0] == null) continue;
+      &#47;&#47; Offre de séjour
+      &#47;&#47;String offre = sheet.rows[row][0]?.value.toString() ?? &quot;Problème parsing&quot;;
+      &#47;&#47;print(&quot;Offre: $offre&quot;);
+      for (int col = 0; col &lt; MAXCOLUMN; col++) { &#47;&#47;MAXCOLUMN YEAH
+        String value = sheet.rows[row][col]?.value.toString() ?? &quot;Problème parsing&quot;;
+        stdout.write(&quot;$value; &quot;);
+      }
+      &#47;&#47;VERSION DU TABLEUR
+      int version = 2;
+      if(version==2) {
+        String name = sheet.rows[row][0]?.value.toString() ?? &quot;PROBLEM NAME&quot;;
+        String country = sheet.rows[row][1]?.value.toString() ??
+            &quot;PROBLEM COUNTRY&quot;;
+        String contract = sheet.rows[row][2]?.value.toString() ??
+            &quot;PROBLEM CONTRACT_TYPE&quot;;
+        int slots = int.parse(sheet.rows[row][3]?.value.toString() ?? &quot;-1&quot;);
+        int bSlots = int.parse(sheet.rows[row][4]?.value.toString() ?? &quot;-1&quot;);
+        int mSlots = int.parse(sheet.rows[row][5]?.value.toString() ?? &quot;-1&quot;);
+        List&lt;String&gt; specialization = specializationStringToList(
+            sheet.rows[row][6]?.value.toString() ?? &quot;PROBLEM SPECIALIZATION&quot;);
+        String graduationLevel = sheet.rows[row][7]?.value.toString() ??
+            &quot;PROBLEM GRADUATION_LEVEL&quot;;
+        String program = sheet.rows[row][8]?.value.toString() ??
+            &quot;PROBLEM PROGRAM&quot;;
+        String useLanguage = sheet.rows[row][9]?.value.toString() ??
+            &quot;PROBLEM USE_LANGUAGE&quot;;
+        String reqLangLevel = sheet.rows[row][10]?.value.toString() ??
+            &quot;PROBLEM REQ_LANG_LEVEL&quot;;
+        String academicLevel = sheet.rows[row][11]?.value.toString() ??
+            &quot;PROBLEM ACADEMIC_LEVEL&quot;;
+        School school = School(
+            name,
+            country,
+            contract,
+            slots,
+            bSlots,
+            mSlots,
+            specialization,
+            graduationLevel,
+            program,
+            useLanguage,
+            reqLangLevel,
+            academicLevel
+        );
+        schools.add(school);
+      }
+      if(version==1) {
+        String name = sheet.rows[row][0]?.value.toString() ?? &quot;PROBLEM NAME&quot;;
+        String country = sheet.rows[row][1]?.value.toString() ??
+            &quot;PROBLEM COUNTRY&quot;;
+        String contract = sheet.rows[row][2]?.value.toString() ??
+            &quot;PROBLEM CONTRACT_TYPE&quot;;
+        int slots = int.parse(sheet.rows[row][3]?.value.toString() ?? &quot;-1&quot;);
+        int bSlots = slots;
+        int mSlots = slots;
+        List&lt;String&gt; specialization = specializationStringToList(
+            sheet.rows[row][5]?.value.toString() ?? &quot;PROBLEM SPECIALIZATION&quot;);
+        String graduationLevel = sheet.rows[row][6]?.value.toString() ??
+            &quot;PROBLEM GRADUATION_LEVEL&quot;;
+        String program = sheet.rows[row][7]?.value.toString() ??
+            &quot;PROBLEM PROGRAM&quot;;
+        String useLanguage = sheet.rows[row][8]?.value.toString() ??
+            &quot;PROBLEM USE_LANGUAGE&quot;;
+        String reqLangLevel = sheet.rows[row][9]?.value.toString() ??
+            &quot;PROBLEM REQ_LANG_LEVEL&quot;;
+        String academicLevel = sheet.rows[row][10]?.value.toString() ??
+            &quot;PROBLEM ACADEMIC_LEVEL&quot;;
+        School school = School(
+            name,
+            country,
+            contract,
+            slots,
+            bSlots,
+            mSlots,
+            specialization,
+            graduationLevel,
+            program,
+            useLanguage,
+            reqLangLevel,
+            academicLevel
+        );
+        schools.add(school);
+      }
+      print(&quot;&quot;);
+    }
+  }
+  print(&quot;LES SCHOOLS: $schools&quot;);
+  print(&quot;Normalemennt MONS:&quot;);
+  print(schools[5].name);print(schools[5].country);print(schools[5].content_type);print(schools[5].specialization);
+
+  if (schools.isEmpty) {
+    throw ExcelParsingException(&quot;Aucune école n&#39;a été trouvée dans le fichier&quot;);
+  }
+
+  return schools;
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">mobinsa</a></li>
+    <li><a href="../../model_parser/">parser</a></li>
+    <li><a href="../../model_parser/SheetParser-class.html">SheetParser</a></li>
+    <li class="self-crumb">parseSchools static method</li>
+</ol>
+
+    <h5>SheetParser class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    mobinsa
+      1.0.0+1
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+
