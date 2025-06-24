@@ -36,6 +36,7 @@
       gap: 2rem;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
 
     .image-column {
@@ -130,10 +131,36 @@
         font-size: 2rem;
       }
     }
+
+    .github-button {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.8rem;
+      color: white;
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.5rem;
+      border-radius: 12px;
+      backdrop-filter: blur(6px);
+      transition: background 0.3s ease;
+      z-index: 10;
+    }
+
+    .github-button:hover {
+      background: rgba(255, 255, 255, 0.4);
+      color: black;
+    }
+
   </style>
 </head>
 <body>
+
+
   <div class="glass-container">
+    <a href="https://github.com/ton-utilisateur/ton-repo" target="_blank" class="github-button">
+      <i class="ph ph-github-logo"></i>
+    </a>
     <div class="image-column">
       <img src="img.png" alt="Aperçu du projet">
     </div>
