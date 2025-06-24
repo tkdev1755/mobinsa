@@ -2,8 +2,10 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>PROJ</title>
+  <title>Mob'INSA</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <script type="module" src="https://unpkg.com/@phosphor-icons/web"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -75,11 +77,12 @@
       gap: 1rem;
     }
 
-    .button-grid a {
-      display: flex; /* Définit un modèle flex */
-      justify-content: center; /* Centre horizontalement */
-      align-items: center; /* Centre verticalement */
-      text-align: center; /* Assure que le texte est centré si nécessaire */
+    .button-grid a, .platform-buttons button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      text-align: center;
       padding: 0.5rem;
       background: rgba(255, 255, 255, 0.3);
       border: 1px solid rgba(255, 255, 255, 0.3);
@@ -89,11 +92,33 @@
       font-weight: 600;
       transition: all 0.3s ease;
       backdrop-filter: blur(6px);
+      cursor: pointer;
     }
 
-    .button-grid a:hover {
+    .button-grid a:hover,
+    .platform-buttons button:hover {
       background: rgba(255, 255, 255, 0.5);
       color: #000;
+    }
+
+    .platform-buttons {
+      display: none;
+      margin-top: 1rem;
+      gap: 1rem;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .ph {
+      font-size: 1.5rem; */
+    }
+    .platform-buttons.show {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     @media (max-width: 700px) {
@@ -114,16 +139,37 @@
     </div>
 
     <div class="text-column">
-      <h1>PROJ</h1>
-      <p>Une explication claire et précise</p>
+      <h1>Mob'INSA</h1>
+      <p>Un logiciel pour simplifier les jury de mobilité</p>
 
-      <div class="button-grid">
-        <a href="https://github.com/ton-utilisateur/ton-repo/releases" target="_blank">Télécharger</a>
-        <a href="http://monsite.fr" target="_blank">📖 Comment l'utiliser ?</a>
-        <a href="https://github.com/ton-utilisateur/ton-repo/wiki" target="_blank">🛠️ Comment le maintenir ?</a>
-        <a href="https://ton-utilisateur.github.io/ton-repo/dartdoc/" target="_blank">📚 Documentation</a>
+    <div class="button-grid">
+      <a href="#" id="toggle-download"><i class="ph ph-download-simple"></i> Télécharger</a>
+      <a href="https://tkdocs.craft.me/cDa5md84MM1wgG" target="_blank"><i class="ph ph-book-open"></i> Comment l'utiliser ?</a>
+      <a href="https://github.com/tkdev1755/mobinsa/wiki" target="_blank"><i class="ph ph-wrench"></i> Comment le maintenir ?</a>
+      <a href="https://tkdev1755.github.io/mobinsa/dartdoc/" target="_blank"><i class="ph ph-books"></i> Documentation</a>
+    </div>
+
+
+      <div class="button-grid platform-buttons" id="platformButtons">
+        <a href="https://github.com/tkdev1755/mobinsa/releases/latest/download/mobinsa_windows.zip">
+          <i class="ph ph-windows-logo"></i> Windows
+        </a>
+        <a href="https://github.com/tkdev1755/mobinsa/releases/latest/download/mobinsa_macos_universal.zip">
+          <i class="ph ph-apple-logo"></i> macOS
+        </a>
+        <a href="https://github.com/tkdev1755/mobinsa/releases/latest/download/mobinsa_linux.zip">
+          <i class="ph ph-linux-logo"></i> Linux
+        </a>
       </div>
+
     </div>
   </div>
+
+  <script>
+    document.getElementById("toggle-download").addEventListener("click", function(e) {
+      e.preventDefault();
+      document.getElementById("platformButtons").classList.toggle("show");
+    });
+  </script>
 </body>
 </html>
