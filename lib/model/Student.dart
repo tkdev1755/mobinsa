@@ -39,6 +39,7 @@ class Student {
   Student(this.id, this.name, this.choices, this.specialization,
       this.ranking_s1, this.ects_number, this.lang_lvl, this.missed_hours,
       this.comment) {
+    // Fonction pour initialiser les attributs représentant l'année et le département de l'étudiant
     year_departement(specialization);
   }
 
@@ -122,16 +123,32 @@ class Student {
     return "$departement ${year + 1}A";
   }
 
-  Student clone(){
-    return Student(id, name,choices,specialization,ranking_s1,ects_number,lang_lvl,missed_hours,comment);
+  Student clone(List<School> schools){
+    // Fonction nécessaire pour éviter de se retrouver à traiter un même étudiant sur deux pages différentes
+    Student newStudent = Student(id, name,{},specialization,ranking_s1,ects_number,lang_lvl,missed_hours,comment);
+    newStudent.choices = {
+      for (var entry in choices.entries) entry.key: entry.value.clone(newStudent, school: schools.where((e) => e == entry.value.school).first),
+    };
+    return newStudent;
   }
 
   double get_max_rank(){
+
     List<double> lst = [];
     for (var c in choices.values ){
       lst.add(c.interranking);
     }
+    // Permet d'obtenir la valeur la plus élevée en terme d'interranking parmi ses choix
     double max = lst.reduce((a, b) => a > b ? a : b);
+
+    // Une version plus simplifiée pourrait ressembler à ça
+    /*
+      // je récupère les valeurs du dictionnaire que je transforme en liste et à laquelle j'applique
+      // la fonction reduce pour obtenir la valeur la plus élevée
+      double max = choices.values.toList().reduce((a, b) => a.interranking > b.interranking ? a.interranking : b.interranking);
+
+     */
+
     /*
     List<Choice> Mmax = choices.values.toList();
     Mmax.sort((a,b) => b.interranking.compareTo(a.interranking));
@@ -142,10 +159,13 @@ class Student {
   }
 
   double get_min_rank (){
+
     List<double> lst = [];
     for (var c in choices.values ){
       lst.add(c.interranking);
     }
+    // .reduce permet d'obtenir une seule valeur en combinant toutes les valeurs d'une liste de manière itérative
+    // elle peut être utilisée pour calculer la somme de tout les éléments d'une liste
     double min = lst.reduce((a, b) => a < b ? a : b);
     return min;
   }
@@ -158,6 +178,8 @@ class Student {
         return false;
       }
     }
+    // un peu superflu, pourrait faire
+    // return refused.length == 3;
     return true;
   }
 
@@ -174,7 +196,7 @@ class Student {
   String toString() {
     String choicesString = choices.entries.map((entry) => '\n    Vœu ${entry.key}: ${entry.value}').join('');
     String refusedChoicesString = refused.isNotEmpty ? refused.map((choice) => '\n    Refusé: $choice').join('') : '\n    Aucun refus';
-    return this.name;
+    return "${name} - Voeu accepté : ${accepted?.school.name} - Voeux refusés : ${refused.length}";
     // return 'Étudiant {\n'
     //     '  ID: $id,\n'
     //     '  Nom: $name,\n'
@@ -189,6 +211,13 @@ class Student {
     //     '  Vœu Accepté: ${accepted ?? 'Aucun'}\n'
     //     '  Vœux Refusés: $refusedChoicesString\n'
     //     '}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    // if (identical(this, other)) return true;
+    if (other is! Student) return false;
+    return name == other.name && specialization == other.specialization;
   }
 
   Map<int, Choice> diff_interrankings() {
@@ -284,6 +313,8 @@ class Student {
     return equal_dict;
   }
 
+
+
   Map<String, dynamic> toJson(){
     Map<String,dynamic> choicesMap = choices.map((k,v) => MapEntry(k.toString(), v.toJson()));
     List<dynamic> refusedChoiceList = refused.map((e)=> e.toJson()).toList();
@@ -301,6 +332,7 @@ class Student {
       jsonComment : comment,
     };
   }
+
   factory Student.fromJson(Map<String, dynamic> json){
     Map<int, Choice> deserializedChoices = {};
     Student student = Student(

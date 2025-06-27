@@ -44,10 +44,20 @@ class School {
   School(this.name, this.country, this.content_type, this.available_slots,
       this.b_slots, this.m_slots, this.specialization, this.graduation_level,
       this.program, this.use_langage, this.req_lang_level,
-      this.academic_level) {
+      this.academic_level, {int? initialID, int? overrideRemainingPlaces}) {
+    if (initialID !=null){
+      id = initialID;
+    }
+    else{
     id = global_id;
-    remaining_slots = available_slots;
     global_id++;
+    }
+    if (overrideRemainingPlaces != null){
+      remaining_slots = overrideRemainingPlaces;
+    }
+    else{
+      remaining_slots = available_slots;
+    }
   }
 
   static void setGlobalID(int globalID){
@@ -91,20 +101,32 @@ class School {
     }
   }
 
+  int getPlacesBySpecialization(String specialization){
+    if(specialization == "master"){
+      return m_slots;
+    }
+    else if (specialization == "bachelor") {
+      return b_slots;
+    }
+    else {
+      return -1;
+    }
+  }
+
   bool accepted(Student s) {
     //affectation d'une offre de séjour à un élève
-    print("s.year : ${s.year}");
-    print("this.b_slots : ${b_slots}");
-    print("this.specialization : ${specialization}");
-    print("s.get_next_year() : ${s.get_next_year()}");
+    //print("s.year : ${s.year}");
+    //print("this.b_slots : ${b_slots}");
+    //print("this.specialization : ${specialization}");
+    //print("s.get_next_year() : ${s.get_next_year()}");
     //Les 2A ne pourront quand même pas prendre de formation en master !
     if (s.year == 2 && this.b_slots > 0 ) {
-      print("ACCEPTED SCHOOL LICENCE");
+      //print("ACCEPTED SCHOOL LICENCE");
       reduce_slots(s);
       return true;
     }
     else if (s.year > 2 && this.m_slots > 0 ) {
-      print("ACCEPTED SCHOOL MASTER");
+      //print("ACCEPTED SCHOOL MASTER");
       reduce_slots(s);
       return true;
     }
@@ -115,6 +137,9 @@ class School {
     return "Ecole : $name - $country - $specialization";
   }
 
+  School clone(){
+    return School(name, country, content_type, available_slots, b_slots, m_slots, specialization, graduation_level, program, use_langage, req_lang_level, academic_level, initialID: id, overrideRemainingPlaces: remaining_slots);
+  }
   Map<String,dynamic> toJson(){
     return {
       jsonId : id,
@@ -158,6 +183,13 @@ class School {
     school.is_full_b = json[jsonIsFull_b];
     school.is_full_m = json[jsonIsFull_m];
     return  school;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    // if (identical(this, other)) return true;
+    if (other is! School) return false;
+    return id == other.id;
   }
 
 }

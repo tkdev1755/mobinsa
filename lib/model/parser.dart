@@ -15,8 +15,8 @@ import 'package:mobinsa/model/School.dart';
  */
 class ExcelParsingException implements Exception {
   final String message;
-  
-  ExcelParsingException(this.message);
+  final String? stackTrace;
+  ExcelParsingException(this.message, {this.stackTrace});
   
   @override
   String toString() {
@@ -119,7 +119,6 @@ class SheetParser{
 
     if (excel.sheets.isEmpty) {
       print("Information: Le fichier Excel ne contient aucune feuille.");
-
       return [];
     }
     String sheetName = excel.sheets.keys.first; // Prend la première feuille par défaut
@@ -172,7 +171,8 @@ class SheetParser{
         );
         tempStudentMap[studentName] = currentStudent;
         nextStudentId++;
-      } else {
+      }
+      else {
         // Étudiant existant : le récupérer
         currentStudent = tempStudentMap[studentName]!;
         // Optionnel : mettre à jour des informations de l'étudiant si elles sont plus complètes
@@ -210,6 +210,8 @@ class SheetParser{
       // Création de l'objet School
       School? school = schools.where((e) => e.name == schoolName).firstOrNull;
       if (school == null){
+        // On jette un exception si l'école n'est pas repertoriée dans le fichier excel
+        throw ExcelParsingException("L'école ${schoolName} ne semble pas être repertoriée au sein du fichier école");
         print("The schools doesn't appear in the list of parsed school");
         return [];
       }
@@ -252,6 +254,7 @@ class SheetParser{
       var sheet = file.sheets[sheetName];
 
       if (sheet == null || sheet.maxRows < 2) {
+        throw ExcelParsingException("Il semble que le fichier passé n'est pas lisible");
         // Ajouter une throw indiquant que le ficher n'as pas été parsé correctement
         return [];
       }
@@ -284,20 +287,55 @@ class SheetParser{
         //VERSION DU TABLEUR
         int version = 2;
         if(version==2) {
-          String name = sheet.rows[row][0]?.value.toString() ?? "PROBLEM NAME";
-          String country = sheet.rows[row][1]?.value.toString() ??
-              "PROBLEM COUNTRY";
-          String contract = sheet.rows[row][2]?.value.toString() ??
-              "PROBLEM CONTRACT_TYPE";
-          int slots = int.parse(sheet.rows[row][3]?.value.toString() ?? "-1");
-          int bSlots = int.parse(sheet.rows[row][4]?.value.toString() ?? "-1");
-          int mSlots = int.parse(sheet.rows[row][5]?.value.toString() ?? "-1");
-          List<String> specialization = specializationStringToList(
+          List<String> readInfo = ["Offre de séjour", "Pays", "Cadre"];
+          String? name = sheet.rows[row][0]?.value?.toString();
+
+          if (name != null){
+            print("Name is ${name}");
+            readInfo.remove("Offre de séjour");
+          }
+
+          String? country = sheet.rows[row][1]?.value?.toString();
+          if (country != null){
+            readInfo.remove("Pays");
+          }
+          String? contract = sheet.rows[row][2]?.value?.toString();
+          if (contract != null){
+            readInfo.remove("Cadre");
+          }
+          if (readInfo.length != 0){
+            throw ExcelParsingException("Les valeurs ${readInfo} pour l'école ${name} semblent être incorrecte");
+          }
+          int slots = -1;
+          int bSlots = -1;
+          int mSlots = -1;
+          List<String> readSlots = ["Places", "Places Bachelor","Places Master"];
+          try{
+            slots = int.parse(sheet.rows[row][3]?.value.toString() ?? "-1");
+            readSlots.remove("Places");
+            bSlots = int.parse(sheet.rows[row][4]?.value.toString() ?? "-1");
+            readSlots.remove("Places Bachelor");
+            mSlots = int.parse(sheet.rows[row][5]?.value.toString() ?? "-1");
+            readSlots.remove("Places Master");
+          }
+          catch (e,s){
+            throw ExcelParsingException("Les valeurs ${readSlots.toString()} pour l'école ${name} sont incorrectes ");
+          }
+          List<String> readDetails = ["Discipline","Niveau", "Formation","Langue d'enseignement", "Niveau langue", "Niveau Académique"];
+          List<String>? specialization = specializationStringToList(
               sheet.rows[row][6]?.value.toString() ?? "PROBLEM SPECIALIZATION");
-          String graduationLevel = sheet.rows[row][7]?.value.toString() ??
-              "PROBLEM GRADUATION_LEVEL";
-          String program = sheet.rows[row][8]?.value.toString() ??
-              "PROBLEM PROGRAM";
+          if (specialization != null){
+            readDetails.remove("Discipline");
+          }
+          String? graduationLevel = sheet.rows[row][7]?.value?.toString();
+          if (graduationLevel != null){
+            readDetails.remove("Niveau");
+          }
+
+          String? program = sheet.rows[row][8]?.value?.toString();
+          if (program != null){
+            readDetails.remove("Formation");
+          }
           String useLanguage = sheet.rows[row][9]?.value.toString() ??
               "PROBLEM USE_LANGUAGE";
           String reqLangLevel = sheet.rows[row][10]?.value.toString() ??
@@ -305,22 +343,22 @@ class SheetParser{
           String academicLevel = sheet.rows[row][11]?.value.toString() ??
               "PROBLEM ACADEMIC_LEVEL";
           School school = School(
-              name,
-              country,
-              contract,
+              name!,
+              country!,
+              contract!,
               slots,
               bSlots,
               mSlots,
-              specialization,
-              graduationLevel,
-              program,
+              specialization!,
+              graduationLevel!,
+              program!,
               useLanguage,
               reqLangLevel,
               academicLevel
           );
           schools.add(school);
         }
-        if(version==1) {
+        /*if(version==1) {
           String name = sheet.rows[row][0]?.value.toString() ?? "PROBLEM NAME";
           String country = sheet.rows[row][1]?.value.toString() ??
               "PROBLEM COUNTRY";
@@ -356,13 +394,15 @@ class SheetParser{
               academicLevel
           );
           schools.add(school);
-        }
+        }*/
         print("");
       }
     }
-    print("LES SCHOOLS: $schools");
-    print("Normalemennt MONS:");
-    print(schools[5].name);print(schools[5].country);print(schools[5].content_type);print(schools[5].specialization);
+
+    // muted prints to clean the debug output
+    //print("LES SCHOOLS: $schools");
+    //print("Normalemennt MONS:");
+    //print(schools[5].name);print(schools[5].country);print(schools[5].content_type);print(schools[5].specialization);
     
     if (schools.isEmpty) {
       throw ExcelParsingException("Aucune école n'a été trouvée dans le fichier");
@@ -372,7 +412,7 @@ class SheetParser{
   }
 
   //transforme la colonne DISCIPLINE en une liste de STI 3A, STI 4A, MRI 3A, MRI 4A
-  static List<String> specializationStringToList(String specialization){
+  static List<String>? specializationStringToList(String specialization){
     List<String> spez = [];
     List<String> substrings = specialization.split("+");
     for(String substring in substrings) {
@@ -393,8 +433,12 @@ class SheetParser{
         }
       }
     }
+    if (spez.length == 0){
+      return null;
+    }
     return spez;
   }
+
   static List<int> exportResult(List<Student> students, List<School> schools) {
     Map<int, String> indexes = {
       0: "Nom",
@@ -571,8 +615,11 @@ class SheetParser{
   }
 
   static int saveExcelToDisk(String path, List<int> bytes){
+    // On crée un objet Fichier qui contient le descripteur, le chemin etc...
     File excelFile = File(path);
+    // Ici étant qu'on est forcément dans un cas où on enregistre le fichier sur le disque, on le crée dans le système de fichier
     excelFile.createSync();
+    // On écrit ensuite les octets qui composent le fichier excel initial
     excelFile.writeAsBytes(bytes);
     return 1;
   }

@@ -203,12 +203,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                           backgroundColor: Colors.green,
                                         ),
                                       );
-                                    } catch (e) {
+                                    } catch (e,s) {
+
                                       // Error extracting schools from Excel
                                       showErrorDialog(
                                           context,
                                           "Erreur d'analyse des écoles",
-                                          "Impossible de lire les données des écoles: ${e.toString()}"
+                                          "Impossible de lire les données des écoles: ${e.toString()} ${e.runtimeType != ExcelParsingException ? "\nDetail : \n ${s}" : ""}"
                                       );
                                     }
                                   } catch (e) {

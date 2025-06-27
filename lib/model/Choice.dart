@@ -16,7 +16,7 @@ class Choice {
     //affectation d'une offre de séjour à un élève
     if (school.accepted(s)) {
       student.accepted = this;
-      print("ACCEPTED CHOICE");
+      //print("ACCEPTED CHOICE");
       return true;
     }
     return false;
@@ -29,8 +29,8 @@ class Choice {
     if(student.accepted == this){
       remove_choice();
     }
-    print("REFUSED CHOICE");
-    print(student.refused);
+    //print("REFUSED CHOICE");
+    //print(student.refused);
   }
 
   void remove_choice() {
@@ -71,10 +71,24 @@ class Choice {
     return school.name;
   }
 
+
+  bool isChoiceValid(){
+    // On s'assure ici que 2 éléments sont vrai, disponibilité de la spécialisation chez l'école, et disponibilité des places
+    bool hasSpecialization = school.specialization.contains(student.get_next_year());
+    bool hasPlaces = school.getPlacesBySpecialization(student.get_graduation_level()) != 0;
+    print("IsChoiceValid : L'étudiant a-t-il la spécialisation nécessaire ? ${hasSpecialization} \n la formation as-t-elle encore des places ${hasPlaces}");
+    return hasSpecialization && hasPlaces;
+  }
+
+  Choice clone(Student newStudent, {School? school}){
+    return Choice(school ?? this.school.clone(), interranking, newStudent);
+  }
   @override
   bool operator ==(Object other) {
     // if (identical(this, other)) return true;
     if (other is! Choice) return false;
+    // On considère que deux choix sont les mêmes s'ils ont la même école, on fait la distinction entre les étudiants plus tard
+
     return school.id == other.school.id;
   }
 
