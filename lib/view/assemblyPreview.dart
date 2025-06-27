@@ -34,7 +34,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
     int numberOfThirdWishes = 0;
 
     // Je converti la liste d'étudiants en une liste de tuple dont le type est un entier et un choix
-    // Ce tuple représente le couple numéro de voeu+ voeu
+    // Ce tuple représente le couple numéro de voeu + voeu
     // Cela facilite grandement le traitement car on peut ensuite simplement trier les voeux par ordre décroissant et ne pas se soucier de cas extrêmes
     // car tous les voeux qui auraient pu avoir un meilleur classement ont forcément été traités
     List<(int,Choice)> allChoices = allStudents.expand((e) => e.choices.entries.map((entry) => (entry.key, entry.value))).toList();
@@ -44,11 +44,10 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
 
     // Itération sur chaque élément de la liste
     for ((int,Choice) choice in allChoices){
-      // Si l'étudiant n'as pas de voeu d'accepté et que le voeux sur lequel j'itère n'est pas déjà dans la liste des voeux refusés, je continue le traitement
+      // Si l'étudiant n'a pas de voeu d'accepté et que le voeux sur lequel j'itère n'est pas déjà dans la liste des voeux refusés, je continue le traitement
       if (choice.$2.student.accepted == null && !(choice.$2.student.refused.contains(choice.$2))){
         // Si le voeu peut être accepté, en dehors de toute considération pour l'interclassement, on le donne. Voir isChoiceValid pour les conditions
         if (choice.$2.isChoiceValid()){
-
           // On "donne" le voeu en utilisant la méthode accepted de la classe Choice pour actualiser tout les acteurs concernés (écoles, étudiants...)
           // Voir Choice.accepted pour plus de détails
           print("Le voeu : ${choice.$2.school.name} de ${choice.$2.student.name} a été donné");
@@ -77,7 +76,6 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
       }
       // Si l'attribut accepted est initialisée (non nul), l'étudiant associé au voeu courant n'a pas besoin d'être traité
       else if (choice.$2.student.accepted != null){
-
         print("L'étudiant ${choice.$2.student.name} à déjà un de ses voeux");
       }
       // il est possible que ces 2 clauses peuvent être réunies en une seule
@@ -86,7 +84,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
       }
     }
     // Print de débug pour s'assurer du bon fonctionnement de l'algorithme
-    print("------- Résumé : Sur ${allStudents.length} étudiants, on a -------\n ${numberOfFirstWishes} ont eu leur premier voeu, \n ${numberOfSecondWishes} ont eu leur second voeu \n ${numberOfThirdWishes} ont eu leur 3ème voeu \n ${(allStudents.length-(numberOfFirstWishes+numberOfThirdWishes+numberOfSecondWishes))}  étudiants qui ont eu aucun voeu");
+    print("------- Résumé : Sur ${allStudents.length} étudiants, on a -------\n ${numberOfFirstWishes} étudiants ont eu leur premier voeu, \n ${numberOfSecondWishes} étudiants ont eu leur second voeu \n ${numberOfThirdWishes} étudiants ont eu leur 3ème voeu \n ${(allStudents.length-(numberOfFirstWishes+numberOfThirdWishes+numberOfSecondWishes))}  étudiants qui ont eu aucun voeu");
     // Affectation des statistiques d'attribution des voeux au anciennes variables utilisée pour l'affichage, afin de ne pas casser le code écrit par mes camarades
     stats.choice1 = numberOfFirstWishes;
     stats.choice2 = numberOfSecondWishes;

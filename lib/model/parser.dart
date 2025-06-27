@@ -11,7 +11,6 @@ import 'package:mobinsa/model/School.dart';
 
   16/06/2025@tahakhetib : J'ai apporté les modification suivantes
     - Mis à jour la fonction de Mehdi des étudiants pour récupérer l'école à partir d'un voeu
-    - Corrigé la fonction de Max des
  */
 class ExcelParsingException implements Exception {
   final String message;
@@ -56,7 +55,6 @@ class SheetParser{
         throw Exception("Formulaes aren't supported rn");
         //print(value.formula);
       }
-      print("${row[colIndex]!.value.runtimeType}");
       return int.tryParse(row[colIndex]!.value.toString().trim()) ?? defaultValue;
     }
     return defaultValue;
@@ -208,10 +206,10 @@ class SheetParser{
       }
 
       // Création de l'objet School
-      School? school = schools.where((e) => e.name == schoolName).firstOrNull;
+      School? school = schools.where((e) => e.name.contains(schoolName)).firstOrNull;
       if (school == null){
         // On jette un exception si l'école n'est pas repertoriée dans le fichier excel
-        throw ExcelParsingException("L'école ${schoolName} ne semble pas être repertoriée au sein du fichier école");
+        throw ExcelParsingException("L'école ${schoolName} ne semble pas être repertoriée au sein du fichier école \nDétail : Ligne ${rowIndex+1} du fichier étudiants, Etudiant : ${studentName}");
         print("The schools doesn't appear in the list of parsed school");
         return [];
       }
@@ -304,7 +302,7 @@ class SheetParser{
             readInfo.remove("Cadre");
           }
           if (readInfo.length != 0){
-            throw ExcelParsingException("Les valeurs ${readInfo} pour l'école ${name} semblent être incorrecte");
+            throw ExcelParsingException("Les valeurs ${readInfo} pour l'école ${name} à la ligne ${row+1} semblent être incorrecte ");
           }
           int slots = -1;
           int bSlots = -1;
@@ -319,7 +317,7 @@ class SheetParser{
             readSlots.remove("Places Master");
           }
           catch (e,s){
-            throw ExcelParsingException("Les valeurs ${readSlots.toString()} pour l'école ${name} sont incorrectes ");
+            throw ExcelParsingException("Les valeurs ${readSlots.toString()} pour l'école ${name} à la ligne ${row+1} sont incorrectes ");
           }
           List<String> readDetails = ["Discipline","Niveau", "Formation","Langue d'enseignement", "Niveau langue", "Niveau Académique"];
           List<String>? specialization = specializationStringToList(
@@ -328,6 +326,7 @@ class SheetParser{
             readDetails.remove("Discipline");
           }
           String? graduationLevel = sheet.rows[row][7]?.value?.toString();
+
           if (graduationLevel != null){
             readDetails.remove("Niveau");
           }
@@ -336,12 +335,23 @@ class SheetParser{
           if (program != null){
             readDetails.remove("Formation");
           }
-          String useLanguage = sheet.rows[row][9]?.value.toString() ??
-              "PROBLEM USE_LANGUAGE";
-          String reqLangLevel = sheet.rows[row][10]?.value.toString() ??
-              "PROBLEM REQ_LANG_LEVEL";
-          String academicLevel = sheet.rows[row][11]?.value.toString() ??
-              "PROBLEM ACADEMIC_LEVEL";
+          String? useLanguage = sheet.rows[row][9]?.value.toString();
+          if (useLanguage != null){
+            readDetails.remove("Langue d'enseignement");
+          }
+          String? reqLangLevel = sheet.rows[row][10]?.value?.toString();
+          if (reqLangLevel != null){
+            readDetails.remove("Niveau langue");
+          }
+          String? academicLevel = sheet.rows[row][11]?.value?.toString();
+          if (academicLevel != null){
+            readDetails.remove("Niveau Académique");
+          }
+          
+          if (readDetails.isNotEmpty){
+            throw ExcelParsingException("Les valeurs ${readDetails.toString()} pour l'école $name à la ligne ${row+1}  sont incorrectes");
+          }
+          //
           School school = School(
               name!,
               country!,
@@ -352,9 +362,9 @@ class SheetParser{
               specialization!,
               graduationLevel!,
               program!,
-              useLanguage,
-              reqLangLevel,
-              academicLevel
+              useLanguage!,
+              reqLangLevel!,
+              academicLevel!
           );
           schools.add(school);
         }
