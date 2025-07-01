@@ -134,7 +134,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
               Map<String, dynamic> serializedData = {};
               
               try {
-                serializedData = SessionStorage.serializeData(widget.students, widget.schools);
+                serializedData = await SessionStorage.serializeData(widget.students, widget.schools);
               }
               catch (e,s){
                 print("$s , $e -> There was a problem while serializing the data");
@@ -271,16 +271,21 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                           title: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                widget.students[index].name,
-                                style: GoogleFonts.montserrat(textStyle : TextStyle(
-                                  fontSize: 14,
-                                  color: currentStudentIndex == index
-                                      ? const Color.fromARGB(255, 242, 244, 246)
-                                      : Colors.black,
-                                  fontWeight: currentStudentIndex == index ? FontWeight.bold : FontWeight.normal,
-                                )),
+                              Expanded(
+                                child: Text(
+                                  widget.students[index].name,
+                                  style: GoogleFonts.montserrat(textStyle : TextStyle(
+                                    fontSize: 14,
+                                    color: currentStudentIndex == index
+                                        ? const Color.fromARGB(255, 242, 244, 246)
+                                        : Colors.black,
+                                    fontWeight: currentStudentIndex == index ? FontWeight.bold : FontWeight.normal,
+                                  )),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
+                              Padding(padding: EdgeInsets.only(right: 10)),
                               Text(
                                 widget.students[index].get_max_rank().toStringAsFixed(2),
                                 style: GoogleFonts.montserrat(textStyle : TextStyle(

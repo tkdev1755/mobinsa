@@ -2,10 +2,11 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:mobinsa/model/versionManager.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart' as pp;
 import 'School.dart';
 import 'Student.dart';
@@ -74,11 +75,13 @@ class SessionStorage{
     return saves;
   }
 
-  static Map<String, dynamic> serializeData(List<Student> students, List<School> schools){
+  static Future<Map<String, dynamic>> serializeData(List<Student> students, List<School> schools) async{
+    // Ajout de l'attribut version au dictionnaire
+    SoftwareUpdater softwareUpdater = SoftwareUpdater(await PackageInfo.fromPlatform());
     //print("Stats about the file \n Currently ${students.where((e) => e.accepted != null).length} students have an accepted choice \n  and ${students.where((e) => e.refused.isNotEmpty).length} students have a refused choice");
     //print("We currently have ${students.length} students and ${schools.length} schools ");
     // Je prépare le dictionnaire qui contient notre structure de donnée avec les étudiants d'un côté et les écoles d'un côté
-    Map<String, List<dynamic>> finalData = {"students" : [], "schools" : []};
+    Map<String, dynamic> finalData = {"students" : [], "schools" : [], "version" : softwareUpdater.toString()};
     // Je sérialise chaque étudiant et l'ajoute à la liste des étudiants sérialisée
     for (var student in students){
       finalData["students"]?.add(student.toJson());
@@ -122,8 +125,11 @@ class SessionStorage{
     List<Student> students = [];
     List<School> schools = [];
     // je m'assure de l'existence des clés que je recherche pour désérialiser mes données
-    if ((!data.containsKey(jsonStudentName)) || (!data.containsKey(jsonSchoolName)) ){
+    if ((!data.containsKey(jsonStudentName)) || (!data.containsKey(jsonSchoolName))){
       throw Exception("404 - File doesn't have the required field to reconstruct the data");
+    }
+    if (!data.containsKey("version")){
+      print("Save from 1.0.0, loading it as it causes no crashes");
     }
     print(data);
 

@@ -39,6 +39,8 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
     // car tous les voeux qui auraient pu avoir un meilleur classement ont forcément été traités
     List<(int,Choice)> allChoices = allStudents.expand((e) => e.choices.entries.map((entry) => (entry.key, entry.value))).toList();
 
+    //allChoices.sort((a,b) => a.$1.compareTo(b.$1));
+
     // Tri de tout les voeux selon l'ordre décroissant
     allChoices.sort((a,b) => b.$2.interranking.compareTo(a.$2.interranking));
 
@@ -95,7 +97,6 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
 
   Stats stats = Stats();
 
-  @override
   List<(double, Student)> sort_student(List<Student> lstStudent) {
     List<(double, Student)> myList = [];
     for (var el in lstStudent) {

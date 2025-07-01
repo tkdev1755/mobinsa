@@ -6,20 +6,25 @@ import 'package:flutter/material.dart';
 import 'package:mobinsa/model/School.dart';
 import 'package:mobinsa/model/parser.dart';
 import 'package:mobinsa/model/Student.dart';
+import 'package:mobinsa/model/versionManager.dart';
 import 'package:mobinsa/view/assemblyPreview.dart';
 import 'package:mobinsa/view/modalPages/saveDialog.dart';
+import 'package:mobinsa/view/modalPages/updaterDialog.dart';
 import 'package:mobinsa/view/uiElements.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  runApp(MyApp(pkgInfo: packageInfo,));
 }
 
 
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+  final PackageInfo pkgInfo;
+  const MyApp({super.key, required this.pkgInfo});
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -43,13 +48,13 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
       ),
-      home: const MyHomePage(title: "Bienvenue sur Mob'INSA"),
+      home: MyHomePage(title: "Bienvenue sur Mob'INSA", packageInfo: pkgInfo,),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({super.key, required this.title, required this.packageInfo});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -61,7 +66,7 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   final String title;
-
+  final PackageInfo packageInfo;
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
@@ -73,6 +78,9 @@ class _MyHomePageState extends State<MyHomePage> {
   String? selectedFilenameStudents;
   bool schoolsLoaded = false;
   bool studentsLoaded = false;  // Changed to false
+  late SoftwareUpdater softwareUpdater;
+  late (int,int,int) currentVersion;
+  late Future<bool> isUptoDate;
 
   Future<String?> pickFile() async {
     final result = await FilePicker.platform.pickFiles();
@@ -107,11 +115,19 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-
+  @override
+  void initState() {
+    softwareUpdater = SoftwareUpdater(widget.packageInfo);
+    currentVersion = softwareUpdater.currentVersion;
+    isUptoDate = softwareUpdater.isUpToDate();
+    // TODO: implement initState
+    super.initState();
+  }
 
 
 
   Widget build(BuildContext context) {
+
     // Keep your existing button style definition
     final ButtonStyle customButtonStyle = ElevatedButton.styleFrom(
       backgroundColor: Colors.grey[300],
@@ -128,6 +144,53 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         title: Text(widget.title,style: UiText(color: UiColors.white, weight: FontWeight.w600).mediumText,),
         centerTitle: true,
+        actions: [
+          Text("Version ${currentVersion.$1}.${currentVersion.$2}.${currentVersion.$3}", style: UiText(color: UiColors.white).smallText,),
+          Padding(padding: EdgeInsets.only(right: 20)),
+          FutureBuilder(future: isUptoDate, builder: (BuildContext context, AsyncSnapshot<bool> snap){
+            if (snap.hasData){
+              return Visibility(
+                visible: !(snap.data!),
+                child: InkWell(
+                  splashColor: Colors.green.shade400,
+                  hoverColor: Colors.green.shade600,
+                  hoverDuration: Duration(milliseconds: 200),
+                  customBorder: RoundedRectangleBorder(
+                    side:  BorderSide(
+                      color: Colors.orange,
+                      width: 4,
+                      strokeAlign: 20
+                    )
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () async {
+                    await softwareUpdater.isUpToDate();
+                    // Future code to try and get the update
+                    if (context.mounted){
+                      showDialog(context: context, builder: (BuildContext context){
+                        return UpdateDialog(softwareUpdater: softwareUpdater);
+                      });
+                    }
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Text(
+                      "Une mise à jour est disponible ",
+                      style: UiText(color: UiColors.white).smallText,
+                    ),
+                  ),
+                ),
+              );
+            }
+            else if (snap.hasError){
+              return Text("Impossible de récupérer la dernière version");
+            }
+            else{
+              return CircularProgressIndicator();
+            }
+          }),
+          Padding(padding: EdgeInsets.only(right: 40))
+        ],
       ),
       body: Stack(
         children: [
@@ -139,7 +202,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 opacity: 0.03,
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    // Adapte la taille du logo en fonction de la largeur de l'écran
                     double width = constraints.maxWidth * 0.25; // 25% de la largeur
                     return Icon(PhosphorIcons.globe(), size: MediaQuery.sizeOf(context).height*1.2,);
                   },

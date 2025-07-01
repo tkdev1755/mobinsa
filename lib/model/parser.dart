@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:excel/excel.dart';
-import 'package:flutter/material.dart';
 import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/School.dart';
@@ -25,7 +24,7 @@ class ExcelParsingException implements Exception {
 
 
 class SheetParser{
-  // --- Constantes pour les indices de colonnes (À AJUSTER SELON VOTRE FICHIER EXCEL) ---
+  // --- Constantes pour les indices de colonnes du Excel des étudiants (À AJUSTER SELON VOTRE FICHIER EXCEL) ---
   // Rappel : les indices sont 0-basés pour l'accès aux données de la ligne
   static const int _colStudentName = 0;     // Colonne 1 dans Excel
   static const int _colWishOrder = 1;       // Colonne 2
@@ -38,6 +37,22 @@ class SheetParser{
   static const int _colLangLvl = 8;         // Colonne 9
   static const int _colMissedHours = 9;     // Colonne 10
   static const int _colComment = 10;        // Colonne 11
+
+  // --- Constantes pour les indices des colonnes du Excel des écoles (A adapter si le fichier Ecoles venait à changer) ---
+  // Ici un S à été ajouté avant le "nom" de la colonne pour éviter des conflits avec les constantes définies précédemment
+  // Si une colonne à changé d'emplacement
+  static const int _colSOfferName = 0;      // Colonne 1 dans Excel -> Colonne "OFFRE DE SEJOUR"
+  static const int _colSCountry = 1;        // Colonne 2 -> Colonne "PAYS"
+  static const int _colSContentType = 2;    // Colonne 3 -> Colonne "CADRE"
+  static const int _colSSlots = 3;          // Colonne 4 -> Colonne "Places en 20**/20**"
+  static const int _colSBachelorSlots = 4;  // Colonne 5 -> Colonne "Places Bachelor"
+  static const int _colSMasterSlots = 5;    // Colonne 6 -> Colonne "Places Master"
+  static const int _colSSpecialization= 6;  // Colonne 7 -> Colonne "DISCIPLINE"
+  static const int _colSGraduation = 7;     // Colonne 8 -> Colonne "Niveau"
+  static const int _colSProgram = 8;        // Colonne 9 -> Colonne "FORMATION"
+  static const int _colSLangage = 9;        // Colonne 10 -> Colonne "Langue d'enseignement"
+  static const int _colSLangLvl = 10;       // Colonne 11 -> Colonne "Niveau langue"
+  static const int _colSAcademicLvl = 10;   // Colonne 11 -> Colonne "Niveau Académique"
 
 
   // --- Fonctions d'aide pour l'extraction sécurisée des données de cellules ---
@@ -209,9 +224,7 @@ class SheetParser{
       School? school = schools.where((e) => e.name.contains(schoolName)).firstOrNull;
       if (school == null){
         // On jette un exception si l'école n'est pas repertoriée dans le fichier excel
-        throw ExcelParsingException("L'école ${schoolName} ne semble pas être repertoriée au sein du fichier école \nDétail : Ligne ${rowIndex+1} du fichier étudiants, Etudiant : ${studentName}");
-        print("The schools doesn't appear in the list of parsed school");
-        return [];
+        throw ExcelParsingException("L'école ${schoolName} ne semble pas être répertoriée au sein du fichier école \nDétail : Ligne ${rowIndex+1} du fichier étudiants, Etudiant : ${studentName}");
       }
       // Création de l'objet Choice (en passant l'instance de Student, comme défini dans votre classe Choice)
       Choice choice = Choice(school, interRanking, currentStudent);
@@ -234,7 +247,9 @@ class SheetParser{
         throw ExcelParsingException("L'étudiant ${student.name} n'a aucun choix d'école");
       }
     }
-    
+    for (var student in finalStudentList){
+      student.sortChoices();
+    }
     return finalStudentList;
   }
 
@@ -278,42 +293,43 @@ class SheetParser{
         // Offre de séjour
         //String offre = sheet.rows[row][0]?.value.toString() ?? "Problème parsing";
         //print("Offre: $offre");
-        for (int col = 0; col < MAXCOLUMN; col++) { //MAXCOLUMN YEAH
+        /*for (int col = 0; col < MAXCOLUMN; col++) { //MAXCOLUMN YEAH
           String value = sheet.rows[row][col]?.value.toString() ?? "Problème parsing";
           stdout.write("$value; ");
-        }
+        }*/
         //VERSION DU TABLEUR
         int version = 2;
         if(version==2) {
           List<String> readInfo = ["Offre de séjour", "Pays", "Cadre"];
-          String? name = sheet.rows[row][0]?.value?.toString();
+          String? name = sheet.rows[row][_colSOfferName]?.value?.toString();
 
           if (name != null){
             print("Name is ${name}");
             readInfo.remove("Offre de séjour");
           }
 
-          String? country = sheet.rows[row][1]?.value?.toString();
+          String? country = sheet.rows[row][_colSCountry]?.value?.toString();
           if (country != null){
             readInfo.remove("Pays");
           }
-          String? contract = sheet.rows[row][2]?.value?.toString();
+          String? contract = sheet.rows[row][_colSContentType]?.value?.toString();
           if (contract != null){
             readInfo.remove("Cadre");
           }
           if (readInfo.length != 0){
             throw ExcelParsingException("Les valeurs ${readInfo} pour l'école ${name} à la ligne ${row+1} semblent être incorrecte ");
           }
+
           int slots = -1;
           int bSlots = -1;
           int mSlots = -1;
           List<String> readSlots = ["Places", "Places Bachelor","Places Master"];
           try{
-            slots = int.parse(sheet.rows[row][3]?.value.toString() ?? "-1");
+            slots = int.parse(sheet.rows[row][_colSSlots]?.value.toString() ?? "-1");
             readSlots.remove("Places");
-            bSlots = int.parse(sheet.rows[row][4]?.value.toString() ?? "-1");
+            bSlots = int.parse(sheet.rows[row][_colSBachelorSlots]?.value.toString() ?? "-1");
             readSlots.remove("Places Bachelor");
-            mSlots = int.parse(sheet.rows[row][5]?.value.toString() ?? "-1");
+            mSlots = int.parse(sheet.rows[row][_colSMasterSlots]?.value.toString() ?? "-1");
             readSlots.remove("Places Master");
           }
           catch (e,s){
@@ -321,29 +337,29 @@ class SheetParser{
           }
           List<String> readDetails = ["Discipline","Niveau", "Formation","Langue d'enseignement", "Niveau langue", "Niveau Académique"];
           List<String>? specialization = specializationStringToList(
-              sheet.rows[row][6]?.value.toString() ?? "PROBLEM SPECIALIZATION");
+              sheet.rows[row][_colSSpecialization]?.value.toString() ?? "PROBLEM SPECIALIZATION");
           if (specialization != null){
             readDetails.remove("Discipline");
           }
-          String? graduationLevel = sheet.rows[row][7]?.value?.toString();
+          String? graduationLevel = sheet.rows[row][_colSGraduation]?.value?.toString();
 
           if (graduationLevel != null){
             readDetails.remove("Niveau");
           }
 
-          String? program = sheet.rows[row][8]?.value?.toString();
+          String? program = sheet.rows[row][_colSProgram]?.value?.toString();
           if (program != null){
             readDetails.remove("Formation");
           }
-          String? useLanguage = sheet.rows[row][9]?.value.toString();
+          String? useLanguage = sheet.rows[row][_colSLangage]?.value.toString();
           if (useLanguage != null){
             readDetails.remove("Langue d'enseignement");
           }
-          String? reqLangLevel = sheet.rows[row][10]?.value?.toString();
+          String? reqLangLevel = sheet.rows[row][_colSLangLvl]?.value?.toString();
           if (reqLangLevel != null){
             readDetails.remove("Niveau langue");
           }
-          String? academicLevel = sheet.rows[row][11]?.value?.toString();
+          String? academicLevel = sheet.rows[row][_colSAcademicLvl]?.value?.toString();
           if (academicLevel != null){
             readDetails.remove("Niveau Académique");
           }

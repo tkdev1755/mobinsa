@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/School.dart';
 
@@ -192,6 +191,15 @@ class Student {
     }
   }
 
+  void sortChoices(){
+    List<MapEntry<int,Choice>> unsortedChoices = choices.entries.toList();
+    unsortedChoices.sort((a,b) => a.key.compareTo(b.key));
+    choices.clear();
+    for (var choice in unsortedChoices){
+      choices[choice.key] = choice.value;
+    }
+  }
+
   @override
   String toString() {
     String choicesString = choices.entries.map((entry) => '\n    Vœu ${entry.key}: ${entry.value}').join('');
@@ -212,6 +220,7 @@ class Student {
     //     '  Vœux Refusés: $refusedChoicesString\n'
     //     '}';
   }
+
 
   @override
   bool operator ==(Object other) {
