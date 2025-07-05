@@ -40,7 +40,6 @@ class SheetParser{
 
   // --- Constantes pour les indices des colonnes du Excel des écoles (A adapter si le fichier Ecoles venait à changer) ---
   // Ici un S à été ajouté avant le "nom" de la colonne pour éviter des conflits avec les constantes définies précédemment
-  // Si une colonne à changé d'emplacement
   static const int _colSOfferName = 0;      // Colonne 1 dans Excel -> Colonne "OFFRE DE SEJOUR"
   static const int _colSCountry = 1;        // Colonne 2 -> Colonne "PAYS"
   static const int _colSContentType = 2;    // Colonne 3 -> Colonne "CADRE"
@@ -52,7 +51,11 @@ class SheetParser{
   static const int _colSProgram = 8;        // Colonne 9 -> Colonne "FORMATION"
   static const int _colSLangage = 9;        // Colonne 10 -> Colonne "Langue d'enseignement"
   static const int _colSLangLvl = 10;       // Colonne 11 -> Colonne "Niveau langue"
-  static const int _colSAcademicLvl = 10;   // Colonne 11 -> Colonne "Niveau Académique"
+  static const int _colSAcademicLvl = 11;   // Colonne 12 -> Colonne "Niveau Académique"
+
+
+
+
 
 
   // --- Fonctions d'aide pour l'extraction sécurisée des données de cellules ---
@@ -119,14 +122,12 @@ class SheetParser{
 
 
   // --- Méthode principale pour extraire les étudiants ---
-
-
   static List<Student> extractStudents(Excel excel, List<School> schools) {
   // Check if schools list is empty
   if (schools.isEmpty) {
     throw ExcelParsingException("La liste des écoles est vide. Importez d'abord les écoles.");
   }
-  
+
   Map<String, Student> tempStudentMap = {};
     int nextStudentId=1;
 
@@ -135,7 +136,7 @@ class SheetParser{
       return [];
     }
     String sheetName = excel.sheets.keys.first; // Prend la première feuille par défaut
-    var sheet = excel.tables[sheetName]; // Utilisez .tables pour la nouvelle version de la lib excel
+    Sheet? sheet = excel.tables[sheetName]; // Utilisez .tables pour la nouvelle version de la lib excel
 
     if (sheet == null) {
       print("Erreur: La feuille '$sheetName' n'a pas pu être chargée ou n'existe pas dans les tables.");
@@ -149,7 +150,6 @@ class SheetParser{
     // Itérer sur les lignes, en commençant par la deuxième (index 1) pour sauter l'en-tête
     for (int rowIndex = 1; rowIndex < sheet.maxRows; rowIndex++) {
       var rowData = sheet.row(rowIndex); // Récupère les données de la ligne actuelle
-
       // Vérification minimale : le nom de l'étudiant doit être présent
       String studentName = _getStringCellData(rowData, _colStudentName);
       if (studentName.isEmpty) {
@@ -319,7 +319,6 @@ class SheetParser{
           if (readInfo.length != 0){
             throw ExcelParsingException("Les valeurs ${readInfo} pour l'école ${name} à la ligne ${row+1} semblent être incorrecte ");
           }
-
           int slots = -1;
           int bSlots = -1;
           int mSlots = -1;
@@ -382,6 +381,9 @@ class SheetParser{
               reqLangLevel!,
               academicLevel!
           );
+          if (!school.isCoherent()){
+            throw ExcelParsingException("L'école ${school.name} à la ligne ${row+1} est incohérente, veuillez vérifier les données");
+          }
           schools.add(school);
         }
         /*if(version==1) {

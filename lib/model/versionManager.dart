@@ -7,9 +7,9 @@ import 'package:path_provider/path_provider.dart' as pp;
 
 class SoftwareUpdater{
 
-  static String _user = "tkdev1755";
-  static String _repo = "mobinsa";
-  static Uri _repoUrl = Uri.parse("https://api.github.com/repos/$_user/$_repo/releases/latest");
+  static final String _user = "tkdev1755";
+  static final String _repo = "mobinsa";
+  static final Uri _repoUrl = Uri.parse("https://api.github.com/repos/$_user/$_repo/releases/latest");
 
   static String windowsAssetName = "mobinsa_windows.zip";
   static String macOSAssetName = "mobinsa_macos_universal.zip";

@@ -140,6 +140,16 @@ class School {
   School clone(){
     return School(name, country, content_type, available_slots, b_slots, m_slots, specialization, graduation_level, program, use_langage, req_lang_level, academic_level, initialID: id, overrideRemainingPlaces: remaining_slots);
   }
+
+  bool isCoherent(){
+    List<bool> conditions = [
+      available_slots == (b_slots+m_slots),
+      specialization.isNotEmpty
+    ];
+    return conditions.where((e) => !e).isEmpty;
+  }
+
+
   Map<String,dynamic> toJson(){
     return {
       jsonId : id,
@@ -175,10 +185,10 @@ class School {
       json[jsonProgram],
       json[jsonUseLanguage],                   // use_langage
       json[jsonReq_lang_lvl],                  // req_lang_level
-      json[json_academic_lvl],                 // academic_level
+      json[json_academic_lvl],
+      initialID: json[jsonId], // academic_level,
+      overrideRemainingPlaces: json[jsonRemaining_slots],
     );
-    school.setId(json[jsonId]);
-    school.remaining_slots = json[jsonRemaining_slots];
     school.is_full = json[jsonIsFull];
     school.is_full_b = json[jsonIsFull_b];
     school.is_full_m = json[jsonIsFull_m];
