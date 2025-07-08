@@ -53,7 +53,6 @@ class SoftwareUpdater{
       http.Response response = await http.get(_repoUrl);
       if (response.statusCode == 200){
         latestVersionData = jsonDecode(response.body);
-        print(latestVersionData);
         latestPull = DateTime.now();
         return 1;
       }
@@ -62,7 +61,6 @@ class SoftwareUpdater{
       }
     }
     else{
-      print(latestVersionData);
       return 1;
     }
 
@@ -163,7 +161,6 @@ class SoftwareUpdater{
   Future<String?> getUpdate() async{
     String assetUrl = await getAssetUrl();
     String assetName = await getAssetName();
-    print("Asset url is ${assetUrl}");
     if (true){
       if (Platform.isWindows){
         await Process.start(

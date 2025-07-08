@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:excel/excel.dart';
+import 'package:http/http.dart';
 import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/School.dart';
@@ -119,14 +120,20 @@ class SheetParser{
 }
 
 
-
-
+  /// Fonction qui s'occupe de modifier les caractères non communs présents dans l'excel par des caractères commun
+  ///
+  /// Si d'autres caractères peu communs venait à apparaitre dans l'excel, veuillez les ajouter ici en faisant usage de la méthode suivante
+  /// schoolname.replaceAll("caractère à remplacer", "caractère remplaçant");
+  static String sanitizeString(String schoolName){
+    return schoolName.replaceAll("–", "-");
+  }
   // --- Méthode principale pour extraire les étudiants ---
   static List<Student> extractStudents(Excel excel, List<School> schools) {
   // Check if schools list is empty
   if (schools.isEmpty) {
     throw ExcelParsingException("La liste des écoles est vide. Importez d'abord les écoles.");
   }
+
 
   Map<String, Student> tempStudentMap = {};
     int nextStudentId=1;
@@ -171,15 +178,15 @@ class SheetParser{
         // String? postComment = _getStringCellData(rowData, _colPostComment, defaultValue: null); // Exemple
 
         currentStudent = Student(
-            nextStudentId,
-            studentName,
-            {}, // Initialiser avec une Map de choix vide
-            specialization,
-            rankingS1,
-            ectsNumber,
-            langLvl,
-            missedHours,
-            comment
+            id : nextStudentId,
+            name: studentName,
+            choices: {}, // Initialiser avec une Map de choix vide
+            specialization: specialization,
+            ranking_s1: rankingS1,
+            ects_number: ectsNumber,
+            lang_lvl: langLvl,
+            missed_hours: missedHours,
+            comment: comment
           // post_comment: postComment, // Si vous avez ce champ et l'avez lu
         );
         tempStudentMap[studentName] = currentStudent;
@@ -221,13 +228,15 @@ class SheetParser{
       }
 
       // Création de l'objet School
+      // Sanitizing the school name that was fetched from the excel file
+      schoolName = sanitizeString(schoolName);
       School? school = schools.where((e) => e.name.contains(schoolName)).firstOrNull;
       if (school == null){
         // On jette un exception si l'école n'est pas repertoriée dans le fichier excel
         throw ExcelParsingException("L'école ${schoolName} ne semble pas être répertoriée au sein du fichier école \nDétail : Ligne ${rowIndex+1} du fichier étudiants, Etudiant : ${studentName}");
       }
       // Création de l'objet Choice (en passant l'instance de Student, comme défini dans votre classe Choice)
-      Choice choice = Choice(school, interRanking, currentStudent);
+      Choice choice = Choice(school: school, interranking: interRanking,student:  currentStudent);
 
       // Ajout du choix à la map de choix de l'étudiant
       currentStudent.choices[wishOrder] = choice;
@@ -302,9 +311,9 @@ class SheetParser{
         if(version==2) {
           List<String> readInfo = ["Offre de séjour", "Pays", "Cadre"];
           String? name = sheet.rows[row][_colSOfferName]?.value?.toString();
-
+          // Sanitizing the school name that was fetched from the excel file
           if (name != null){
-            print("Name is ${name}");
+            name = sanitizeString(name);
             readInfo.remove("Offre de séjour");
           }
 
@@ -317,7 +326,7 @@ class SheetParser{
             readInfo.remove("Cadre");
           }
           if (readInfo.length != 0){
-            throw ExcelParsingException("Les valeurs ${readInfo} pour l'école ${name} à la ligne ${row+1} semblent être incorrecte ");
+            throw ExcelParsingException("Les valeurs ${readInfo} pour l'école ${name} à la ligne ${row+1} feuille $sheetName semblent être incorrecte ");
           }
           int slots = -1;
           int bSlots = -1;
@@ -332,11 +341,12 @@ class SheetParser{
             readSlots.remove("Places Master");
           }
           catch (e,s){
-            throw ExcelParsingException("Les valeurs ${readSlots.toString()} pour l'école ${name} à la ligne ${row+1} sont incorrectes ");
+            throw ExcelParsingException("Les valeurs ${readSlots.toString()} pour l'école ${name} à la ligne ${row+1}, feuille $sheetName sont incorrectes ");
           }
           List<String> readDetails = ["Discipline","Niveau", "Formation","Langue d'enseignement", "Niveau langue", "Niveau Académique"];
           List<String>? specialization = specializationStringToList(
               sheet.rows[row][_colSSpecialization]?.value.toString() ?? "PROBLEM SPECIALIZATION");
+
           if (specialization != null){
             readDetails.remove("Discipline");
           }
@@ -364,25 +374,26 @@ class SheetParser{
           }
           
           if (readDetails.isNotEmpty){
-            throw ExcelParsingException("Les valeurs ${readDetails.toString()} pour l'école $name à la ligne ${row+1}  sont incorrectes");
+            throw ExcelParsingException("Les valeurs ${readDetails.toString().replaceAll("[", "").replaceAll("]", "")} pour l'école $name à la ligne ${row+1} feuille $sheetName  sont incorrectes");
           }
           //
           School school = School(
-              name!,
-              country!,
-              contract!,
-              slots,
-              bSlots,
-              mSlots,
-              specialization!,
-              graduationLevel!,
-              program!,
-              useLanguage!,
-              reqLangLevel!,
-              academicLevel!
+              name: name!,
+              country: country!,
+              content_type: contract!,
+              available_slots: slots,
+              b_slots: bSlots,
+              m_slots: mSlots,
+              specialization: specialization!,
+              graduation_level : graduationLevel!,
+              program: program!,
+              use_langage: useLanguage!,
+              req_lang_level :reqLangLevel!,
+              academic_level : academicLevel!
           );
-          if (!school.isCoherent()){
-            throw ExcelParsingException("L'école ${school.name} à la ligne ${row+1} est incohérente, veuillez vérifier les données");
+          (bool, String) isCoherent = school.isCoherent();
+          if (!isCoherent.$1){
+            throw ExcelParsingException("L'école ${school.name} à la ligne ${row+1}, feuille $sheetName est incohérente, veuillez vérifier les données \nDétails : ${isCoherent.$2}");
           }
           schools.add(school);
         }
@@ -423,7 +434,6 @@ class SheetParser{
           );
           schools.add(school);
         }*/
-        print("");
       }
     }
 
@@ -587,8 +597,21 @@ class SheetParser{
     for (int i = 0; i < indexes.length; i++) {
       sheet.insertColumn(i);
       headerRow.add(TextCellValue(indexes[i]!));
+      sheet.setColumnAutoFit(i);
     }
     sheet.appendRow(headerRow);
+    for (int i = 0; i < indexes.length; i++){
+      var cell = sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0));
+      print("Currently modifying the cell ${cell.value.toString()}");
+      CellStyle cellStyle = CellStyle(
+          backgroundColorHex: ExcelColor.grey100,
+          fontFamily :getFontFamily(FontFamily.Arial),
+          fontSize: 15,
+          textWrapping: TextWrapping.WrapText,
+
+      );
+      cell.cellStyle = cellStyle;
+    }
   }
 
   // Helper method to fill a sheet with choice data
@@ -623,21 +646,31 @@ class SheetParser{
       // Apply color coding if needed (only for the main sheet)
       if (applyColors) {
         List<Data?> currentRow = sheet.row(rowIndex);
-        
         // Green for accepted choices
         if (currentStudent.accepted != null && currentStudent.accepted!.school.id == currentChoice.school.id) {
           for (var data in currentRow) {
-            data?.cellStyle = CellStyle(backgroundColorHex: ExcelColor.green200);
+            data?.cellStyle = CellStyle(backgroundColorHex: ExcelColor.green200,fontSize: 12, fontFamily: "Arial");
           }
         }
         // Red for rejected choices
         else if (currentStudent.refused.any((choice) => choice.school.id == currentChoice.school.id)) {
           for (var data in currentRow) {
-            data?.cellStyle = CellStyle(backgroundColorHex: ExcelColor.red200);
+            data?.cellStyle = CellStyle(backgroundColorHex: ExcelColor.red200, fontSize: 12, fontFamily: "Arial");
+          }
+        }
+        else{
+          List<Data?> currentRow = sheet.row(rowIndex);
+          for (var data in currentRow){
+            data?.cellStyle = CellStyle(fontSize: 12, fontFamily: "Arial");
           }
         }
       }
-      
+      else{
+        List<Data?> currentRow = sheet.row(rowIndex);
+        for (var data in currentRow){
+          data?.cellStyle = CellStyle(fontSize: 12, fontFamily: "Arial");
+        }
+      }
       rowIndex++;
     }
   }

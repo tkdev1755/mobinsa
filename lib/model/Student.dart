@@ -15,6 +15,24 @@ class Student {
   static String jsonMissedHours = "missed_hours";
   static String jsonComment = "comment";
 
+  static const List<String> specializationList = [
+    "GSI 2A",
+    "GSI 3A",
+    "GSI 4A",
+    "GSI 5A",
+    "MRI 2A",
+    "MRI 3A",
+    "MRI 4A",
+    "MRI 5A",
+    "STI 2A",
+    "STI 3A",
+    "STI 4A",
+    "STI 5A",
+    "ENP 2A",
+    "ENP 3A",
+    "ENP 4A",
+    "ENP 5A"
+  ];
   int id;
 
   String name;
@@ -35,9 +53,9 @@ class Student {
   late String departement;
 
 
-  Student(this.id, this.name, this.choices, this.specialization,
-      this.ranking_s1, this.ects_number, this.lang_lvl, this.missed_hours,
-      this.comment) {
+  Student({required this.id, required this.name, required this.choices, required this.specialization,
+    required this.ranking_s1, required this.ects_number, required this.lang_lvl, required this.missed_hours,
+    required this.comment}) {
     // Fonction pour initialiser les attributs représentant l'année et le département de l'étudiant
     year_departement(specialization);
   }
@@ -124,7 +142,7 @@ class Student {
 
   Student clone(List<School> schools){
     // Fonction nécessaire pour éviter de se retrouver à traiter un même étudiant sur deux pages différentes
-    Student newStudent = Student(id, name,{},specialization,ranking_s1,ects_number,lang_lvl,missed_hours,comment);
+    Student newStudent = Student(id : id, name : name,choices: {}, specialization:  specialization, ranking_s1:   ranking_s1,ects_number:  ects_number,lang_lvl: lang_lvl,missed_hours: missed_hours, comment: comment);
     newStudent.choices = {
       for (var entry in choices.entries) entry.key: entry.value.clone(newStudent, school: schools.where((e) => e == entry.value.school).first),
     };
@@ -199,6 +217,7 @@ class Student {
       choices[choice.key] = choice.value;
     }
   }
+
 
   @override
   String toString() {
@@ -345,15 +364,15 @@ class Student {
   factory Student.fromJson(Map<String, dynamic> json){
     Map<int, Choice> deserializedChoices = {};
     Student student = Student(
-        json[jsonId],
-        json[jsonName],
-        deserializedChoices,
-        json[jsonSpec],
-        json[jsonRanking],
-        json[jsonEcts],
-        json[jsonLang_lvl],
-        json[jsonMissedHours],
-        json[jsonComment]);
+        id :json[jsonId],
+        name : json[jsonName],
+        choices:  deserializedChoices,
+        specialization: json[jsonSpec],
+        ranking_s1: json[jsonRanking],
+        ects_number: json[jsonEcts],
+        lang_lvl: json[jsonLang_lvl],
+        missed_hours: json[jsonMissedHours],
+        comment: json[jsonComment]);
     Map<String, dynamic> serializedChoices = json[jsonChoices];
     List<Choice> refusedChoices = [];
     for (var c in serializedChoices.entries){

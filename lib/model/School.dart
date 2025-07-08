@@ -41,10 +41,10 @@ class School {
   bool is_full_b = false;
   bool is_full_m = false;
 
-  School(this.name, this.country, this.content_type, this.available_slots,
-      this.b_slots, this.m_slots, this.specialization, this.graduation_level,
-      this.program, this.use_langage, this.req_lang_level,
-      this.academic_level, {int? initialID, int? overrideRemainingPlaces}) {
+  School({required this.name,required this.country,required this.content_type,required this.available_slots,
+    required this.b_slots,required this.m_slots,required this.specialization,required this.graduation_level,
+    required this.program,required this.use_langage, required this.req_lang_level,
+    required this.academic_level, int? initialID, int? overrideRemainingPlaces}) {
     if (initialID !=null){
       id = initialID;
     }
@@ -75,12 +75,12 @@ class School {
       // this.available_slots--;
       if (s.year > 2) {
         m_slots--;
-        print("SLOT SUCCESSFULLY REMOVED MASTER");
+        //print("SLOT SUCCESSFULLY REMOVED MASTER");
         if (m_slots == 0) is_full_m = true;
       }
       else if (s.year == 2) {
         b_slots--;
-        print("SLOT SUCCESSFULLY REMOVED LICENCE");
+        //print("SLOT SUCCESSFULLY REMOVED LICENCE");
         if (b_slots == 0) is_full_b = true;
       }
     }
@@ -138,15 +138,20 @@ class School {
   }
 
   School clone(){
-    return School(name, country, content_type, available_slots, b_slots, m_slots, specialization, graduation_level, program, use_langage, req_lang_level, academic_level, initialID: id, overrideRemainingPlaces: remaining_slots);
+    return School(name: name,country:  country, content_type:  content_type, available_slots: available_slots, b_slots:  b_slots, m_slots:  m_slots, specialization: specialization, graduation_level: graduation_level,program:  program, use_langage: use_langage, req_lang_level: req_lang_level, academic_level: academic_level, initialID: id, overrideRemainingPlaces: remaining_slots);
   }
 
-  bool isCoherent(){
-    List<bool> conditions = [
-      available_slots == (b_slots+m_slots),
-      specialization.isNotEmpty
+  (bool,String) isCoherent(){
+    List<(bool,String)> conditions = [
+      (available_slots == (b_slots+m_slots)
+          ||
+          (available_slots == b_slots
+              && available_slots == m_slots
+              && (specialization.contains("ENP 2A"))
+          ), "Places incohérentes"), // takes care of the fact that the ENP choices don't have a set number of places for bachelor and master students as they are in the same ballot for their mobility
+      (specialization.isNotEmpty, "Aucune spécialisation n'as été detectée"),
     ];
-    return conditions.where((e) => !e).isEmpty;
+    return (conditions.where((e) => !e.$1).isEmpty, "${conditions.where((e) => !e.$1).firstOrNull?.$2}");
   }
 
 
@@ -174,18 +179,18 @@ class School {
 
   factory School.fromJson(Map<String, dynamic> json) {
     School school = School(
-      json[jsonName],                          // name
-      json[jsonCountry],                       // country
-      json[jsonContent_type],                  // content_type
-      json[jsonAvailable_slots],               // available_slots
-      json[jsonB_slots],                       // b_slots
-      json[jsonM_slots],                       // m_slots
-      List<String>.from(json[jsonSpecialization]), // specialization
-      json[jsonGraduationLVL],                 // graduation_level
-      json[jsonProgram],
-      json[jsonUseLanguage],                   // use_langage
-      json[jsonReq_lang_lvl],                  // req_lang_level
-      json[json_academic_lvl],
+      name: json[jsonName],                          // name
+      country: json[jsonCountry],                       // country
+      content_type: json[jsonContent_type],                  // content_type
+      available_slots: json[jsonAvailable_slots],               // available_slots
+      b_slots: json[jsonB_slots],                       // b_slots
+      m_slots: json[jsonM_slots],                       // m_slots
+      specialization :List<String>.from(json[jsonSpecialization]), // specialization
+      graduation_level: json[jsonGraduationLVL],                 // graduation_level
+      program: json[jsonProgram],
+      use_langage: json[jsonUseLanguage],                   // use_langage
+      req_lang_level: json[jsonReq_lang_lvl],                  // req_lang_level
+      academic_level: json[json_academic_lvl],
       initialID: json[jsonId], // academic_level,
       overrideRemainingPlaces: json[jsonRemaining_slots],
     );

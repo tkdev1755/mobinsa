@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobinsa/model/School.dart';
 import 'package:mobinsa/model/parser.dart';
 import 'package:mobinsa/model/Student.dart';
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
+        textTheme: GoogleFonts.montserratTextTheme()
       ),
       home: MyHomePage(title: "Bienvenue sur Mob'INSA", packageInfo: pkgInfo,),
     );

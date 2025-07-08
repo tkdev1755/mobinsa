@@ -10,7 +10,7 @@ class Choice {
   double interranking;
   Student student;
   String? post_comment;
-  Choice (this.school, this.interranking,this.student);
+  Choice ({required this.school, required this.interranking, required this.student});
 
   bool accepted(Student s) {
     //affectation d'une offre de séjour à un élève
@@ -59,7 +59,7 @@ class Choice {
   
   factory Choice.fromJson(Map<String,dynamic> json, Student student){
     School school = School.fromJson(json[jsonSchool]);
-    return Choice(school, json[jsonInterranking], student);
+    return Choice(school: school, interranking: json[jsonInterranking], student:  student);
   }
 
   @override
@@ -76,12 +76,18 @@ class Choice {
     // On s'assure ici que 2 éléments sont vrai, disponibilité de la spécialisation chez l'école, et disponibilité des places
     bool hasSpecialization = school.specialization.contains(student.get_next_year());
     bool hasPlaces = school.getPlacesBySpecialization(student.get_graduation_level()) != 0;
-    print("IsChoiceValid : L'étudiant a-t-il la spécialisation nécessaire ? ${hasSpecialization} \n la formation as-t-elle encore des places ${hasPlaces}");
+    //print("IsChoiceValid : L'étudiant a-t-il la spécialisation nécessaire ? ${hasSpecialization} \n la formation as-t-elle encore des places ${hasPlaces}");
     return hasSpecialization && hasPlaces;
   }
 
+  String getRejectionInformation(){
+    bool hasSpecialization = school.specialization.contains(student.get_next_year());
+    bool hasPlaces = school.getPlacesBySpecialization(student.get_graduation_level()) != 0;
+    return "L'étudiant a-t-il la spécialisation nécessaire ? ${hasSpecialization ? "Oui" : "Non"}. \n La formation as-t-elle encore des places ${hasPlaces ? "Oui" : "Non"}";
+  }
+
   Choice clone(Student newStudent, {School? school}){
-    return Choice(school ?? this.school.clone(), interranking, newStudent);
+    return Choice(school: school ?? this.school.clone(),interranking:  interranking, student: newStudent);
   }
   @override
   bool operator ==(Object other) {

@@ -80,6 +80,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
     return MaterialApp(
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
+        textTheme: GoogleFonts.montserratTextTheme()
       ),
       home: Scaffold(
         appBar: AppBar(
@@ -223,7 +224,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                   itemCount: widget.students.length,
                   itemBuilder: (context, index) {
                     return Card(
-                      margin: const EdgeInsets.only(bottom: 12.0),
+                      margin: const EdgeInsets.only(bottom: 12.0,left: 5,right: 8),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                         side: BorderSide(
@@ -359,73 +360,81 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                     padding: const EdgeInsets.all(16.0),
                                     decoration: BoxDecoration(
                                       color: Colors.grey[300],
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Column(
                                       children: [
                                         Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text("Classement S1", style: UiText().smallText,),
-                                                Text("${selectedStudent!.ranking_s1}",
-                                                  style:  GoogleFonts.montserrat(textStyle: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w500,
-                                                  )),
-                                                )
-                                              ],
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text("Classement S1", style: UiText().smallText,),
+                                                  Text("${selectedStudent!.ranking_s1}",
+                                                    style:  GoogleFonts.montserrat(textStyle: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.w500,
+                                                    )),
+                                                  )
+                                                ],
+                                              ),
                                             ),
                                             Padding(padding: EdgeInsets.only(right: 20)),
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                const Text("Crédits ECTS",),
-                                                Text("${selectedStudent!.ects_number}",
-                                                  style: GoogleFonts.montserrat(textStyle: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w500,
-                                                    color : (selectedStudent!.ects_number < 30 ?
-                                                    Colors.orange :
-                                                    Colors.black),
-                                                  )),
-                                                )
-                                              ],
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  const Text("Crédits ECTS",),
+                                                  Text("${selectedStudent!.ects_number}",
+                                                    style: GoogleFonts.montserrat(textStyle: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.w500,
+                                                      color : (selectedStudent!.ects_number < 30 ?
+                                                      Colors.orange :
+                                                      Colors.black),
+                                                    )),
+                                                  )
+                                                ],
+                                              ),
                                             ),
                                             Padding(padding: EdgeInsets.only(right: 20)),
                                           ],
                                         ),
                                         Row(
                                           children: [
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text("Niveau d'anglais",style: UiText().smallText,),
-                                                Text(selectedStudent!.lang_lvl,
-                                                  style:  GoogleFonts.montserrat(textStyle: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w500,
-                                                  )),
-                                                )
-                                              ],
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text("Niveau d'anglais",style: UiText().smallText,),
+                                                  Text(selectedStudent!.lang_lvl,
+                                                    style:  GoogleFonts.montserrat(textStyle: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.w500,
+                                                    )),
+                                                  )
+                                                ],
+                                              ),
                                             ),
                                             Padding(padding: EdgeInsets.only(right: 20)),
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text("Heures d'absences", style : UiText().smallText),
-                                                Text("${selectedStudent!.missed_hours}",
-                                                  style: GoogleFonts.montserrat(textStyle: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w500,
-                                                    color : (selectedStudent!.missed_hours >= 5 ?
-                                                    (selectedStudent!.missed_hours >= 10 ? Colors.red : Colors. orange) :
-                                                    Colors.black),
-                                                  )),
-                                                )
-                                              ],
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text("Heures d'absences", style : UiText().smallText),
+                                                  Text("${selectedStudent!.missed_hours}",
+                                                    style: GoogleFonts.montserrat(textStyle: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.w500,
+                                                      color : (selectedStudent!.missed_hours >= 5 ?
+                                                      (selectedStudent!.missed_hours >= 10 ? Colors.red : Colors. orange) :
+                                                      Colors.black),
+                                                    )),
+                                                  )
+                                                ],
+                                              ),
                                             ),
                                           ],
                                         )
@@ -479,7 +488,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.red,
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius: BorderRadius.circular(12),
                                             ),
                                           ),
                                           child: Text(
@@ -505,7 +514,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.grey[300],
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius: BorderRadius.circular(12),
                                             ),
                                           ),
                                           child: Text(
@@ -529,7 +538,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.grey[300],
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius: BorderRadius.circular(12),
                                             ),
                                           ),
                                           child: Text(
@@ -622,8 +631,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
       margin: const EdgeInsets.only(bottom: 8.0),
       color: disbaleChoice(choice) ? disabledColor : Colors.grey[300],
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
       ),
+
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: AnimatedSize(
