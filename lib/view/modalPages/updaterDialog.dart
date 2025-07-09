@@ -52,29 +52,30 @@ class _UpdateDialogState extends State<UpdateDialog> {
             UiShapes.bPadding(10),
             Text("Détails", style: UiText().nText,),
             UiShapes.bPadding(10),
-            FutureBuilder(future: latestVersionInfo, builder: (BuildContext context, AsyncSnapshot snap){
-              if (snap.hasData){
-                return Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      borderRadius: UiShapes().frameRadius,
+            Expanded(
+              child: FutureBuilder(future: latestVersionInfo, builder: (BuildContext context, AsyncSnapshot snap){
+                if (snap.hasData){
+                  return Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        borderRadius: UiShapes().frameRadius,
+                      ),
+                      child: SingleChildScrollView(
+                          child: Text("${snap.data}", style: UiText().nsText,)
+                      ),
 
-                    ),
-                    child: SingleChildScrollView(
-                        child: Text("${snap.data}", style: UiText().nsText,)
-                    ),
-                  
-                );
-              }
-              else if (snap.hasError){
-                return Text("Impossible de récupérer les détails sur la dernière version");
-              }
-              else{
-                return CircularProgressIndicator();
-              }
-            }),
-            Spacer(),
+                  );
+                }
+                else if (snap.hasError){
+                  return Text("Impossible de récupérer les détails sur la dernière version");
+                }
+                else{
+                  return CircularProgressIndicator();
+                }
+              }),
+            ),
+            Padding(padding: EdgeInsets.only(bottom: 30)),
             Visibility(
               visible: !startedUpdate,
               replacement: Row(
