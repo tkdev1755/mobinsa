@@ -350,6 +350,7 @@ class SheetParser{
           if (specialization != null){
             readDetails.remove("Discipline");
           }
+
           String? graduationLevel = sheet.rows[row][_colSGraduation]?.value?.toString();
 
           if (graduationLevel != null){
@@ -371,6 +372,9 @@ class SheetParser{
           String? academicLevel = sheet.rows[row][_colSAcademicLvl]?.value?.toString();
           if (academicLevel != null){
             readDetails.remove("Niveau Académique");
+          }
+          else{
+            academicLevel = "Non spécifié";
           }
           
           if (readDetails.isNotEmpty){
