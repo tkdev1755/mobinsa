@@ -273,7 +273,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       showErrorDialog(
                                           context,
                                           "Erreur d'analyse des écoles",
-                                          "Impossible de lire les données des écoles: ${e.toString()} ${e.runtimeType != ExcelParsingException ? "\nDetail : \n ${s}" : ""}"
+                                          "Impossible de lire les données des écoles : \n${e.toString()} ${e.runtimeType != ExcelParsingException ? "\nDetail : \n ${s}" : ""}"
                                       );
                                     }
                                   } catch (e) {

@@ -369,16 +369,21 @@ class SheetParser{
           if (reqLangLevel != null){
             readDetails.remove("Niveau langue");
           }
+          else{
+            reqLangLevel = "Non spécifié";
+            readDetails.remove("Niveau langue");
+          }
           String? academicLevel = sheet.rows[row][_colSAcademicLvl]?.value?.toString();
           if (academicLevel != null){
             readDetails.remove("Niveau Académique");
           }
           else{
             academicLevel = "Non spécifié";
+            readDetails.remove("Niveau Académique");
           }
           
           if (readDetails.isNotEmpty){
-            throw ExcelParsingException("Les valeurs ${readDetails.toString().replaceAll("[", "").replaceAll("]", "")} pour l'école $name à la ligne ${row+1} feuille $sheetName  sont incorrectes");
+            throw ExcelParsingException("${ readDetails.length <= 1 ?"La" : "Les"} valeurs ${readDetails.toString().replaceAll("[", "").replaceAll("]", "")} pour l'école $name à la ligne ${row+1} feuille $sheetName  sont incorrectes");
           }
           //
           School school = School(
