@@ -268,7 +268,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                         ),
                                       );
                                     } catch (e,s) {
-
                                       // Error extracting schools from Excel
                                       showErrorDialog(
                                           context,
