@@ -75,8 +75,7 @@ jobs:
         run: flutter build windows --release
       - name : Copy install script to release folder
         run : |
-          copy buildAssets\install.bat build\windows\runner\Release\install.bat
-
+          copy buildAssets\install.bat build\windows\runner\Release\
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
