@@ -75,6 +75,27 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
 
     super.initState();
   }
+  
+  getAutoRejectionComment(Student currentStudent){
+    Map<int, List<bool>> rejectionReasons = currentStudent.choices.map((k,v) => MapEntry(k, v.getRejectionReasons()));
+    rejectionReasons.removeWhere((k,v) => currentStudent.refused.contains(currentStudent.choices[k]));
+    print("rejectionReasonlength ${rejectionReasons.length}");
+
+    // On compte le nombre de voeux refusé automatiquement pour cause d'une mauvaise spécialisation
+    int numberOfBadSpecialization = 0;
+    // on compte le nombre de voeux refusés automatiquement pour cause d'un manque de place sur le niveau de l'élève
+    int numberOfNoMoreSlots = 0;
+    for (var value in rejectionReasons.values){
+      // Si la valeur de la liste à l'index 0 est vraie, l'étudiant a la spécialisation nécessaire, selon la fonction Choice().getRejectionReasons
+      numberOfBadSpecialization = numberOfBadSpecialization + (value[0] ? 0:1);
+      // Si la valeur de la liste à l'index 1 est vraie, l'école à encore des places
+      numberOfNoMoreSlots = numberOfNoMoreSlots + (value[1] ? 0:1);
+    }
+    final String numberOfSlotsComment = numberOfNoMoreSlots == 0 ? "" : "- ${numberOfNoMoreSlots == rejectionReasons.length ? "Tous ses voeux restants n'ont" : "$numberOfNoMoreSlots de ses voeux restants n'ont"} plus de places";
+    final String numberOfBadSpecComment = numberOfBadSpecialization == 0 ? "" : "${numberOfNoMoreSlots != 0 ? "\n" : ""}" "- ${numberOfBadSpecialization == rejectionReasons.length ? "Tous ses voeux restants" : "$numberOfBadSpecialization de ses voeux restants"} ne prennent pas de ${currentStudent.get_next_year()}";
+    print("Auto generated comment -> " "${numberOfSlotsComment + numberOfBadSpecComment}");
+    return numberOfSlotsComment + numberOfBadSpecComment;
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -186,6 +207,8 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
             IconButton(
               icon: Icon(PhosphorIcons.house(PhosphorIconsStyle.regular), size: 32.0),
               onPressed: () => {
+                widget.schools.clear(),
+                widget.students.clear,
                 Navigator.pop(
                   context,
                 ),
@@ -239,9 +262,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                           ? const Color.fromARGB(255, 120, 151, 211)
                           : (widget.students[index].accepted != null
                               ? const Color.fromARGB(255, 134, 223, 137)
-                              : widget.students[index].refused.length == 3
+                              : widget.students[index].refused.length == widget.students[index].choices.length
                                   ? const Color.fromARGB(255, 213, 62, 35)
-                                  : Colors.white),
+                                  : widget.students[index].hasNoChoiceLeft() ? Colors.orange.shade200: Colors.white),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(20),
                         onTap: (){
@@ -349,6 +372,12 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                           fontWeight: FontWeight.w500,
                                         )),
                                       ),
+                                      UiShapes.bPadding(20),
+                                      Visibility(
+                                        child: notificationCard(selectedStudent!),
+                                        visible : selectedStudent?.refused.length != selectedStudent?.choices.length && (selectedStudent?.accepted == null) &&(selectedStudent?.hasNoChoiceLeft() ?? false) ,
+                                      )
+
                                     ],
                                   ),
                                 ),
@@ -1074,6 +1103,29 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                   ),
               ),
         ),
+      ),
+    );
+  }
+
+  Widget notificationCard(Student currentStudent){
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.orange.shade100,
+        borderRadius: UiShapes().frameRadius,
+      ),
+      padding: EdgeInsets.all(10),
+      child: Row(
+        children: [
+          Icon(PhosphorIcons.info(),size: 50,),
+          Padding(padding: EdgeInsets.only(right: 10)),
+          Expanded(child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Cet étudiant n'as plus de voeux admissibles à cause des raisons suivantes :", style: UiText().nsText,),
+              Text("${getAutoRejectionComment(currentStudent)}", style: UiText(weight: FontWeight.w500).nText,),
+            ],
+          ))
+        ],
       ),
     );
   }

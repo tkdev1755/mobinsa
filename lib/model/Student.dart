@@ -140,6 +140,37 @@ class Student {
     return "$departement ${year + 1}A";
   }
 
+  static String getNextYearFromString(String stringSpecialization){
+    int year;
+    String department;
+    if (stringSpecialization.contains("2")) {
+      year = 2;
+    }
+    else if (stringSpecialization.contains("3")) {
+      year = 3;
+    }
+    else if (stringSpecialization.contains("4")) {
+      year = 4;
+    }
+    else {
+      year = 5;
+    }
+
+    if (stringSpecialization.contains("MRI")) {
+      department = "MRI";
+    }
+    else if (stringSpecialization.contains("STI")) {
+      department = "STI";
+    }
+    else if (stringSpecialization.contains("ENP")) {
+      department = "ENP";
+    }
+    else {
+      department = "GSI";
+    }
+    return "$department ${year + 1}A";
+  }
+
   Student clone(List<School> schools){
     // Fonction nécessaire pour éviter de se retrouver à traiter un même étudiant sur deux pages différentes
     Student newStudent = Student(id : id, name : name,choices: {}, specialization:  specialization, ranking_s1:   ranking_s1,ects_number:  ects_number,lang_lvl: lang_lvl,missed_hours: missed_hours, comment: comment);
@@ -341,7 +372,13 @@ class Student {
     return equal_dict;
   }
 
-
+  bool hasNoChoiceLeft(){
+    // Condition -> Aucun voeu disponible à cause de places/mauvaise formation ou choix aucun choix d'accepté
+    return (refused.length == choices.length)
+        || (choices.values.where(
+                (e) => e.isChoiceValid() && !refused.contains(e)).isEmpty)
+    ;
+  }
 
   Map<String, dynamic> toJson(){
     Map<String,dynamic> choicesMap = choices.map((k,v) => MapEntry(k.toString(), v.toJson()));
@@ -352,7 +389,7 @@ class Student {
       jsonChoices : choicesMap,
       jsonAccepted : accepted?.toJson() ?? "null",
       jsonRefused : refusedChoiceList,
-      jsonSpec : "",
+      jsonSpec : specialization,
       jsonRanking : ranking_s1,
       jsonEcts : ects_number,
       jsonLang_lvl : lang_lvl,

@@ -17,7 +17,6 @@ class SessionStorage{
   static String jsonSchoolName = "schools";
   static String jsonStudentName = "students";
   static String saveFolder = "/mobinsa/saves";
-
   static String dateFormat = "dd-MM-yyyy-HH.mm";
   static Future<String> getSaveName() async{
     return "CRMob_${DateFormat(dateFormat).format(DateTime.now())}.mbsave";
@@ -126,7 +125,7 @@ class SessionStorage{
     List<School> schools = [];
     // je m'assure de l'existence des clés que je recherche pour désérialiser mes données
     if ((!data.containsKey(jsonStudentName)) || (!data.containsKey(jsonSchoolName))){
-      throw Exception("404 - File doesn't have the required field to reconstruct the data");
+      throw Exception("404 - File doesn't have the required fields to reconstruct the data");
     }
     if (!data.containsKey("version")){
       print("Save from 1.0.0, loading it as it causes no crashes");
@@ -168,7 +167,7 @@ class SessionStorage{
     if (result?.files.first == null){
       throw Exception("The file doesn't exists");
     }
-    // j'extrait le chemin du fichier sélectionner
+    // j'extrait le chemin du fichier sélectionné
     String path = result!.files.first.path!;
 
     // j'extrait les données du fichier pour les utiliser lors du chargement de la sauvegarde

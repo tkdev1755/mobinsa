@@ -5,6 +5,8 @@ import 'package:http/http.dart';
 import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/School.dart';
+import 'package:text_analysis/extensions.dart';
+import 'package:text_analysis/text_analysis.dart';
 
 /*
 
@@ -13,9 +15,33 @@ import 'package:mobinsa/model/School.dart';
     - Mis à jour la fonction de Mehdi des étudiants pour récupérer l'école à partir d'un voeu
  */
 class ExcelParsingException implements Exception {
+  static const Map<String, int> errorCodes  = {
+    "nonExistentFileException" : 1000, // le fichier n'existe pas
+    "formatException" : 1001, //  Le fichier n'est pas au format Excel
+    "emptyFileException" : 1002, // le Fichier ne contient aucune feuille
+    "fileReadException" : 1003, // Le fichier n'as pas été lu correctement
+    "emptySchoolListException" : 2000, // La liste des écoles passée en paramètre à SheetParser.extractStudents() est vide
+    "unknownSchoolException" : 2001, // le nom de l'école liée au voeu d'un étudiant n'existe pas dans la liste des écoles importées
+    "emptyStudentFileException" : 2002, // Aucun étudiant n'as été trouvé dans le fichier
+    "emptyChoicesException" : 2003, // Un étudiant n'as aucun choix d'enregistré
+    "missingSheetException" : 3000, // Il manque une feuille dans le fichier Excel des écoles
+    "schoolFileReadException" : 3001, // N'as pas été lu correctement
+    "readInfoException" : 3002, // Les champs "Offre de séjour", "Pays", "Cadre" ont été mal lus
+    "slotsException" : 3004, // les places de l'offre de séjour sont incorrects
+    "readDetailsException" : 3005, // Les champs ont été mal lus,
+    "incoherentSchoolException" : 3006, // L'école contient des incohérences
+    "emptySchoolsException" : 3007, // La liste des écoles à l'issue de la fonction est vide
+    "unknown" : 9999 // Exception générique
+  };
+  final int errorCode;
   final String message;
   final String? stackTrace;
-  ExcelParsingException(this.message, {this.stackTrace});
+  final Map<String,dynamic>? data;
+
+  static int getErrorCode(String name){
+    return errorCodes[name]!;
+  }
+  ExcelParsingException(this.message, {required this.errorCode,this.stackTrace,this.data});
   
   @override
   String toString() {
@@ -94,20 +120,20 @@ class SheetParser{
     
     // Check if file exists
     if (!newFile.existsSync()) {
-      throw ExcelParsingException("Le fichier n'existe pas");
+      throw ExcelParsingException("Le fichier n'existe pas",errorCode: ExcelParsingException.getErrorCode("nonExistentFileException"));
     }
     
     // Check file extension
     String extension = path.split('.').last.toLowerCase();
     if (extension != "xlsx" && extension != "xls") {
-      throw ExcelParsingException("Le fichier doit être au format Excel (.xlsx ou .xls)");
+      throw ExcelParsingException("Le fichier doit être au format Excel (.xlsx ou .xls)", errorCode: ExcelParsingException.getErrorCode("formatException"));
     }
     
     Excel parsedData = Excel.decodeBytes(newFile.readAsBytesSync());
     
     // Check if the parsed data is valid
     if (parsedData.sheets.isEmpty) {
-      throw ExcelParsingException("Le fichier Excel ne contient aucune feuille");
+      throw ExcelParsingException("Le fichier Excel ne contient aucune feuille", errorCode: ExcelParsingException.getErrorCode("emptyFileException"));
     }
     
     return parsedData;
@@ -115,7 +141,7 @@ class SheetParser{
     if (e is ExcelParsingException) {
       rethrow;
     }
-    throw ExcelParsingException("Erreur lors de la lecture du fichier: ${e.toString()}");
+    throw ExcelParsingException("Erreur lors de la lecture du fichier: ${e.toString()}", errorCode: ExcelParsingException.getErrorCode("fileReadException"));
   }
 }
 
@@ -127,11 +153,18 @@ class SheetParser{
   static String sanitizeString(String schoolName){
     return schoolName.replaceAll("–", "-");
   }
+
+  static List<(double,School)>getSimilarSchools(List<School> schools, String problematicSchool){
+    List<(double,School)>similarSchools = schools.map((e) => (TermSimilarity(problematicSchool,e.name).characterSimilarity, e)
+    ).toList();
+    similarSchools.sort((a,b) => b.$1.compareTo(a.$1));
+    return similarSchools;
+  }
   // --- Méthode principale pour extraire les étudiants ---
   static List<Student> extractStudents(Excel excel, List<School> schools) {
   // Check if schools list is empty
   if (schools.isEmpty) {
-    throw ExcelParsingException("La liste des écoles est vide. Importez d'abord les écoles.");
+    throw ExcelParsingException("La liste des écoles est vide. Importez d'abord les écoles.", errorCode: ExcelParsingException.getErrorCode("emptySchoolListException"));
   }
 
 
@@ -233,7 +266,10 @@ class SheetParser{
       School? school = schools.where((e) => e.name.contains(schoolName)).firstOrNull;
       if (school == null){
         // On jette un exception si l'école n'est pas repertoriée dans le fichier excel
-        throw ExcelParsingException("L'école ${schoolName} ne semble pas être répertoriée au sein du fichier école \nDétail : Ligne ${rowIndex+1} du fichier étudiants, Etudiant : ${studentName}");
+        List<(double,School)> similarSchools = getSimilarSchools(schools, schoolName);
+        throw ExcelParsingException("L'école ${schoolName} ne semble pas être répertoriée au sein du fichier école \nDétail : Ligne ${rowIndex+1} du fichier étudiants, Etudiant : ${studentName}", errorCode: ExcelParsingException.getErrorCode("unknownSchoolException"),
+            data: {"name" : schoolName,"specialization" : currentStudent.specialization, "country":country, "concernedCell" : (_colSchoolName,rowIndex), "studentName" : studentName}
+        );
       }
       // Création de l'objet Choice (en passant l'instance de Student, comme défini dans votre classe Choice)
       Choice choice = Choice(school: school, interranking: interRanking,student:  currentStudent);
@@ -247,13 +283,13 @@ class SheetParser{
 
     // Add verification at specific points, for example:
     if (tempStudentMap.isEmpty) {
-      throw ExcelParsingException("Aucun étudiant n'a été trouvé dans le fichier");
+      throw ExcelParsingException("Aucun étudiant n'a été trouvé dans le fichier" ,errorCode: ExcelParsingException.getErrorCode("emptyStudentFileException"));
     }
     
     // Check if any student has no choices
     for (var student in tempStudentMap.values) {
       if (student.choices.isEmpty) {
-        throw ExcelParsingException("L'étudiant ${student.name} n'a aucun choix d'école");
+        throw ExcelParsingException("L'étudiant ${student.name} n'a aucun voeu",errorCode:ExcelParsingException.getErrorCode("emptyChoicesException") );
       }
     }
     for (var student in finalStudentList){
@@ -261,13 +297,26 @@ class SheetParser{
     }
     return finalStudentList;
   }
+  static int updateExcelOnDisk(Excel excel, String savePath){
+    List<int>? bytes = excel.save();
+    if (bytes == null){
+      return -1;
+    }
+    File excelFile = File(savePath);
+    try {
+      excelFile.writeAsBytesSync(bytes);
 
+    } on Exception catch (e) {
+      print("Exception ${e}");
+    }
+    return 0;
+  }
   static List<School> parseSchools(Excel file) {
     List<School> schools = [];
     
     // Basic validation for file structure
     if (file.sheets.length < 2) {
-      throw ExcelParsingException("Le fichier des écoles doit contenir au moins deux feuilles (Europe et Hors-Europe)");
+      throw ExcelParsingException("Le fichier des écoles doit contenir au moins deux feuilles (Europe et Hors-Europe)", errorCode: ExcelParsingException.getErrorCode("missingSheetException"));
     }
     
     //Données Europe et Hors-Europe
@@ -276,7 +325,7 @@ class SheetParser{
       var sheet = file.sheets[sheetName];
 
       if (sheet == null || sheet.maxRows < 2) {
-        throw ExcelParsingException("Il semble que le fichier passé n'est pas lisible");
+        throw ExcelParsingException("Il semble que le fichier passé n'est pas lisible", errorCode: ExcelParsingException.getErrorCode("schoolFileReadException"));
         // Ajouter une throw indiquant que le ficher n'as pas été parsé correctement
         return [];
       }
@@ -326,7 +375,7 @@ class SheetParser{
             readInfo.remove("Cadre");
           }
           if (readInfo.length != 0){
-            throw ExcelParsingException("Les valeurs ${readInfo} pour l'école ${name} à la ligne ${row+1} feuille $sheetName semblent être incorrecte ");
+            throw ExcelParsingException("Les valeurs ${readInfo} pour l'école ${name} à la ligne ${row+1} feuille $sheetName semblent être incorrecte", errorCode: ExcelParsingException.getErrorCode("readInfoException"));
           }
           int slots = -1;
           int bSlots = -1;
@@ -341,7 +390,7 @@ class SheetParser{
             readSlots.remove("Places Master");
           }
           catch (e,s){
-            throw ExcelParsingException("Les valeurs ${readSlots.toString()} pour l'école ${name} à la ligne ${row+1}, feuille $sheetName sont incorrectes ");
+            throw ExcelParsingException("Les valeurs ${readSlots.toString()} pour l'école ${name} à la ligne ${row+1}, feuille $sheetName sont incorrectes", errorCode: ExcelParsingException.getErrorCode("slotsException"));
           }
           List<String> readDetails = ["Discipline","Niveau", "Formation","Langue d'enseignement", "Niveau langue", "Niveau Académique"];
           List<String>? specialization = specializationStringToList(
@@ -383,7 +432,7 @@ class SheetParser{
           }
           
           if (readDetails.isNotEmpty){
-            throw ExcelParsingException("${ readDetails.length <= 1 ?"La" : "Les"} valeurs ${readDetails.toString().replaceAll("[", "").replaceAll("]", "")} pour l'école $name à la ligne ${row+1} feuille $sheetName  sont incorrectes");
+            throw ExcelParsingException("${ readDetails.length <= 1 ?"La" : "Les"} valeurs ${readDetails.toString().replaceAll("[", "").replaceAll("]", "")} pour l'école $name à la ligne ${row+1} feuille $sheetName  sont incorrectes", errorCode: ExcelParsingException.getErrorCode("readDetailsException"));
           }
           //
           School school = School(
@@ -402,7 +451,7 @@ class SheetParser{
           );
           (bool, String) isCoherent = school.isCoherent();
           if (!isCoherent.$1){
-            throw ExcelParsingException("L'école ${school.name} à la ligne ${row+1}, feuille $sheetName est incohérente, veuillez vérifier les données \nDétails : ${isCoherent.$2}");
+            throw ExcelParsingException("L'école ${school.name} à la ligne ${row+1}, feuille $sheetName est incohérente, veuillez vérifier les données \nDétails : ${isCoherent.$2}" , errorCode:  ExcelParsingException.getErrorCode("incoherentSchoolException"));
           }
           schools.add(school);
         }
@@ -452,7 +501,7 @@ class SheetParser{
     //print(schools[5].name);print(schools[5].country);print(schools[5].content_type);print(schools[5].specialization);
     
     if (schools.isEmpty) {
-      throw ExcelParsingException("Aucune école n'a été trouvée dans le fichier");
+      throw ExcelParsingException("Aucune école n'a été trouvée dans le fichier", errorCode: ExcelParsingException.getErrorCode("emptySchoolsException"));
     }
     
     return schools;
@@ -617,7 +666,6 @@ class SheetParser{
           fontFamily :getFontFamily(FontFamily.Arial),
           fontSize: 15,
           textWrapping: TextWrapping.WrapText,
-
       );
       cell.cellStyle = cellStyle;
     }
@@ -651,7 +699,11 @@ class SheetParser{
       ];
       
       sheet.appendRow(studentValues);
-      
+
+      if (currentStudent.hasNoChoiceLeft() && currentStudent.refused.where((e) => e == currentChoice).isEmpty && currentStudent.accepted != currentChoice){
+        sheet.row(rowIndex)[11]?.value = TextCellValue(currentChoice.getRejectionString());
+      }
+
       // Apply color coding if needed (only for the main sheet)
       if (applyColors) {
         List<Data?> currentRow = sheet.row(rowIndex);
@@ -665,6 +717,11 @@ class SheetParser{
         else if (currentStudent.refused.any((choice) => choice.school.id == currentChoice.school.id)) {
           for (var data in currentRow) {
             data?.cellStyle = CellStyle(backgroundColorHex: ExcelColor.red200, fontSize: 12, fontFamily: "Arial");
+          }
+        }
+        else if (currentStudent.hasNoChoiceLeft() && !(currentStudent.refused.any((choice) => choice.school.id == currentChoice.school.id))){
+          for (var data in currentRow) {
+            data?.cellStyle = CellStyle(backgroundColorHex: ExcelColor.orange200, fontSize: 12, fontFamily: "Arial");
           }
         }
         else{

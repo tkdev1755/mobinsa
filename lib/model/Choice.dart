@@ -80,10 +80,15 @@ class Choice {
     return hasSpecialization && hasPlaces;
   }
 
-  String getRejectionInformation(){
-    bool hasSpecialization = school.specialization.contains(student.get_next_year());
-    bool hasPlaces = school.getPlacesBySpecialization(student.get_graduation_level()) != 0;
-    return "L'étudiant a-t-il la spécialisation nécessaire ? ${hasSpecialization ? "Oui" : "Non"}. \n La formation as-t-elle encore des places ${hasPlaces ? "Oui" : "Non"}";
+  String getRejectionString(){
+    bool hasSpecialization = getRejectionReasons()[0];
+    bool hasPlaces = getRejectionReasons()[1];
+    String finalString = "L'étudiant à été refusé car :" "${hasPlaces ? "" : "\nAbsence de places à l'établissement"}" "${hasSpecialization ? "":"\n Établissement ne recevant pas de ${student.get_next_year()}"}";
+    return finalString;
+  }
+
+  List<bool> getRejectionReasons(){
+    return [school.specialization.contains(student.get_next_year()),school.getPlacesBySpecialization(student.get_graduation_level()) != 0];
   }
 
   Choice clone(Student newStudent, {School? school}){

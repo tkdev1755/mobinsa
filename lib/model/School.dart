@@ -137,6 +137,9 @@ class School {
     return "Ecole : $name - $country - $specialization";
   }
 
+  String getSpecializations(){
+    return specialization.toString().replaceAll("[", "").replaceAll("]", "");
+  }
   School clone(){
     return School(name: name,country:  country, content_type:  content_type, available_slots: available_slots, b_slots:  b_slots, m_slots:  m_slots, specialization: specialization, graduation_level: graduation_level,program:  program, use_langage: use_langage, req_lang_level: req_lang_level, academic_level: academic_level, initialID: id, overrideRemainingPlaces: remaining_slots);
   }

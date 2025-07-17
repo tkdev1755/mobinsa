@@ -52,9 +52,9 @@ class UiText{
         overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400 ));
     mLargeText = GoogleFonts.poppins(textStyle: TextStyle(color: (matColor ?? Color(UiColors.black)).withAlpha(alpha ?? 1000),fontSize: 35,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
     mMediumText = GoogleFonts.montserrat(textStyle: TextStyle(color: (matColor ?? Color(UiColors.black)).withAlpha(alpha ?? 1000),fontSize: 35,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
-    mNormalText = GoogleFonts.montserrat(textStyle: TextStyle(color: (matColor ?? Color(UiColors.black)).withAlpha(alpha ?? 1000),fontSize: 14,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
-    mSmallText = GoogleFonts.montserrat(textStyle: TextStyle(color: (matColor ?? Color(UiColors.black)).withAlpha(alpha ?? 1000),fontSize: 35,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
-    mSSmallText = GoogleFonts.montserrat(textStyle: TextStyle(color: (matColor ?? Color(UiColors.black)).withAlpha(alpha ?? 1000),fontSize: 35,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
+    mNormalText = GoogleFonts.montserrat(textStyle: TextStyle(color: (matColor ?? Color(UiColors.black)).withAlpha(alpha ?? 1000),fontSize: 16,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
+    mSmallText = GoogleFonts.montserrat(textStyle: TextStyle(color: (matColor ?? Color(UiColors.black)).withAlpha(alpha ?? 1000),fontSize: 14,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
+    mSSmallText = GoogleFonts.montserrat(textStyle: TextStyle(color: (matColor ?? Color(UiColors.black)).withAlpha(alpha ?? 1000),fontSize: 12,overflow: TextOverflow.clip,decoration: TextDecoration.none,fontWeight: weight ?? FontWeight.w400));
 
   }
 }

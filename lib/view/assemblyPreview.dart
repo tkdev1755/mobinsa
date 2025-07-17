@@ -107,7 +107,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
         }
         else if (choice.$2.student.accepted == null){
           //print("Le voeu ${choice.$2.school.name} de ${choice.$2.student.name} ne peut être accepté, refus");
-          choice.$2.post_comment = "Raison du refus : ${choice.$2.getRejectionInformation()} ";
+          choice.$2.post_comment = "Raison du refus : ${choice.$2.getRejectionString()} ";
           // On refuse ce voeux pour marquer la différence entre un voeu qui n'as pas été traité et celui qu'on ne pouvait pas donner
           choice.$2.refuse();
         }
@@ -533,7 +533,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
               UiShapes.bPadding(10),
               Text("Cette statistique est basée sur le rapport entre le nombre de voeu total et le nombre de places disponibles", style: UiText(alpha: 150).nsText,),
               UiShapes.bPadding(10),
-              Text("Répartition par spécialité des places", style: UiText().nText,),
+              Text("Répartition des places par spécialité", style: UiText().nText,),
               UiShapes.bPadding(10),
               SizedBox(
                 height: 120,

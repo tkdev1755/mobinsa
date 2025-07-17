@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobinsa/model/School.dart';
@@ -10,6 +11,7 @@ import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/versionManager.dart';
 import 'package:mobinsa/view/assemblyPreview.dart';
 import 'package:mobinsa/view/modalPages/saveDialog.dart';
+import 'package:mobinsa/view/modalPages/similarSchoolsDialog.dart';
 import 'package:mobinsa/view/modalPages/updaterDialog.dart';
 import 'package:mobinsa/view/uiElements.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -82,8 +84,11 @@ class _MyHomePageState extends State<MyHomePage> {
   bool studentsLoaded = false;  // Changed to false
   late SoftwareUpdater softwareUpdater;
   late (int,int,int) currentVersion;
-  late Future<bool> isUptoDate;
+  late Future<bool> isUpToDate;
 
+  bool noExceptions = false;
+  List<bool> writeExcelToDisk = [false];
+  List<bool> cancelSimilarSchoolsProcedure = [false];
   Future<String?> pickFile() async {
     final result = await FilePicker.platform.pickFiles();
     if (result != null && result.files.isNotEmpty) {
@@ -121,7 +126,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     softwareUpdater = SoftwareUpdater(widget.packageInfo);
     currentVersion = softwareUpdater.currentVersion;
-    isUptoDate = softwareUpdater.isUpToDate();
+    if (kDebugMode){
+      isUpToDate = Future.value(true);
+    }
+    else{
+      isUpToDate = softwareUpdater.isUpToDate();
+    }
     // TODO: implement initState
     super.initState();
   }
@@ -149,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           Text("Version ${currentVersion.$1}.${currentVersion.$2}.${currentVersion.$3}", style: UiText(color: UiColors.white).smallText,),
           Padding(padding: EdgeInsets.only(right: 20)),
-          FutureBuilder(future: isUptoDate, builder: (BuildContext context, AsyncSnapshot<bool> snap){
+          FutureBuilder(future: isUpToDate, builder: (BuildContext context, AsyncSnapshot<bool> snap){
             if (snap.hasData){
               return Visibility(
                 visible: !(snap.data!),
@@ -158,6 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   hoverColor: Colors.green.shade600,
                   hoverDuration: Duration(milliseconds: 200),
                   customBorder: RoundedRectangleBorder(
+                    borderRadius: UiShapes().frameRadius,
                     side:  BorderSide(
                       color: Colors.orange,
                       width: 4,
@@ -263,7 +274,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                       // Show success message
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
-                                          content: Text('${schools.length} écoles importées avec succès'),
+                                          content: Row(
+                                            children: [
+                                              Icon(PhosphorIcons.check(), size: 40, color: Colors.white),
+                                              Padding(padding: EdgeInsets.all(10)),
+                                              Text('${schools.length} écoles importées avec succès', style: UiText(color: UiColors.white).nText,),
+                                            ],
+                                          ),
                                           backgroundColor: Colors.green,
                                         ),
                                       );
@@ -291,7 +308,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             }, child: Text("Importez les écoles", style: UiText().nsText,),
                           ),
                           Padding(padding: EdgeInsets.only(bottom: 10)),
-                          Visibility(visible: selectedFilenameSchools != null,child: Text("Fichier Choisi : $selectedFilenameSchools"),),
+                          Visibility(visible: (selectedFilenameSchools != null && schoolsLoaded),child: Text("Fichier Choisi : $selectedFilenameSchools"),),
                           Padding(padding: EdgeInsets.only(bottom: 10)),
                           /// BOUTON POUR LES ETUDIANTS
                           ElevatedButton(
@@ -307,11 +324,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                         selectedFilenameStudents = filePath.split("/").last;
                                       }
                                     });
-
                                     // Try to parse Excel
                                     try {
                                       Excel studentsResult = SheetParser.parseExcel(filePath);
-
+                                      cancelSimilarSchoolsProcedure[0] = false;
+                                      writeExcelToDisk[0] = false;
+                                      noExceptions = false;
                                       // Try to extract students
                                       try {
                                         List<Student> parsedStudents = SheetParser.extractStudents(studentsResult, schools);
@@ -319,21 +337,128 @@ class _MyHomePageState extends State<MyHomePage> {
                                           students = parsedStudents;
                                           studentsLoaded = students.isNotEmpty;
                                         });
-
                                         // Show success message
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
-                                            content: Text('${students.length} étudiants importés avec succès'),
+                                            content: Row(
+                                              children: [
+                                                Icon(PhosphorIcons.check(), size : 40, color: Colors.white),
+                                                Padding(padding: EdgeInsets.all(10)),
+                                                Text('${students.length} étudiants importés avec succès', style: UiText(color: UiColors.white).nText,),
+                                              ],
+                                            ),
                                             backgroundColor: Colors.green,
                                           ),
                                         );
-                                      } catch (e) {
+                                      } on ExcelParsingException catch (e) {
                                         // Error extracting students from Excel
-                                        showErrorDialog(
-                                            context,
-                                            "Erreur d'analyse des étudiants",
-                                            "Impossible de lire les données des étudiants: ${e.toString()}"
-                                        );
+                                        if (e.errorCode == ExcelParsingException.getErrorCode("unknownSchoolException")){
+                                          Map<String,dynamic> errorData = e.data!;
+                                          List<(double, School)> similarSchools = SheetParser.getSimilarSchools(schools, errorData["name"]);
+                                          similarSchools = similarSchools.where((e) => e.$2.country == errorData["country"]).toList();
+                                          await showDialog(context: context, builder: (BuildContext context){
+                                              return SimilarSchoolsDialog(similarSchools: similarSchools, schools: schools, excelFile: studentsResult, problematicSchool: errorData, writeExcelToDisk: writeExcelToDisk,cancelProcedure: cancelSimilarSchoolsProcedure,);
+                                            }
+                                          );
+                                          if (cancelSimilarSchoolsProcedure[0]){
+                                            print("PROCEDURE CANCELED !");
+                                            noExceptions = true;
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  children: [
+                                                    Icon(PhosphorIcons.warning(), size : 40, color: Colors.white,),
+                                                    Padding(padding: EdgeInsets.all(10)),
+                                                    Text("Aucun étudiant n'a été importé", style: UiText(color : UiColors.white).nText,),
+                                                  ],
+                                                ),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                          while (!noExceptions){
+                                            try {
+                                              List<Student> parsedStudents = SheetParser.extractStudents(studentsResult, schools);
+                                              setState(() {
+                                                students = parsedStudents;
+                                                studentsLoaded = students.isNotEmpty;
+                                              });
+                                              if (studentsLoaded){
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Row(
+                                                      children: [
+                                                        Icon(PhosphorIcons.check(), size : 40, color: Colors.white,),
+                                                        Padding(padding: EdgeInsets.all(10)),
+                                                        Text('${students.length} étudiants importés avec succès',style: UiText(color: UiColors.white).nText),
+                                                      ],
+                                                    ),
+                                                    backgroundColor: Colors.green,
+                                                  ),
+                                                );
+
+                                              }
+                                              if (writeExcelToDisk[0]){
+                                                SheetParser.updateExcelOnDisk(studentsResult,filePath);
+                                              }
+                                              noExceptions = true;
+                                            } on ExcelParsingException catch (ne) {
+                                              if (ne.errorCode == ExcelParsingException.getErrorCode("unknownSchoolException")){
+                                                Map<String,dynamic> errorData = ne.data!;
+                                                List<(double, School)> similarSchools = SheetParser.getSimilarSchools(schools, errorData["name"]);
+                                                similarSchools = similarSchools.where((e) => e.$2.country == errorData["country"]).toList();
+                                                await showDialog(context: context, builder: (BuildContext context){
+                                                    return SimilarSchoolsDialog(similarSchools: similarSchools, schools: schools, excelFile: studentsResult, problematicSchool: errorData, writeExcelToDisk: writeExcelToDisk, cancelProcedure: cancelSimilarSchoolsProcedure,);
+                                                  }
+                                                );
+                                                if (cancelSimilarSchoolsProcedure[0]){
+                                                  noExceptions = true;
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(
+                                                      content: Row(
+                                                        mainAxisAlignment: MainAxisAlignment.start,
+                                                        children: [
+                                                          Icon(PhosphorIcons.warning(), size : 40, color: Colors.white,),
+                                                          Padding(padding: EdgeInsets.all(10)),
+                                                          Text("Aucun étudiant n'a été importé", style: UiText(color : UiColors.white).nText,),
+                                                        ],
+                                                      ),
+                                                      backgroundColor: Colors.red,
+                                                    ),
+                                                  );
+                                                }
+                                              }
+                                              else{
+                                                print("Une exception d'un autre type est arrivée !");
+                                                showErrorDialog(
+                                                    context,
+                                                    "Erreur d'analyse des étudiants",
+                                                    "Impossible de lire les données des étudiants: ${ne.toString()}"
+                                                );
+                                                noExceptions = true;
+                                                /*SnackBar(
+                                                  content: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    children: [
+                                                      Icon(PhosphorIcons.warning(), size : 40, color: Colors.white,),
+                                                      Padding(padding: EdgeInsets.all(10)),
+                                                      Text("Aucun étudiant n'a été importé", style: UiText(color : UiColors.white).nText,),
+                                                    ],
+                                                  ),
+                                                  backgroundColor: Colors.red,
+                                                );*/
+                                              }
+                                            }
+                                          }
+                                        }
+                                        else{
+                                          showErrorDialog(
+                                              context,
+                                              "Erreur d'analyse des étudiants",
+                                              "Impossible de lire les données des étudiants: ${e.toString()}"
+                                          );
+                                        }
                                       }
                                     } catch (e) {
                                       // Error parsing Excel file
@@ -352,7 +477,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Text("Importez les étudiants", style: UiText().nsText,)
                           ),
                           Padding(padding: EdgeInsets.only(bottom: 10)),
-                          Visibility(visible: selectedFilenameStudents != null,child: Text("Fichier Choisi : $selectedFilenameStudents"),),
+                          Visibility(visible: (selectedFilenameStudents != null && studentsLoaded),child: Text("Fichier Choisi : $selectedFilenameStudents"),),
                           Padding(padding: EdgeInsets.only(bottom: 10)),
                           ElevatedButton(
                               style: customButtonStyle,
@@ -387,4 +512,6 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+
 }
