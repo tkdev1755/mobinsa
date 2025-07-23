@@ -5,6 +5,7 @@ import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/parser.dart';
 import 'package:mobinsa/model/sessionStorage.dart';
+import 'package:mobinsa/view/modalPages/sessionProgressDialog.dart';
 import 'package:mobinsa/view/uiElements.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../model/School.dart';
@@ -96,6 +97,13 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
     print("Auto generated comment -> " "${numberOfSlotsComment + numberOfBadSpecComment}");
     return numberOfSlotsComment + numberOfBadSpecComment;
   }
+  
+  double getSessionProgress(){
+    double progress = widget.students.where((e) => e.accepted != null || e.hasNoChoiceLeft()).length / widget.students.length;
+    return progress;
+  }
+
+   // de 0.0 à 1.0
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -119,8 +127,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
               ],
             ),
           ),
-          
+
           actions: [
+
             AnimatedOpacity(
               opacity: _showSaveMessage ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 300),
@@ -198,9 +207,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                 }
                 else{
                   // TODO - Ajouter une gestion des erreurs
-                }
-                // TODO: Exporter en excel
-              },
+                }},
               tooltip: "Exporter vers excel",
             ),
 
@@ -340,7 +347,6 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                     ),
                   ],
                 ),
-                width: double.infinity, // Prend tout l'espace horizontal
                 child: selectedStudent != null
                     ? SingleChildScrollView(
                         padding: const EdgeInsets.all(24.0),
@@ -579,6 +585,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                           ),
                                         ),
                                       ),
+                                      Padding(
+                                        padding: EdgeInsets.only(bottom : 40),
+                                      ),
+                                      progressCard()
                                     ],
                                   ),
                                 ),
@@ -1125,6 +1135,47 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
               Text("${getAutoRejectionComment(currentStudent)}", style: UiText(weight: FontWeight.w500).nText,),
             ],
           ))
+        ],
+      ),
+    );
+  }
+
+  Widget progressCard(){
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(15),
+      decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: UiShapes().frameRadius
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text("Avancement de la Séance", style: UiText().nText,)),
+              Padding(padding: EdgeInsets.only(right: 20)),
+              IconButton(onPressed: (){
+                showDialog(context: context, builder: (BuildContext context){
+                  return SessionProgressDialog(students: widget.students, schools: widget.schools);
+                });
+              }, icon: Icon(PhosphorIcons.info()))
+            ],
+          ),
+          UiShapes.bPadding(10),
+          Row(
+            children: [
+              Expanded(
+                child: LinearProgressIndicator(
+                  borderRadius: UiShapes().frameRadius,
+                  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                  value: getSessionProgress(),
+                ),
+              ),
+              Padding(padding: EdgeInsets.only(right : 20)),
+              Text("${(getSessionProgress()*100).toStringAsFixed(1)}%", style: UiText().mediumText,)
+            ],
+          )
         ],
       ),
     );

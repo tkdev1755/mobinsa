@@ -226,8 +226,6 @@ class Student {
         return false;
       }
     }
-    // un peu superflu, pourrait faire
-    // return refused.length == 3;
     return true;
   }
 

@@ -75,5 +75,8 @@ class UiShapes {
   static Widget bPadding(double bottom){
     return Padding(padding: EdgeInsets.only(bottom: bottom),);
   }
+  static Widget rPadding(double right){
+    return Padding(padding: EdgeInsets.only(right: right),);
+  }
 
 }
