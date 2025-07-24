@@ -3,6 +3,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobinsa/model/School.dart';
@@ -26,7 +28,7 @@ class _SaveDialogState extends State<SaveDialog> {
   late Future<List<(String,String)>> saves;
   @override
   void initState(){
-    saves = SessionStorage.askForLoadPath();
+    saves = SessionStorage.getSaveFolder();
   }
 
   String parseSaveText(String filename){
@@ -58,14 +60,28 @@ class _SaveDialogState extends State<SaveDialog> {
       }, child: Text("D'accord"))],
     );
   }
+  Future<void> openSaveFolder() async {
+    String folderPath = await SessionStorage.getSaveFolderPath();
+    if (Platform.isMacOS || Platform.isLinux){
+      ProcessResult test = Process.runSync("open", [folderPath]);
+    }
+    else if (Platform.isWindows){
+      await Process.start(
+        'cmd',
+        ['/c', 'start', '', folderPath],
+        runInShell: true,
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
       child: Container(
         padding: EdgeInsets.all(20),
-        width: MediaQuery.sizeOf(context).width*0.4,
-        height: MediaQuery.sizeOf(context).height*0.4,
+        width: 600,
+        height: 355,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -89,7 +105,6 @@ class _SaveDialogState extends State<SaveDialog> {
             }),
             Padding(padding: EdgeInsets.only(bottom: 10)),
             TextButton(onPressed: ()async {
-
               Map<String, dynamic> encodedData = {};
               (String,String)? saveInfo;
               try {
@@ -133,7 +148,8 @@ class _SaveDialogState extends State<SaveDialog> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => DisplayApplicants(schools: schools, students: students,loadedSave: saveInfo,)),);
-            }, child: Text("Charger une sauvegarde manuellement", style: GoogleFonts.montserrat(),))
+            }, child: Text("Charger une sauvegarde manuellement", style: GoogleFonts.montserrat(),)),
+            TextButton(onPressed: () async {await openSaveFolder();}, child: Text("Ouvrir le dossier des sauvegardes"))
           ],
         ),
       ),
@@ -185,7 +201,7 @@ class _SaveDialogState extends State<SaveDialog> {
               }, icon: Icon(PhosphorIcons.export())),
               IconButton(onPressed: (){
                 SessionStorage.deleteSave(saveInfo);
-                saves = SessionStorage.askForLoadPath();
+                saves = SessionStorage.getSaveFolder();
                 setState(() {
                 });
               }, icon: Icon(PhosphorIcons.trash()))

@@ -16,9 +16,15 @@ import 'package:mobinsa/view/modalPages/updaterDialog.dart';
 import 'package:mobinsa/view/uiElements.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:window_manager/window_manager.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  await windowManager.ensureInitialized();
+  windowManager.waitUntilReadyToShow(null, () async{
+    await windowManager.show();
+    await windowManager.focus();
+  });
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   runApp(MyApp(pkgInfo: packageInfo,));
 }
@@ -75,7 +81,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WindowListener {
   List<Student> students = [];
   List<School> schools = [];
   String? selectedFilenameSchools;
@@ -131,6 +137,10 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     else{
       isUpToDate = softwareUpdater.isUpToDate();
+    }
+    if (Platform.isLinux || Platform.isWindows || Platform.isMacOS){
+      windowManager.addListener(this);
+      windowManager.setPreventClose(false);
     }
     // TODO: implement initState
     super.initState();

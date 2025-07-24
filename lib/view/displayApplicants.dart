@@ -1,6 +1,7 @@
+import 'dart:ui';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_window_close/flutter_window_close.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/Student.dart';
@@ -11,7 +12,7 @@ import 'package:mobinsa/view/uiElements.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../model/School.dart';
 import 'dart:io';
-
+import 'package:window_manager/window_manager.dart';
 
 /*
 
@@ -31,7 +32,7 @@ class DisplayApplicants extends StatefulWidget {
   State<DisplayApplicants> createState() => _DisplayApplicantsState();
 }
 
-class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProviderStateMixin {
+class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProviderStateMixin,WindowListener{
 
   Student? selectedStudent;
   Map<int, bool?> schoolChoices = {}; // null = pas de choix, true = accepté, false = refusé
@@ -65,7 +66,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
     }
     return Colors.black;
   }
-
+  bool _canDisplayCloseMessage = false;
   // Execute gtcode on startup of the page
   @override
   void initState() {
@@ -75,7 +76,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
       currentSaveName = widget.loadedSave!.$2;
     }
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux){
-      FlutterWindowClose.setWindowShouldCloseHandler(() async {
+      windowManager.addListener(this);
+      windowManager.setPreventClose(true);
+      /*FlutterWindowClose.setWindowShouldCloseHandler(() async {
         return await showDialog(
             context: context,
             builder: (context) {
@@ -100,13 +103,59 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
 
                   ]);
             });
-      });
+      });*/
     }
 
     super.initState();
   }
-  
-  getAutoRejectionComment(Student currentStudent){
+  @override
+  void dispose() {
+    /*FlutterWindowClose.setWindowShouldCloseHandler(() async {
+      return true;
+    });*/
+    windowManager.setPreventClose(false);
+    windowManager.removeListener(this);
+
+    // TODO: implement dispose
+    super.dispose();
+  }
+  @override
+  void onWindowClose() async {
+    print("onWindowClose called");
+    bool canCloseWindow = await windowManager.isPreventClose();
+    if (canCloseWindow){
+      await showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+                title: const Text('Souhaitez vous sauvegarder cette séance ?'),
+                actions: [
+                  TextButton(
+                      onPressed: () async {
+                        Navigator.of(context).pop(false);
+                      }, child: const Text('Annuler')),
+                  TextButton(
+                      onPressed: () async {
+                        await windowManager.setPreventClose(false);
+                        windowManager.destroy();
+                      },
+                      child: const Text('Non')),
+                  TextButton(
+                      onPressed: () async =>  {
+                        await saveProcedure(),
+                        await windowManager.setPreventClose(false),
+                        windowManager.destroy(),
+                      },
+                      child: const Text('Oui')),
+
+                ]);
+          });
+    }
+
+
+
+  }
+  String getAutoRejectionComment(Student currentStudent){
     Map<int, List<bool>> rejectionReasons = currentStudent.choices.map((k,v) => MapEntry(k, v.getRejectionReasons()));
     rejectionReasons.removeWhere((k,v) => currentStudent.refused.contains(currentStudent.choices[k]));
     print("rejectionReasonlength ${rejectionReasons.length}");

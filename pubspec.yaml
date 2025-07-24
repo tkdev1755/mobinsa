@@ -45,7 +45,7 @@ dependencies:
   http: ^1.4.0
   archive: ^3.6.1
   text_analysis: ^1.0.0+2
-  flutter_window_close: ^1.3.0
+  window_manager: ^0.5.1
 
 
 

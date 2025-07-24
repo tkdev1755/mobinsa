@@ -18,12 +18,11 @@ class SessionStorage{
   static String jsonStudentName = "students";
   static String saveFolder = "/mobinsa/saves";
   static String dateFormat = "dd-MM-yyyy-HH.mm";
-  static Future<String> getSaveName() async{
+  static String getSaveName() {
     return "CRMob_${DateFormat(dateFormat).format(DateTime.now())}.mbsave";
   }
 
   static int compareSaveFiles(String filename_a, filename_b){
-
     List<String> splitFilename_a = filename_a.split("_").toList();
     List<String> splitFilename_b = filename_b.split("_").toList();
     if (splitFilename_a.length < 2 || splitFilename_b.length < 2){
@@ -36,6 +35,16 @@ class SessionStorage{
     return date_a.compareTo(date_b);
   }
 
+  static getSaveFolderPath() async{
+    return "${(await pp.getApplicationDocumentsDirectory()).path}$saveFolder/";
+  }
+  /// Ancienne fonction qui faisait apparaitre une invite demandant l'endroit où enregistrer les sauvegarde
+  /// Retourne désormais le chemin fixe de la sauvegarde
+  ///
+  /// Sur Windows et Linux, le chemin est le suivant
+  /// ~/Documents/mobinsa/saves/
+  /// Sur MacOS, à cause du système de conteuneurisation des apps,le chemin est le suivant
+  /// ~/Library/Containers/com.insacvl.mobinsa.mobinsa/Data/Documents/saves
   static Future<String> askForSavePath(String saveName) async {
     /*final result = await FilePicker.platform.saveFile(
       type: FileType.custom,
@@ -50,8 +59,8 @@ class SessionStorage{
     // Retourne le chemin du fichier de sauvegarde
     return "${(await pp.getApplicationDocumentsDirectory()).path}$saveFolder/$saveName";
   }
-
-  static Future<List<(String,String)>> askForLoadPath() async {
+  ///
+  static Future<List<(String,String)>> getSaveFolder() async {
     // Charge le dossier où sont stockées les sauvegarde
     final result = "${(await pp.getApplicationDocumentsDirectory()).path}$saveFolder/";
 
@@ -73,7 +82,10 @@ class SessionStorage{
     // Je retourne la liste de sauvegardes
     return saves;
   }
-
+  /// Fonction transformant les données de l'application au format json
+  ///
+  /// Prends une liste d'objets Student et une liste d'objet School
+  /// Retourne le dictionnaire des données au format json
   static Future<Map<String, dynamic>> serializeData(List<Student> students, List<School> schools) async{
     // Ajout de l'attribut version au dictionnaire
     SoftwareUpdater softwareUpdater = SoftwareUpdater(await PackageInfo.fromPlatform());
@@ -93,6 +105,9 @@ class SessionStorage{
     // Je retourne le dictionnaire avec les données sérialisée
     return finalData;
   }
+  /// Fonction enregistrant le fichier de sauvegarde sur le disque
+  ///
+  /// Prends les données de l'application sérialisées et le chemin pour enregistrer le fichier de sauvegarde
   static int saveData(Map<String, dynamic> data,String path){
     File saveFile = File(path);
     // Je vérifie si le fichier existe, autrement dit je le crée
@@ -100,7 +115,7 @@ class SessionStorage{
       saveFile.createSync();
     }
 
-    print("Data resemble to $data");
+    // print("Data resemble to $data");
     // J'écrit ensuite directement le dictionnaire sous forme de chaine de caractère dans le fichier
     saveFile.writeAsStringSync(jsonEncode(data));
     return 1;
@@ -154,7 +169,7 @@ class SessionStorage{
       "students" : students,
     };
   }
-
+  /// Fonction chargeant
   static Future<(String,String)> loadExternalSave() async{
     // Je fait aparaitre le sélecteur de fichiers
     final result = await FilePicker.platform.pickFiles(
