@@ -57,8 +57,8 @@ class Choice {
     };
   }
   
-  factory Choice.fromJson(Map<String,dynamic> json, Student student){
-    School school = School.fromJson(json[jsonSchool]);
+  factory Choice.fromJson(Map<String,dynamic> json, Student student, List<School> schools){
+    School school = schools.firstWhere((e) => e == School.fromJson(json[jsonSchool]));
     return Choice(school: school, interranking: json[jsonInterranking], student:  student);
   }
 

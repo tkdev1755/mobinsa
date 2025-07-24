@@ -188,7 +188,7 @@ class School {
       available_slots: json[jsonAvailable_slots],               // available_slots
       b_slots: json[jsonB_slots],                       // b_slots
       m_slots: json[jsonM_slots],                       // m_slots
-      specialization :List<String>.from(json[jsonSpecialization]), // specialization
+      specialization : List<String>.from(json[jsonSpecialization]), // specialization
       graduation_level: json[jsonGraduationLVL],                 // graduation_level
       program: json[jsonProgram],
       use_langage: json[jsonUseLanguage],                   // use_langage
@@ -200,7 +200,7 @@ class School {
     school.is_full = json[jsonIsFull];
     school.is_full_b = json[jsonIsFull_b];
     school.is_full_m = json[jsonIsFull_m];
-    return  school;
+    return school;
   }
 
   @override

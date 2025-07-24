@@ -100,7 +100,6 @@ class SessionStorage{
       saveFile.createSync();
     }
 
-
     print("Data resemble to $data");
     // J'écrit ensuite directement le dictionnaire sous forme de chaine de caractère dans le fichier
     saveFile.writeAsStringSync(jsonEncode(data));
@@ -143,7 +142,7 @@ class SessionStorage{
     int i = 0;
     // Je refait la même chose pour les étudiants
     for (var entry in jsonStudents){
-      students.add(Student.fromJson(entry));
+      students.add(Student.fromJson(entry,schools));
       i++;
     }
     /*print("Currently ${students.where((e) => e.accepted != null).length} Students has an acceptedChoice");

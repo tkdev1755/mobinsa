@@ -230,7 +230,7 @@ class Student {
   }
 
   String get_graduation_level (){
-    if (this.year == 2){
+    if (year == 2){
       return "bachelor";
     }
     else {
@@ -396,7 +396,7 @@ class Student {
     };
   }
 
-  factory Student.fromJson(Map<String, dynamic> json){
+  factory Student.fromJson(Map<String, dynamic> json,List<School> schools){
     Map<int, Choice> deserializedChoices = {};
     Student student = Student(
         id :json[jsonId],
@@ -411,15 +411,17 @@ class Student {
     Map<String, dynamic> serializedChoices = json[jsonChoices];
     List<Choice> refusedChoices = [];
     for (var c in serializedChoices.entries){
-      deserializedChoices[int.parse(c.key)] = Choice.fromJson(c.value, student);
+      deserializedChoices[int.parse(c.key)] = Choice.fromJson(c.value, student,schools);
     }
+
     for (var c in deserializedChoices.entries){
       deserializedChoices[c.key]?.student.choices[c.key] = deserializedChoices[c.key]!;
     }
+
     for (var rc in json[jsonRefused]){
-      refusedChoices.add(Choice.fromJson(rc, student));
+      refusedChoices.add(Choice.fromJson(rc, student,schools));
     }
-    student.accepted = json[jsonAccepted] != "null" ? Choice.fromJson(json[jsonAccepted], student) : null;
+    student.accepted = json[jsonAccepted] != "null" ? Choice.fromJson(json[jsonAccepted], student,schools) : null;
     student.refused = refusedChoices;
     return student;
   }

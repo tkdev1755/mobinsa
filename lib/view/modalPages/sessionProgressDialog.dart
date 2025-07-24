@@ -28,7 +28,7 @@ class SessionProgressDialog extends StatelessWidget {
   Map<String,int> getSecondBallotStudentNumber(List<Student> students){
     int secondBallotStudents = students.where((e) => e.accepted == null && e.hasNoChoiceLeft()).length;
     int allChoicesDeclinedStudentNumber = students.where((e) => e.choices.length == e.refused.length).length;
-    int noPlaceInAnyChoiceStudentNumber = students.where((e) => e.choices.entries.where((e) => !(e.value.getRejectionReasons()[1])).length == e.choices.length && e.accepted == null).length;
+    int noPlaceInAnyChoiceStudentNumber = students.where((e) => e.choices.entries.where((e) => !(e.value.getRejectionReasons()[1])).length == e.choices.length && e.accepted == null && !(e.choices.length == e.refused.length) && !(e.choices.entries.where((e) => !(e.value.getRejectionReasons()[0])).length == e.choices.length) ).length;
     int allIncoherentChoiceStudentNumber = students.where((e) => e.choices.entries.where((e) => !(e.value.getRejectionReasons()[0])).length == e.choices.length && e.accepted == null).length;
     return {
       "allSecondBallotStudents":secondBallotStudents,
@@ -96,10 +96,18 @@ class SessionProgressDialog extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: LinearProgressIndicator(
-            borderRadius: UiShapes().frameRadius,
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            value: progress,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 0.0, end: getSessionProgress(students)),
+            duration: Duration(milliseconds: 200),
+            builder: (context, value, _) {
+              final progressColor = Color.lerp(Colors.red, Colors.green, value)!;
+              return LinearProgressIndicator(
+                borderRadius: UiShapes().frameRadius,
+                backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                value: value,
+              );
+            },
           ),
         ),
         Padding(padding: EdgeInsets.only(right : 20)),

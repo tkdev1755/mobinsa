@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_window_close/flutter_window_close.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/Student.dart';
@@ -73,6 +74,34 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
       hasSaved = true;
       currentSaveName = widget.loadedSave!.$2;
     }
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux){
+      FlutterWindowClose.setWindowShouldCloseHandler(() async {
+        return await showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                  title: const Text('Souhaitez vous sauvegarder cette séance ?'),
+                  actions: [
+                    TextButton(
+                        onPressed: () async {
+
+                          Navigator.of(context).pop(false);
+                        }, child: const Text('Annuler')),
+                    TextButton(
+                        onPressed: () async {
+
+                          Navigator.of(context).pop(true);
+                        }, child: const Text('Non')),
+                    TextButton(
+                        onPressed: () async =>  {
+                          await saveProcedure(),
+                          Navigator.of(context).pop(true)},
+                        child: const Text('Oui')),
+
+                  ]);
+            });
+      });
+    }
 
     super.initState();
   }
@@ -102,7 +131,38 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
     double progress = widget.students.where((e) => e.accepted != null || e.hasNoChoiceLeft()).length / widget.students.length;
     return progress;
   }
+  Future<void> saveProcedure() async{
+    String savePath = "";
+    String saveName = "";
+    try {
+      if (hasSaved && currentSaveName != null){
+        saveName = currentSaveName!;
+      }
+      else{
+        saveName = await SessionStorage.getSaveName();
+        currentSaveName = saveName;
+        hasSaved = true;
+      }
+      savePath = await SessionStorage.askForSavePath(saveName);
+    } catch (e, s) {
+      print("$s , $e -> the directory is null ");
+    }
+    Map<String, dynamic> serializedData = {};
 
+    try {
+      serializedData = await SessionStorage.serializeData(widget.students, widget.schools);
+    }
+    catch (e,s){
+      print("$s , $e -> There was a problem while serializing the data");
+    }
+
+    try{
+      SessionStorage.saveData(serializedData, savePath);
+    }
+    catch(e,s){
+      print("$s , $e -> There was a problem while writing the data to disk");
+    }
+  }
    // de 0.0 à 1.0
   @override
   Widget build(BuildContext context) {
@@ -147,36 +207,8 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
             ),
             Padding(padding: EdgeInsets.only(left: 10)),
             IconButton(onPressed: () async {
-              String savePath = "";
-              String saveName = "";
-              try {
-                if (hasSaved && currentSaveName != null){
-                  saveName = currentSaveName!;
-                }
-                else{
-                  saveName = await SessionStorage.getSaveName();
-                  currentSaveName = saveName;
-                  hasSaved = true;
-                }
-                savePath = await SessionStorage.askForSavePath(saveName);
-              } catch (e, s) {
-                print("$s , $e -> the directory is null ");
-              }
-              Map<String, dynamic> serializedData = {};
-              
-              try {
-                serializedData = await SessionStorage.serializeData(widget.students, widget.schools);
-              }
-              catch (e,s){
-                print("$s , $e -> There was a problem while serializing the data");
-              }
-              
-              try{
-                SessionStorage.saveData(serializedData, savePath);
-              }
-              catch(e,s){
-                print("$s , $e -> There was a problem while writing the data to disk");
-              }
+
+              await saveProcedure();
               setState(() {
                 _showSaveMessage = true;
               });
@@ -1166,14 +1198,24 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
           Row(
             children: [
               Expanded(
-                child: LinearProgressIndicator(
-                  borderRadius: UiShapes().frameRadius,
-                  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-                  value: getSessionProgress(),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: 0.0, end: getSessionProgress()),
+                  duration: Duration(milliseconds: 200),
+                  builder: (context, value, _) {
+                    final progressColor = Color.lerp(Colors.red, Colors.green, value)!;
+                    return LinearProgressIndicator(
+                      borderRadius: UiShapes().frameRadius,
+                      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                      valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                      value: value,
+                    );
+                  },
                 ),
               ),
               Padding(padding: EdgeInsets.only(right : 20)),
-              Text("${(getSessionProgress()*100).toStringAsFixed(1)}%", style: UiText().mediumText,)
+              SizedBox(
+                width: 90,
+                  child: Text("${(getSessionProgress()*100).toStringAsFixed(1)}%", style: UiText().mediumText,))
             ],
           )
         ],
@@ -1215,6 +1257,7 @@ class _CommentModalState extends State<CommentModal> {
     return AlertDialog(
       title: Text(widget.choice != null ? "Commentaire sur le refus" : "Laisser un commentaire"),
       content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           if (widget.choice == null) // Afficher le dropdown seulement pour les commentaires généraux
