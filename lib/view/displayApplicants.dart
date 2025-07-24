@@ -137,14 +137,24 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                   TextButton(
                       onPressed: () async {
                         await windowManager.setPreventClose(false);
-                        windowManager.destroy();
+                        if (!Platform.isWindows){
+                          windowManager.destroy();
+                        }
+                        else{
+                          windowManager.close();
+                        }
                       },
                       child: const Text('Non')),
                   TextButton(
-                      onPressed: () async =>  {
-                        await saveProcedure(),
-                        await windowManager.setPreventClose(false),
-                        windowManager.destroy(),
+                      onPressed: () async {
+                        await saveProcedure();
+                        await windowManager.setPreventClose(false);
+                        if (!Platform.isWindows){
+                          windowManager.destroy();
+                        }
+                        else{
+                          windowManager.close();
+                        }
                       },
                       child: const Text('Oui')),
 
