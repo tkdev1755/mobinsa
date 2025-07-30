@@ -5,10 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobinsa/model/Choice.dart';
 import 'package:mobinsa/model/Student.dart';
+import 'package:mobinsa/model/networkManager.dart';
 import 'package:mobinsa/model/parser.dart';
 import 'package:mobinsa/model/sessionStorage.dart';
+import 'package:mobinsa/model/versionManager.dart';
 import 'package:mobinsa/view/modalPages/sessionProgressDialog.dart';
+import 'package:mobinsa/view/modalPages/startCollaborativeSessionDialog.dart';
 import 'package:mobinsa/view/uiElements.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../model/School.dart';
 import 'dart:io';
@@ -66,8 +70,14 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
     }
     return Colors.black;
   }
-  bool _canDisplayCloseMessage = false;
+  Future<bool>? initializedNetworkManager;
+  late NetworkManager _networkManager;
+  List<bool> _startNetworkSession = [false];
   // Execute gtcode on startup of the page
+  Future<bool> initializeNetworkManager() async {
+    _networkManager = NetworkManager(SoftwareUpdater(await PackageInfo.fromPlatform()).toString());
+    return true;
+  }
   @override
   void initState() {
     // TODO: implement initState
@@ -75,6 +85,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
       hasSaved = true;
       currentSaveName = widget.loadedSave!.$2;
     }
+    initializedNetworkManager = initializeNetworkManager();
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux){
       windowManager.addListener(this);
       windowManager.setPreventClose(true);
@@ -248,7 +259,6 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
           ),
 
           actions: [
-
             AnimatedOpacity(
               opacity: _showSaveMessage ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 300),
@@ -263,6 +273,55 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                   style: UiText(color: UiColors.white).smallText,
                 ),
               ),
+            ),
+            Padding(padding: EdgeInsets.only(left: 10)),
+            FutureBuilder(
+              future: initializedNetworkManager,
+              builder: (context, asyncSnapshot) {
+                if (asyncSnapshot.hasData){
+                  return ListenableBuilder(
+                    listenable: _networkManager,
+                    builder: (BuildContext context, Widget? child ){
+                      return Visibility(
+                          visible: _networkManager.hasJuryStarted,
+                          child: Container(
+                            padding: EdgeInsets.only(top : 5,bottom: 5, right: 10, left : 10),
+                            decoration: BoxDecoration(
+                                color: Colors.green.shade700,
+                                borderRadius: UiShapes().frameRadius
+                            ),
+                            child: Row(
+                              children: [
+                                Text("${_networkManager.connectedClients.length}", style: UiText(color : UiColors.white).smallText,),
+                                UiShapes.rPadding(10),
+                                Icon(PhosphorIcons.userSound(),color: Colors.white,)
+                              ],
+                            ),
+                          )
+                      );
+                    },
+                  );
+                }
+                else{
+                  return Container();
+                }
+
+              }
+            ),
+            Padding(padding: EdgeInsets.only(left: 10)),
+            IconButton(
+                onPressed: (){
+                  if (initializedNetworkManager == null){
+                    print("Not able to show the dialog rn");
+                    throw Exception("Not able to show the dialog");
+                  }
+                  initializedNetworkManager!.then((e){
+                    showDialog(context: context, builder: (BuildContext context){
+                      return StartCollaborativeSessionDialog(networkManager: _networkManager, startNetworkSession: _startNetworkSession, students: widget.students, schools: widget.schools,);
+                    });
+                  });
+                },
+                icon: Icon(PhosphorIcons.usersThree())
             ),
             Padding(padding: EdgeInsets.only(left: 10)),
             IconButton(onPressed: () async {
@@ -675,6 +734,37 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                             )),
                                           ),
                                         ),
+                                      ),
+                                      UiShapes.bPadding(20),
+                                      ListenableBuilder(
+                                        listenable: _networkManager,
+                                        builder: (BuildContext context, Widget? child){
+                                          return Visibility(
+                                            visible: _networkManager.hasJuryStarted,
+                                            child: SizedBox(
+                                              width: double.infinity,
+                                              height: 50,
+                                              child: ElevatedButton(
+                                                onPressed: (){
+
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.green[300],
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  'Démarrer le vote',
+                                                  style: GoogleFonts.montserrat(textStyle: const TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 14,
+                                                  )),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
                                       ),
                                       Padding(
                                         padding: EdgeInsets.only(bottom : 40),
@@ -1281,6 +1371,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
       ),
     );
   }
+
 }
 
 // Widget modal pour les commentaires
