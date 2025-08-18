@@ -5,9 +5,7 @@ on:
     tags:
       - "v*" # déclenche seulement si le push correspond à un tag style v1.0.0
   workflow_dispatch:
-    branch:
-      - mobinsa_collaborative
-      - main
+
 
 jobs:
   build:
