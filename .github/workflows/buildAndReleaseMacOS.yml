@@ -1,0 +1,84 @@
+name: Build macOS App with Embedded Binary
+
+on:
+  push:
+    tags:
+      - "v*" # déclenche seulement si le push correspond à un tag style v1.0.0
+  workflow_dispatch:
+    branch:
+      - mobinsa_collaborative
+      - main
+
+jobs:
+  build:
+  
+    if: contains(github.event.head_commit.message, '[RELEASE]')
+    runs-on: macos-latest
+    outputs : 
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      # 1. Checkout du repo Flutter
+      - name: Checkout Flutter app
+        uses: actions/checkout@v4
+
+      # 2. Setup Flutter
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.22.0"
+
+      # 3. Build Flutter macOS app
+      - name: Build Flutter macOS app
+        run: flutter build macos --release
+        
+      - name: Extract version from pubspec.yaml
+        id: get_version
+        shell: bash
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | cut -d ' ' -f2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Download server binary
+        run: |
+          mkdir server_bin
+          curl -L -o server.zip https://github.com/tkdev1755/mobinsaHttpServer/releases/latest/download/mobinsaHTTPServer_macos_x64.zip
+          unzip mobinsaHTTPServer_macos_x64.zip -d server_bin
+
+      
+      - name: Copy server binary into .app bundle
+        run: |
+          APP_PATH="build/macos/Build/Products/Release/mobinsa.app"
+          RES_PATH="$APP_PATH/Contents/Resources"
+          mkdir -p "$RES_PATH"
+          cp server_bin/mobinsaHttpServer "$RES_PATH/"
+          chmod +x "$RES_PATH/mobinsaHttpServer"
+      
+      - name: Zip up the executable
+        run: |
+          APP_PATH="build/macos/Build/Products/Release"
+          cd APP_PATH
+          zip mobinsa_macos_universal.zip mobinsa.app 
+      # 7. Publier en artefact
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobinsaMacOSUniversal
+          path: build/macos/Build/Products/Release/mobinsa_macos_universal.zip
+  release:
+    needs: build
+    runs-on: macos-latest
+    steps:
+      - name: Download Release
+        uses: actions/download-artifact@v4
+        with:
+          path: ./release_files
+      - name: Create Github Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.build.outputs.version }}
+          name: v${{ needs.build.outputs.version }}
+          draft: true
+          files: ./release_files/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
