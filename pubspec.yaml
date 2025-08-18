@@ -37,7 +37,7 @@ dependencies:
   excel: ^4.0.6
   intl: ^0.20.2
   path_provider: ^2.1.5
-  file_picker: ^10.2.0Unable to determine Flutter version for channel: stable version: null architecture: arm64
+  file_picker: ^10.2.0
   flutter_lints: ^6.0.0
   phosphor_flutter: ^2.0.0
   google_fonts: ^6.2.1
