@@ -29,7 +29,14 @@ jobs:
 
       # 3. Build Flutter macOS app
       - name: Build Flutter macOS app
-        run: flutter build macos --release
+        run: | 
+          flutter build macos --release
+          xcodebuild -workspace macos/Runner.xcworkspace \
+          -scheme Runner \
+          -configuration Release \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
         
       - name: Extract version from pubspec.yaml
         id: get_version
