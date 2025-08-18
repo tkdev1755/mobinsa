@@ -24,7 +24,7 @@ jobs:
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.22.0"
+          flutter-version-file: 'pubspec.yaml'
 
       # 3. Build Flutter macOS app
       - name: Build Flutter macOS app
