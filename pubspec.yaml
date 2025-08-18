@@ -20,7 +20,7 @@ version: 2.2.1
 
 environment:
   sdk: ^3.8.1
-
+  flutter: 3.32.5
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
 # consider running `flutter pub upgrade --major-versions`. Alternatively,
@@ -37,7 +37,7 @@ dependencies:
   excel: ^4.0.6
   intl: ^0.20.2
   path_provider: ^2.1.5
-  file_picker: ^10.2.0
+  file_picker: ^10.2.0Unable to determine Flutter version for channel: stable version: null architecture: arm64
   flutter_lints: ^6.0.0
   phosphor_flutter: ^2.0.0
   google_fonts: ^6.2.1
