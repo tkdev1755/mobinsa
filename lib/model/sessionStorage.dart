@@ -144,7 +144,6 @@ class SessionStorage{
     if (!data.containsKey("version")){
       print("Save from 1.0.0, loading it as it causes no crashes");
     }
-    print(data);
 
     List<dynamic> jsonSchools = data[jsonSchoolName];
     List<dynamic> jsonStudents = data[jsonStudentName];

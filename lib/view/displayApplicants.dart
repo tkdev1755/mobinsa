@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobinsa/model/Choice.dart';
+import 'package:mobinsa/model/ServerRuntimeChecker.dart';
 import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/networkManager.dart';
 import 'package:mobinsa/model/parser.dart';
@@ -27,10 +28,10 @@ import 'package:window_manager/window_manager.dart';
     - Ajouté l'export du fichier excel
  */
 class DisplayApplicants extends StatefulWidget {
-  List<School> schools;
-  List<Student> students;
-  (String,String)? loadedSave;
-  DisplayApplicants({super.key, required this.schools, required this.students, this.loadedSave});
+  final List<School> schools;
+  final List<Student> students;
+  final (String,String)? loadedSave;
+  const DisplayApplicants({super.key, required this.schools, required this.students, this.loadedSave});
 
   @override
   State<DisplayApplicants> createState() => _DisplayApplicantsState();
@@ -48,6 +49,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
   bool hasSaved = false;
   String? currentSaveName;
   bool _showSaveMessage = false;
+  bool get _showVoteCounter => currentStudentVoteIndex != -1 && _networkManager.hasVoteStarted;
+  int currentStudentVoteIndex = -1;
+  ServerRuntimeChecker serverRuntimeChecker = ServerRuntimeChecker();
   Color interrankingColor(int index){
     if(index!=0){
       if(widget.students[index].get_min_rank()>widget.students[index-1].get_min_rank()){
@@ -75,9 +79,62 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
   List<bool> _startNetworkSession = [false];
   // Execute gtcode on startup of the page
   Future<bool> initializeNetworkManager() async {
-    _networkManager = NetworkManager(SoftwareUpdater(await PackageInfo.fromPlatform()).toString());
+    _networkManager = NetworkManager(SoftwareUpdater(await PackageInfo.fromPlatform()).toString(), onVoteUpdate,onLogin);
     return true;
   }
+
+  bool isCurrentVoteStudent(int index){
+    return currentStudentVoteIndex == index;
+  }
+
+  void onVoteUpdate(Map<String,dynamic> data){
+    if (!_networkManager.hasVoteStarted || !_networkManager.hasJuryStarted || !(_networkManager.isServerInitialized())){
+      print("Conditions ${!_networkManager.hasVoteStarted} -> vote started || ${!_networkManager.hasJuryStarted} juryStarted || ${_networkManager.isServerInitialized()} is serverInitialized");
+      throw Exception("Either the vote hasn't been started properly, jury hasn't been started correctly or server hasn't been initialized properly");
+    }
+    if (currentStudentVoteIndex == -1){
+      throw Exception("No student has been selected for a vote");
+    }
+    if (data["voteType"] == "choiceVote"){
+      Student selectedStudent = widget.students[currentStudentVoteIndex];
+      if (selectedStudent.networkData == null){
+        throw Exception("Student network data not initialized properly");
+      }
+      if (int.parse(data["studentID"]) == widget.students[currentStudentVoteIndex].id){
+        int concernedChoice = data["choice"];
+        if (!(selectedStudent.networkData!.containsKey("choiceVotes")) || !(selectedStudent.networkData!['choiceVotes'].containsKey(concernedChoice))){
+          throw Exception("The selected choices doesn't exist or the student Network data wasn't initialized properly");
+        }
+        if (data["action"] == "addVote"){
+          selectedStudent.networkData!["choiceVotes"][concernedChoice]++;
+        }
+        else if (data["action"] == "cancelVote"){
+          selectedStudent.networkData!["choiceVotes"][concernedChoice]--;
+        }
+      }
+      else{
+        throw Exception("The vote indicated in the network request isn't the selected student for the vote");
+      }
+    }
+    else if (data["voteType"] == "matchVote"){
+      // Coming afterwards
+    }
+  }
+
+  Map<String,dynamic> onLogin(){
+    Map<String,List> data = {
+      "students" : [],
+      "schools" : []
+    };
+    for (var student in widget.students){
+      data["students"]!.add(student.toJson());
+    }
+    for (var school in widget.schools){
+      data["schools"]!.add(school.toJson());
+    }
+    return data;
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -126,7 +183,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
     });*/
     windowManager.setPreventClose(false);
     windowManager.removeListener(this);
-
+    serverRuntimeChecker.dispose();
     // TODO: implement dispose
     super.dispose();
   }
@@ -201,6 +258,42 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
     double progress = widget.students.where((e) => e.accepted != null || e.hasNoChoiceLeft()).length / widget.students.length;
     return progress;
   }
+  static const String netChoiceAccept = "choiceAccepted";
+  static const String netChoiceRefusal = "choiceRefused";
+  static const String netCancelAction = "choiceActionCancel";
+  void sendSessionUpdate(String type, Student selectedStudent, int choiceNumber){
+    if (_networkManager.ableToSendUpdates()){
+      switch (type){
+        case _DisplayApplicantsState.netChoiceAccept:
+          Map<String,dynamic> dataToSend = {
+            "updateType": type,
+            "selectedStudent" : selectedStudent.id,
+            "selectedChoice" : choiceNumber,
+          };
+          _networkManager.sendUpdate(dataToSend);
+          break;
+        case _DisplayApplicantsState.netChoiceRefusal:
+          Map<String,dynamic> dataToSend = {
+            "updateType": type,
+            "selectedStudent" : selectedStudent.id,
+            "selectedChoice" : choiceNumber,
+          };
+          _networkManager.sendUpdate(dataToSend);
+          break;
+        case _DisplayApplicantsState.netCancelAction:
+          Map<String,dynamic> dataToSend = {
+            "updateType": type,
+            "selectedStudent" : selectedStudent.id,
+            "selectedChoice" : choiceNumber,
+          };
+          _networkManager.sendUpdate(dataToSend);
+          break;
+        default:
+          throw Exception("Unrecognized Headers");
+      }
+    }
+  }
+
   Future<void> saveProcedure() async{
     String savePath = "";
     String saveName = "";
@@ -233,7 +326,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
       print("$s , $e -> There was a problem while writing the data to disk");
     }
   }
-   // de 0.0 à 1.0
+  // de 0.0 à 1.0
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -317,7 +410,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                   }
                   initializedNetworkManager!.then((e){
                     showDialog(context: context, builder: (BuildContext context){
-                      return StartCollaborativeSessionDialog(networkManager: _networkManager, startNetworkSession: _startNetworkSession, students: widget.students, schools: widget.schools,);
+                      return StartCollaborativeSessionDialog(networkManager: _networkManager, startNetworkSession: _startNetworkSession, students: widget.students, schools: widget.schools,serverRuntimeChecker: serverRuntimeChecker,);
                     });
                   });
                 },
@@ -541,95 +634,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                 // Informations sur l'élève à droite
                                 Expanded(
                                   flex: 1,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(16.0),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[300],
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text("Classement S1", style: UiText().smallText,),
-                                                  Text("${selectedStudent!.ranking_s1}",
-                                                    style:  GoogleFonts.montserrat(textStyle: TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight: FontWeight.w500,
-                                                    )),
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                            Padding(padding: EdgeInsets.only(right: 20)),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  const Text("Crédits ECTS",),
-                                                  Text("${selectedStudent!.ects_number}",
-                                                    style: GoogleFonts.montserrat(textStyle: TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight: FontWeight.w500,
-                                                      color : (selectedStudent!.ects_number < 30 ?
-                                                      Colors.orange :
-                                                      Colors.black),
-                                                    )),
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                            Padding(padding: EdgeInsets.only(right: 20)),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text("Niveau d'anglais",style: UiText().smallText,),
-                                                  Text(selectedStudent!.lang_lvl,
-                                                    style:  GoogleFonts.montserrat(textStyle: TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight: FontWeight.w500,
-                                                    )),
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                            Padding(padding: EdgeInsets.only(right: 20)),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text("Heures d'absences", style : UiText().smallText),
-                                                  Text("${selectedStudent!.missed_hours}",
-                                                    style: GoogleFonts.montserrat(textStyle: TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight: FontWeight.w500,
-                                                      color : (selectedStudent!.missed_hours >= 5 ?
-                                                      (selectedStudent!.missed_hours >= 10 ? Colors.red : Colors. orange) :
-                                                      Colors.black),
-                                                    )),
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  ),
+                                  child: StudentInfoCard(selectedStudent!)
                                 ),
                               ],
                             ),
-
                             const SizedBox(height: 30),
 
                             Row(
@@ -645,97 +653,27 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                       ...selectedStudent!.choices.entries.map((entry) {
                                         int index = entry.key;
                                         //Map<String, String> school = entry.value;
-                                        return choiceCard(entry.value, index);
+                                        return choiceCard(selectedStudent!, entry.value, index,);
                                       }),
                                     ],
                                   ),
                                 ),
-
                                 const SizedBox(width: 20),
-
                                 // Section Boutons d'action (droite)
                                 Expanded(
                                   flex: 1,
                                   child: Column(
                                     children: [
                                       // Bouton Laisser un commentaire
-                                      Container(
-                                        width: double.infinity,
-                                        height: 60,
-                                        margin: const EdgeInsets.only(bottom: 16),
-                                        child: ElevatedButton(
-                                          onPressed: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext dialogContext) => CommentModal(student: selectedStudent!, choice: null),
-                                            );
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.red,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                          ),
-                                          child: Text(
-                                            'Laissez un commentaire',
-                                            style: GoogleFonts.montserrat( textStyle: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            )),
-                                          ),
-                                        ),
-                                      ),
+                                      letACommentButton(selectedStudent!),
 
                                       // Bouton Revenir à l'étudiant précédent
-                                      Container(
-                                        width: double.infinity,
-                                        height: 50,
-                                        margin: const EdgeInsets.only(bottom: 16),
-                                        child: ElevatedButton(
-                                          onPressed: currentStudentIndex > 0
-                                              ? () => selectStudentByIndex(currentStudentIndex - 1)
-                                              : null, // Disable if we're at the first student
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.grey[300],
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                          ),
-                                          child: Text(
-                                            'Revenir à l\'étudiant précédent',
-                                            style: GoogleFonts.montserrat(textStyle: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 14,
-                                            )),
-                                          ),
-                                        ),
-                                      ),
+                                      previousStudentButton(selectedStudent!),
 
                                       // Bouton Passer à l'étudiant suivant
-                                      SizedBox(
-                                        width: double.infinity,
-                                        height: 50,
-                                        child: ElevatedButton(
-                                          onPressed: currentStudentIndex < widget.students.length - 1
-                                              ? () => selectStudentByIndex(currentStudentIndex + 1)
-                                              : null, // Disable if we're at the last student
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.grey[300],
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                          ),
-                                          child: Text(
-                                            'Passer à l\'étudiant Suivant',
-                                            style: GoogleFonts.montserrat(textStyle: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 14,
-                                            )),
-                                          ),
-                                        ),
-                                      ),
+                                      nextStudentButton(selectedStudent!),
                                       UiShapes.bPadding(20),
+                                      // Bouton pour démarrer le vote
                                       ListenableBuilder(
                                         listenable: _networkManager,
                                         builder: (BuildContext context, Widget? child){
@@ -744,24 +682,11 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                             child: SizedBox(
                                               width: double.infinity,
                                               height: 50,
-                                              child: ElevatedButton(
-                                                onPressed: (){
-
-                                                },
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.green[300],
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(12),
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  'Démarrer le vote',
-                                                  style: GoogleFonts.montserrat(textStyle: const TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 14,
-                                                  )),
-                                                ),
-                                              ),
+                                              child: Visibility(
+                                                visible: !_networkManager.hasVoteStarted,
+                                                replacement: stopVoteButton(),
+                                                child: startVoteButton(),
+                                              )
                                             ),
                                           );
                                         },
@@ -822,7 +747,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
   bool disableChoiceByRanking(Student student_f,int choiceNumber){
     Map<int, List<Student>> ladder = student_f.ladder_interranking(widget.students);
     bool atLeastOneNotAccepted = false; 
-    print("meilleur: ${ladder}");
+    /*print("meilleur: ${ladder}");
     print("-----------------------------------------------------------------");
     for (var entry in ladder.entries){
       for (var student in entry.value){
@@ -832,7 +757,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
         print("choice_f: ${student_f.choices[choiceNumber]}");
       }
     }
-    print("-----------------------------------------------------------------");
+    print("-----------------------------------------------------------------");*/
     //pour s'il y a au moins un étudiant mieux classé qui n'est pas accepté.
     for (var entry in ladder.entries){
       if (entry.value.any((student) => student.accepted == null && !student.refused.contains(student_f.choices[choiceNumber]))){
@@ -843,8 +768,95 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
     return  atLeastOneNotAccepted && ladder.containsKey(choiceNumber);
   }
 
+  Widget StudentInfoCard(Student selectedStudent){
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Classement S1", style: UiText().smallText,),
+                    Text("${selectedStudent.ranking_s1}",
+                      style:  GoogleFonts.montserrat(textStyle: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      )),
+                    )
+                  ],
+                ),
+              ),
+              Padding(padding: EdgeInsets.only(right: 20)),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Crédits ECTS",),
+                    Text("${selectedStudent.ects_number}",
+                      style: GoogleFonts.montserrat(textStyle: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color : (selectedStudent.ects_number < 30 ?
+                        Colors.orange :
+                        Colors.black),
+                      )),
+                    )
+                  ],
+                ),
+              ),
+              Padding(padding: EdgeInsets.only(right: 20)),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Niveau d'anglais",style: UiText().smallText,),
+                    Text(selectedStudent.lang_lvl,
+                      style:  GoogleFonts.montserrat(textStyle: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      )),
+                    )
+                  ],
+                ),
+              ),
+              Padding(padding: EdgeInsets.only(right: 20)),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Heures d'absences", style : UiText().smallText),
+                    Text("${selectedStudent.missed_hours}",
+                      style: GoogleFonts.montserrat(textStyle: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color : (selectedStudent.missed_hours >= 5 ?
+                        (selectedStudent.missed_hours >= 10 ? Colors.red : Colors. orange) :
+                        Colors.black),
+                      )),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
 
-  Widget choiceCard(Choice choice, int index) {
+  Widget choiceCard(Student selectedStudent, Choice choice, int index) {
     int availableplaces = choice.student.get_graduation_level() == "master" ? choice.school.m_slots : choice.school.b_slots;
 
     return Card(
@@ -861,49 +873,102 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
           curve: Curves.easeInOut,
           alignment: Alignment.topCenter,
           // vsync: this,
-          child: expandedStudentsChoice[index-1]
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child : Visibility(
+            visible : expandedStudentsChoice[index-1],
+            replacement: Container(
+              width: MediaQuery.sizeOf(context).width * 0.4,
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width * 0.5,
+                minWidth: MediaQuery.sizeOf(context).width * 0.5,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
+                        SizedBox(
+                          width: MediaQuery.sizeOf(context).width*0.35,
                           child: Text(
                             choice.school.name,
-                            style:  GoogleFonts.montserrat(textStyle: TextStyle(
+                            style: GoogleFonts.montserrat(textStyle: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             )),
                           ),
                         ),
-                        Column(
-                          children: [
-                            IconButton(
-                                onPressed: (){
-                                  setState(() {
-                                    expandedStudentsChoice[index-1] = false;
-                                  });
-                                },
-                                icon: Icon(PhosphorIcons.arrowUp()),
-                            ),
-                          ],
-                        )
+                        Text(
+                          choice.school.country,
+                          style: GoogleFonts.montserrat(textStyle: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          )),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      choice.school.country,
-                      style: GoogleFonts.montserrat(textStyle: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      )),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Row(
+                  ),
+                  UiShapes.rPadding(20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            expandedStudentsChoice[index-1] = true;
+                          });
+                        },
+                        icon: Icon(PhosphorIcons.arrowDown()),
+                      ),
+                      Padding(padding: EdgeInsets.only(bottom: 10)),
+                      choiceActionButtons(index, selectedStudent,choice, availableplaces),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          choice.school.name,
+                          style:  GoogleFonts.montserrat(textStyle: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          )),
+                        ),
+                      ),
+                      Column(
+                        children: [
+                          IconButton(
+                            onPressed: (){
+                              setState(() {
+                                expandedStudentsChoice[index-1] = false;
+                              });
+                            },
+                            icon: Icon(PhosphorIcons.arrowUp()),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    choice.school.country,
+                    style: GoogleFonts.montserrat(textStyle: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    )),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Column(
@@ -941,358 +1006,60 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                       fontWeight: FontWeight.w500,
                                       fontSize: 18,
                                     )),
-                                      maxLines: 4,
+                                    maxLines: 4,
                                   ),
                                 ),
                               ],
                             ),
                             Padding(padding: EdgeInsets.only(right: 20)),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Nombre de places",style: UiText().smallText,),
-                                Text("${choice.school.remaining_slots} | ${choice.school.b_slots} Bachelor, ${choice.school.m_slots} Master",
-                                  style: GoogleFonts.montserrat(textStyle: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                                ),
-                                Padding(padding: EdgeInsets.only(bottom: 5)),
-                                Text("Discipline",style: UiText().smallText,),
-                                SizedBox(
-                                  width : MediaQuery.sizeOf(context).width*0.5*0.3,
-                                  child: Text("${choice.school.specialization.toString().replaceAll("[", "").replaceAll("]", "")}",
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Nombre de places",style: UiText().smallText,),
+                                  Text("${choice.school.remaining_slots} | ${choice.school.b_slots} Bachelor, ${choice.school.m_slots} Master",
                                     style: GoogleFonts.montserrat(textStyle: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w500,
-                                      color : (choice.is_incoherent() ?
-                                          Colors.orange :
-                                          Colors.black),
-
                                     )),
                                   ),
-                                ),
-                                Padding(padding: EdgeInsets.only(bottom: 5)),
-                                Text("Interclassement"),
-                                Text("${choice.interranking}",
-                                  style:  GoogleFonts.montserrat(textStyle: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                                ),  
-                              ],
+                                  Padding(padding: EdgeInsets.only(bottom: 5)),
+                                  Text("Discipline",style: UiText().smallText,),
+                                  SizedBox(
+                                    width : MediaQuery.sizeOf(context).width*0.5*0.3,
+                                    child: Text("${choice.school.specialization.toString().replaceAll("[", "").replaceAll("]", "")}",
+                                      style: GoogleFonts.montserrat(textStyle: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                        color : (choice.is_incoherent() ?
+                                        Colors.orange :
+                                        Colors.black),
+
+                                      )),
+                                    ),
+                                  ),
+                                  Padding(padding: EdgeInsets.only(bottom: 5)),
+                                  Text("Interclassement"),
+                                  Text("${choice.interranking}",
+                                    style:  GoogleFonts.montserrat(textStyle: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
-                        Spacer(),
-                        // Afficher le bouton annuler ou les boutons accepter/refuser
-                        if (showCancelButton[index] == true)
-                          SizedBox(
-                            width: 80,
-                            height: 40,
-                            child: Tooltip(
-                              message: "Annuler l'action précédente",
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    showCancelButton[index] = false;
-                                    schoolChoices[index] = null;
-                                    // Annuler l'action précédente
-                                    if (choice.student.accepted == choice) {
-                                      choice.remove_choice();
-                                    }
-                                    // Restaurer le choix si il avait été refusé
-                                    if (choice.student.refused.contains(choice)) {
-                                      choice.student.restoreRefusedChoice(choice, index);
-                                    }
-                                  });
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange,
-                                  padding: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                ),
-                                child: Text(
-                                  "Annuler",
-                                  style: GoogleFonts.montserrat(textStyle: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  )),
-                                ),
-                              ),
-                            ),
-                          )
-                        else
-                          Row(
-                            children: [
-                              // Bouton Refuser (X)
-                              SizedBox(
-                                width: 40,
-                                height: 40,
-                                child: Tooltip(
-                                  message: "Refuser ce choix",
-                                  child: ElevatedButton(
-                                    onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () async {
-                                      // Ouvrir le modal de commentaire pour le refus
-                                      await showDialog(
-                                        context: context,
-                                        builder: (BuildContext dialogContext) => CommentModal(student: choice.student, choice: choice),
-                                      );
-                                      
-                                      setState(() {
-                                        schoolChoices[index] = false;
-                                        choice.refuse();
-                                        showCancelButton[index] = true;
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text("Choix refusé"),
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        );
-                                      });
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: schoolChoices[index] == false
-                                          ? Colors.red[700]
-                                          : Colors.red,
-                                      padding: EdgeInsets.zero,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.close,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              // Bouton Accepter (✓)
-                              SizedBox(
-                                width: 40,
-                                height: 40,
-                                child: Tooltip(
-                                  message: availableplaces == 0 ? "Plus de places disponibles" : disableChoiceByRanking(selectedStudent!, index) ? "Il y un étudiant avec un meilleur interclassement" : "Accepter ce choix",
-                                  child: ElevatedButton(
-                                    onPressed: disableChoiceByRanking(selectedStudent!, index)  || choice.student.accepted != null || availableplaces == 0 ? null : () {
-                                      setState(() {
-                                        schoolChoices[index] = true;
-                                        choice.accepted(choice.student);
-                                        showCancelButton[index] = true;
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text("Choix accepté"),
-                                            backgroundColor: Colors.green,
-                                          ),
-                                        );
-                                      });
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: schoolChoices[index] == true
-                                          ? Colors.green[700]
-                                          : Colors.green,
-                                      padding: EdgeInsets.zero,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.check,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ],
-                )
-              : Container(
-                  width: MediaQuery.sizeOf(context).width * 0.4,
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.sizeOf(context).width * 0.5,
-                    minWidth: MediaQuery.sizeOf(context).width * 0.5,
-                  ),
-                  child: Row(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: MediaQuery.sizeOf(context).width*0.35,
-                            child: Text(
-                              choice.school.name,
-                              style: GoogleFonts.montserrat(textStyle: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              )),
-                            ),
-                          ),
-                          Text(
-                            choice.school.country,
-                            style: GoogleFonts.montserrat(textStyle: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            )),
-                          ),
-                        ],
                       ),
-                      const Spacer(),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              setState(() {
-                                expandedStudentsChoice[index-1] = true;
-                              });
-                            },
-                            icon: Icon(PhosphorIcons.arrowDown()),
-                          ),
-                          Padding(padding: EdgeInsets.only(bottom: 10)),
-                          Row(
-                            children: [
-                              // Afficher le bouton annuler ou les boutons accepter/refuser
-                              if (showCancelButton[index] == true)
-                                SizedBox(
-                                  width: 80,
-                                  height: 40,
-                                  child: Tooltip(
-                                    message: "Annuler l'action précédente",
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          showCancelButton[index] = false;
-                                          schoolChoices[index] = null;
-                                          // Annuler l'action précédente
-                                          if (choice.student.accepted == choice) {
-                                            choice.remove_choice();
-                                          }
-                                          // Restaurer le choix si il avait été refusé
-                                          if (choice.student.refused.contains(choice)) {
-                                            choice.student.restoreRefusedChoice(choice, index);
-                                          }
-                                        });
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.orange,
-                                        padding: EdgeInsets.zero,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        "Annuler",
-                                        style: GoogleFonts.montserrat(textStyle: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        )),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              else
-                                Row(
-                                  children: [
-                                    // Bouton Refuser (X)
-                                    SizedBox(
-                                      width: 40,
-                                      height: 40,
-                                      child: Tooltip(
-                                        message: "Refuser ce choix",
-                                        child: ElevatedButton(
-                                          onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () async {
-                                            // Ouvrir le modal de commentaire pour le refus
-                                            await showDialog(
-                                              context: context,
-                                              builder: (BuildContext dialogContext) => CommentModal(student: choice.student, choice: choice),
-                                            );
-                                            
-                                            setState(() {
-                                              schoolChoices[index] = false;
-                                              choice.refuse();
-                                              showCancelButton[index] = true;
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                  content: Text("Choix refusé"),
-                                                  backgroundColor: Colors.red,
-                                                ),
-                                              );
-                                            });
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: schoolChoices[index] == false
-                                                ? Colors.red[700]
-                                                : Colors.red,
-                                            padding: EdgeInsets.zero,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(6),
-                                            ),
-                                          ),
-                                          child: const Icon(
-                                            Icons.close,
-                                            color: Colors.white,
-                                            size: 20,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    // Bouton Accepter (✓)
-                                    SizedBox(
-                                      width: 40,
-                                      height: 40,
-                                      child: Tooltip(
-                                        message: availableplaces == 0 ? "Plus de places disponibles" : disableChoiceByRanking(selectedStudent!, index) ? "Il y un étudiant avec un meilleur interclassement" : "Accepter ce choix",
-                                        child: ElevatedButton(
-                                          onPressed: disableChoiceByRanking(selectedStudent!, index)  || choice.student.accepted != null || availableplaces == 0 ? null : () {
-                                            setState(() {
-                                              schoolChoices[index] = true;
-                                              choice.accepted(choice.student);
-                                              showCancelButton[index] = true;
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                  content: Text("Choix accepté"),
-                                                  backgroundColor: Colors.green,
-                                                ),
-                                              );
-                                            });
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: schoolChoices[index] == true
-                                                ? Colors.green[700]
-                                                : Colors.green,
-                                            padding: EdgeInsets.zero,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(6),
-                                            ),
-                                          ),
-                                          child: const Icon(
-                                            Icons.check,
-                                            color: Colors.white,
-                                            size: 20,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
+
+                      // Afficher le bouton annuler ou les boutons accepter/refuser
+                      choiceActionButtons(index, selectedStudent,choice, availableplaces)
                     ],
                   ),
+                ],
               ),
+          )
         ),
       ),
     );
@@ -1320,7 +1087,243 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
       ),
     );
   }
+  Widget choiceActionButtons(int index, Student selectedStudent, Choice choice, int availablePlaces){
+    print("_showVoteCounter => ${_showVoteCounter} ;currentStudentIndex == currentStudentVoteIndex => ${currentStudentIndex == currentStudentVoteIndex}");
 
+    return Row(
+      children: [
+        // Afficher le bouton annuler ou les boutons accepter/refuser
+        if (showCancelButton[index] == true)
+          SizedBox(
+            width: 80,
+            height: 40,
+            child: Tooltip(
+              message: "Annuler l'action précédente",
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    showCancelButton[index] = false;
+                    schoolChoices[index] = null;
+                    // Annuler l'action précédente
+                    if (choice.student.accepted == choice) {
+
+                      choice.remove_choice();
+                    }
+                    // Restaurer le choix si il avait été refusé
+                    if (choice.student.refused.contains(choice)) {
+                      choice.student.restoreRefusedChoice(choice, index);
+                    }
+
+                    if (_networkManager.ableToSendUpdates()){
+                      print("Sending update to the network");
+                      sendSessionUpdate(_DisplayApplicantsState.netCancelAction, selectedStudent, index);
+                    }
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                child: Text(
+                  "Annuler",
+                  style: GoogleFonts.montserrat(textStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  )),
+                ),
+              ),
+            ),
+          )
+        else
+          Row(
+            children: [
+              ListenableBuilder(listenable: _networkManager, builder: (BuildContext context ,Widget? child){
+                if (_showVoteCounter && currentStudentIndex == currentStudentVoteIndex){
+                  int voteNumber = widget.students[currentStudentVoteIndex].networkData!["choiceVotes"][index];
+                  print(widget.students[currentStudentVoteIndex].networkData!["choiceVotes"]);
+                  return voteStatus(voteNumber);
+                }
+                else{
+                  return Container();
+                }
+              }),
+              UiShapes.rPadding(10),
+              // Bouton Refuser (X)
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: Tooltip(
+                  message: "Refuser ce choix",
+                  child: ElevatedButton(
+                    onPressed: choice.student.accepted != null && choice.student.accepted != choice ? null : () async {
+                      // Ouvrir le modal de commentaire pour le refus
+                      await showDialog(
+                        context: context,
+                        builder: (BuildContext dialogContext) => CommentModal(student: choice.student, choice: choice),
+                      );
+                      setState(() {
+                        schoolChoices[index] = false;
+                        choice.refuse();
+                        showCancelButton[index] = true;
+                        if (_networkManager.ableToSendUpdates()){
+                          print("Sending update to the network");
+                          sendSessionUpdate(_DisplayApplicantsState.netChoiceRefusal, selectedStudent, index);
+                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Choix refusé"),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: schoolChoices[index] == false
+                          ? Colors.red[700]
+                          : Colors.red,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Bouton Accepter (✓)
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: Tooltip(
+                  message: availablePlaces == 0 ? "Plus de places disponibles" : disableChoiceByRanking(selectedStudent, index) ? "Il y un étudiant avec un meilleur interclassement" : "Accepter ce choix",
+                  child: ElevatedButton(
+                    onPressed: disableChoiceByRanking(selectedStudent, index)  || choice.student.accepted != null || availablePlaces == 0 ? null : () {
+                      setState(() {
+                        schoolChoices[index] = true;
+                        choice.accepted(choice.student);
+                        showCancelButton[index] = true;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Choix accepté"),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                        if (_networkManager.ableToSendUpdates()){
+                          print("Sending update to the network");
+                          sendSessionUpdate(_DisplayApplicantsState.netChoiceAccept, selectedStudent, index);
+                        }
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: schoolChoices[index] == true
+                          ? Colors.green[700]
+                          : Colors.green,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+  Widget letACommentButton(Student selectedStudent){
+    return Container(
+      width: double.infinity,
+      height: 60,
+      margin: const EdgeInsets.only(bottom: 16),
+      child: ElevatedButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext dialogContext) => CommentModal(student: selectedStudent, choice: null),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.red,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Text(
+          'Laissez un commentaire',
+          style: GoogleFonts.montserrat( textStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          )),
+        ),
+      ),
+    );
+  }
+  Widget previousStudentButton(Student selectedStudent){
+    return Container(
+      width: double.infinity,
+      height: 50,
+      margin: const EdgeInsets.only(bottom: 16),
+      child: ElevatedButton(
+        onPressed: currentStudentIndex > 0
+            ? () => selectStudentByIndex(currentStudentIndex - 1)
+            : null, // Disable if we're at the first student
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey[300],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Text(
+          'Revenir à l\'étudiant précédent',
+          style: GoogleFonts.montserrat(textStyle: TextStyle(
+            color: Colors.black,
+            fontSize: 14,
+          )),
+        ),
+      ),
+    );
+  }
+
+  Widget nextStudentButton(Student selectedStudent){
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: currentStudentIndex < widget.students.length - 1
+            ? () => selectStudentByIndex(currentStudentIndex + 1)
+            : null, // Disable if we're at the last student
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey[300],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Text(
+          'Passer à l\'étudiant Suivant',
+          style: GoogleFonts.montserrat(textStyle: const TextStyle(
+            color: Colors.black,
+            fontSize: 14,
+          )),
+        ),
+      ),
+    );
+  }
   Widget progressCard(){
     return Container(
       width: double.infinity,
@@ -1369,6 +1372,78 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
           )
         ],
       ),
+    );
+  }
+
+  Widget startVoteButton(){
+    return ElevatedButton(
+      onPressed: () async {
+        if (selectedStudent == null){
+          throw Exception("No student is selected");
+        }
+        Map<String,dynamic> data = {
+          "studentID" : selectedStudent?.id,
+          "voteType" : "choiceVote",
+        };
+        print("Starting vote");
+        _networkManager.startVote(data);
+        currentStudentVoteIndex = currentStudentIndex;
+        widget.students[currentStudentIndex].initializeNetworkData("choiceVote");
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.green[300],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      child: Text(
+        'Démarrer le vote',
+        style: GoogleFonts.montserrat(textStyle: const TextStyle(
+          color: Colors.black,
+          fontSize: 14,
+        )),
+      ),
+    );
+  }
+
+  Widget stopVoteButton(){
+    return ElevatedButton(
+      onPressed: () async {
+        if (selectedStudent == null){
+          throw Exception("No student is selected");
+        }
+        Map<String,dynamic> data = {
+          "studentID" : selectedStudent?.id,
+          "voteType" : "choiceVote",
+        };
+        _networkManager.stopVote(data);
+        widget.students[currentStudentVoteIndex].clearVoteData();
+        currentStudentVoteIndex = -1;
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.red[300],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      child: Text(
+        'Stopper le vote',
+        style: GoogleFonts.montserrat(textStyle: const TextStyle(
+          color: Colors.black,
+          fontSize: 14,
+        )),
+      ),
+    );
+  }
+
+  Widget voteStatus(int voteNumber){
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: UiShapes().frameRadius,
+        color: Colors.lightBlue
+      ),
+      padding: EdgeInsets.all(8),
+      child: Text("${voteNumber} votes", style: UiText(color: UiColors.white).nsText,),
     );
   }
 

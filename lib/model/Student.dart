@@ -51,7 +51,8 @@ class Student {
 
   late int year;
   late String departement;
-
+  /// Contains information about the network session
+  Map<String,dynamic>? networkData;
 
   Student({required this.id, required this.name, required this.choices, required this.specialization,
     required this.ranking_s1, required this.ects_number, required this.lang_lvl, required this.missed_hours,
@@ -376,6 +377,27 @@ class Student {
         || (choices.values.where(
                 (e) => e.isChoiceValid() && !refused.contains(e)).isEmpty)
     ;
+  }
+  void initializeNetworkData(String voteType){
+    if (voteType == "choiceVote"){
+      networkData = {
+        "choiceVotes" : choices.map((k,v){
+          return MapEntry(k, 0);
+        })
+      };
+      print(networkData);
+    }
+    else if (voteType == "matchVote"){
+      networkData = {
+        "votes" : 0
+      };
+    }
+  }
+
+  void clearVoteData(){
+    if (networkData != null){
+      networkData = null;
+    }
   }
 
   Map<String, dynamic> toJson(){

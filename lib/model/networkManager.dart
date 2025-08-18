@@ -5,7 +5,9 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:convert';
-
+import 'package:mobinsa/model/ServerRuntimeChecker.dart';
+import 'package:path_provider/path_provider.dart' as pp;
+import 'package:path/path.dart' as path;
 import 'package:flutter/cupertino.dart';
 
 
@@ -13,14 +15,19 @@ class NetworkManager with ChangeNotifier{
   static const String initializedStatus = "initialized";
   static const String connectedStatus = "connected";
   static const String offStatus = "off";
+
   // Header from the HTTP server
   static const String httpServerIdentity = "mHTTPServerV1.0.0";
   static const String httpHandshakeHeader = "httpInit";
   static const String httpSessionDataReceivedHeader = "fSessionData";
   static const String httpNewUserHeader = "newUser";
-  static const String httpJuryUpdateHeader = "juryUpdate";
+  static const String httpLoginDataHeader = "loginGetData";
   static const String httpInitOkHeader = "initDataSend";
   static const String httpInitSent = "fInitData";
+  static const String httpVoteOkHeader = "voteOk";
+  static const String httpVoteEndHeader = "voteEndOk";
+  static const String httpVoteUpdateHeader = "voteUpdate";
+
   static const String handShakeMessage = "MobINSAHTTPServer - v1.0.0";
 
   // Header from the master program (this one)
@@ -28,16 +35,22 @@ class NetworkManager with ChangeNotifier{
   late final String masterProgramIdentity;
   static const String sessionDataHeader = "sessionDataExchange";
   static const String initDataHeader = "initData";
-  static const String startJuryHeader  = "startJury";
-  static const String closeJuryHeader = "closeJury";
-  static const String dataExchangeHeader = "dataExchange";
-  static const List<String> masterProgramHeaders = [sessionDataHeader,startJuryHeader, closeJuryHeader, dataExchangeHeader];
+  static const String loginDataHeader = "loginData";
+  static const String startVoteHeader  = "startVote";
+  static const String stopVoteHeader = "closeVote";
+  static const String sessionUpdateHeader = "sessionUpdate";
+  static const List<String> masterProgramHeaders = [sessionDataHeader,startVoteHeader, stopVoteHeader, sessionUpdateHeader];
 
   ServerSocket? _server;
+
+  // Bools and completers to display messages on the graphical interface
+  bool hasInitializedPassword = false;
   bool closedConnections = false;
   bool _isInitialized = false;
   bool _isConnected = false;
   bool hasJuryStarted = false;
+  bool hasVoteStarted = false;
+
   Completer<bool> _isConnectedFuture = Completer<bool>();
   Future<bool> get isConnectedFuture => _isConnectedFuture.future;
   List<Map<String, dynamic>> connectedClients = [];
@@ -46,10 +59,16 @@ class NetworkManager with ChangeNotifier{
 
   Completer<bool> _startJuryCompleter = Completer<bool>();
   Future<bool> get startJury => _startJuryCompleter.future;
-
+  Completer<bool> _startVoteCompleter = Completer<bool>();
+  Future<bool> get startedVote => _startJuryCompleter.future;
+  Function(Map<String,dynamic> data) onVoteUpdate;
+  Map<String,dynamic> Function() onLogin;
   List<String> trustedEmails = ['john.doe@email.com'];
+  late String _sessionPassword;
+  String httpIPAddress= "";
+  String? httpHostAdress;
   Socket? client;
-  NetworkManager(this.softwareVersion){
+  NetworkManager(this.softwareVersion, this.onVoteUpdate,this.onLogin){
    masterProgramIdentity = "mobinsaV${softwareVersion}";
   }
 
@@ -63,8 +82,29 @@ class NetworkManager with ChangeNotifier{
     return true;
   }
 
+  void setSessionPassword(String password){
+    _sessionPassword = password;
+  }
+
   Future<bool> startNetworkCommunications() async {
     _isInitialized = await initServer();
+    Directory serverDirectory = await ServerRuntimeChecker.getServerDirectory();
+    if (Platform.isWindows){
+      Stream<ProcessResult> processStream = Process.run("start", ["${serverDirectory}/${ServerRuntimeChecker.httpServerProgramName}"]).asStream();
+      processStream.listen((ProcessResult? result){
+        if (result != null){
+          print("STDOUT -> ${result.stdout}");
+        }
+      });
+    }
+    else if (Platform.isMacOS){
+      // For the moment, show the info and ask the user to start the program by double clicking on it
+      Process.run("open", [serverDirectory.path]);
+    }
+    else{
+      Process serverProcess = await Process.start("${serverDirectory.path}/${ServerRuntimeChecker.httpServerProgramName}", []);
+      print(stdout);
+    }
     print("[NETWORK] - Finished starting network communications");
     return _isInitialized;
   }
@@ -73,6 +113,10 @@ class NetworkManager with ChangeNotifier{
    return _isInitialized ;
   }
 
+  bool ableToSendUpdates(){
+    print("isInitialized-${_isInitialized} && isConnected-$_isConnected && hasJuryStarted-$hasJuryStarted");
+    return _isInitialized && hasJuryStarted;
+  }
   String getStatus(){
     if (_isInitialized){
       return initializedStatus;
@@ -86,23 +130,61 @@ class NetworkManager with ChangeNotifier{
   }
 
   void handshakeWithHttpClient(sender, rawData){
-    String recievedData = rawData;
-    if (recievedData == handShakeMessage){
+    String receivedData = rawData;
+    if (receivedData.contains(handShakeMessage) ){
       if (!_isConnectedFuture.isCompleted){
-        if (client == null) throw Exception("No client was assigned");
+        print(rawData);
+        Map<String,dynamic> ipInfo = jsonDecode(rawData);
+        if (client == null) throw ("No client was assigned");
         print("[NETWORK] - handshakeWithHttpClient : Connected to Mob'INSA HTTP Server");
-        client!.write('${sessionDataHeader};${masterProgramIdentity};{"sessionPassword":"placeholder_password", "trustedEmails" : ${exportStringListToString(trustedEmails)}}');
+        httpIPAddress = ipInfo["ipaddr"];
+        print(httpIPAddress);
+        httpHostAdress = ipInfo["hostaddr"];
+        _isInitialized = true;
+        client!.write('${sessionDataHeader};${masterProgramIdentity};{"sessionPassword":"${_sessionPassword}", "trustedEmails" : ${exportStringListToString(trustedEmails)}}');
       }
     }
   }
 
-  void sendInitialData(Map<String,dynamic> data){
+  void sendInitialData(Map<String,dynamic> data, {bool fromLogin=false}){
     String encodedData = jsonEncode(data);
     if (client == null){
       throw  Exception("HTTP Client Socket isn't initialized");
     }
-    print("encoded data -> ${initDataHeader};${masterProgramIdentity};${encodedData}");
-    client!.write("${initDataHeader};${masterProgramIdentity};${encodedData}\n");
+    client!.write("${fromLogin ? loginDataHeader:initDataHeader};$masterProgramIdentity;$encodedData\n");
+  }
+
+  void startVote(Map<String, dynamic> data){
+    String encodedData = jsonEncode(data);
+    if (client == null){
+      throw Exception("HTTP Client Socket isn't initialized");
+    }
+    String message = '${startVoteHeader};${masterProgramIdentity};${encodedData}\n';
+    client!.write(message);
+  }
+
+  void stopVote(Map<String, dynamic> data){
+    String encodedData = jsonEncode(data);
+    if (client == null){
+      throw Exception("HTTP Client Socket isn't initialized");
+    }
+    String message = '${stopVoteHeader};${masterProgramIdentity};${encodedData}\n';
+    client!.write(message);
+  }
+
+  void updateVote(String sender, String rawData){
+    Map<String,dynamic> data = jsonDecode(rawData);
+    if (data.containsKey("voteType") && (!(data["voteType"] == "choiceVote") && !data.containsKey("studentID")) ||  (data["voteType"] == "matchVote" && !data.containsKey("studentsID"))){
+      throw Exception("Necessary headers for updating the vote are absent");
+    }
+    onVoteUpdate(data);
+    notifyListeners();
+  }
+
+  void sendUpdate(Map<String,dynamic> data){
+    if (ableToSendUpdates()){
+      client?.write("$sessionUpdateHeader;$masterProgramIdentity;${jsonEncode(data)}");
+    }
   }
 
   void listenToMessages(){
@@ -135,12 +217,13 @@ class NetworkManager with ChangeNotifier{
         _newUserConnected = Completer<bool>();
         handleNewUser(sender, rawData);
         break;
-      case httpJuryUpdateHeader:
+      case httpVoteUpdateHeader:
         print("[NETWORK] - Message type : Jury Update");
-        //handleNewUser(sender, rawData);
+        updateVote(sender,rawData);
         break;
       case httpHandshakeHeader:
         print("[NETWORK] - Message type : Handshake with HTTP Server");
+        print("message : ${receivedData}");
         handshakeWithHttpClient(sender,rawData);
         break;
       case httpSessionDataReceivedHeader:
@@ -148,14 +231,28 @@ class NetworkManager with ChangeNotifier{
         _isConnectedFuture.complete(true);
         break;
       case httpInitSent:
-        print("[NETWORK] - Message type : Finished sending data");
+        print("[NETWORK] - Message type : HTTP client received all jury data");
         hasJuryStarted = true;
         _startJuryCompleter.complete(true);
         notifyListeners();
+      case httpLoginDataHeader:
+        print("[NETWORK] - Message type : User logged back in, sending updated data");
+        Map<String,dynamic> sessionData = onLogin();
+        sendInitialData(sessionData, fromLogin: true);
+      case httpVoteOkHeader:
+        print("[NETWORK] - Message type :  Vote started on clients end");
+        hasVoteStarted = true;
+        _startVoteCompleter.complete(true);
+        notifyListeners();
+      case httpVoteEndHeader:
+        print("[NETWORK] - Message type :  Vote stopped on clients end");
+        hasVoteStarted = false;
+        _startVoteCompleter = Completer<bool>();
+        notifyListeners();
+
       default:
         throw Exception("Unknown Header from HTTP Server -> ${primitive}");
     }
-
     print("[NETWORK] - processMessage : Processed Message");
   }
 
@@ -177,7 +274,7 @@ class NetworkManager with ChangeNotifier{
   Future<void> closeConnections() async {
     // TODO - Add code to send a message on connection close;
     if (_server == null){
-      print("Impossible to server");
+        print("Impossible to server");
         throw Exception("Server is not initialized");
     }
     await _server!.close();
@@ -194,6 +291,8 @@ class NetworkManager with ChangeNotifier{
     _startJuryCompleter = Completer<bool>();
     hasJuryStarted = false;
     _isInitialized = false;
+    hasVoteStarted = false;
+    _startVoteCompleter = Completer<bool>();
     notifyListeners();
   }
 
