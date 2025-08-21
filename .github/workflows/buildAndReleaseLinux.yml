@@ -1,0 +1,102 @@
+name: Build & Release (Linux)
+permissions:
+  contents: write
+on:
+  push:
+    tags:
+      - "v*" # déclenche seulement si le push correspond à un tag style v1.0.0
+  workflow_dispatch: # Permet de le lancer à la main
+
+jobs:
+  build:
+    if: "contains(github.event.head_commit.message, '[RELEASE]') || github.event_name == 'workflow_dispatch'"
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Flutter & Dart
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version-file: 'pubspec.yaml'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libsecret-1-dev libjsoncpp-dev \
+            libglib2.0-dev desktop-file-utils \
+            wget patchelf fuse
+
+      - name: Extract version from pubspec.yaml
+        id: get_version
+        shell: bash
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | cut -d ' ' -f2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+
+      - name: Build app
+        run: flutter build linux
+
+      - name: Prepare AppDir
+        run: |
+          mkdir -p AppDir/usr/bin
+          cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+          cp assets/icons/monapp.png AppDir/usr/share/icons/hicolor/256x256/apps/monapp.png
+          
+          mkdir -p AppDir/usr/share/applications
+          cat > AppDir/usr/share/applications/monapp.desktop <<EOF
+          [Desktop Entry]
+          Name=MonApp
+          Exec=monapp
+          Icon=monapp
+          Type=Application
+          Categories=Utility;
+          EOF
+
+      - name: Download AppImageTool
+        run: |
+          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool-x86_64.AppImage
+
+      - name: Build AppImage
+        run: |
+          ./appimagetool-x86_64.AppImage AppDir Mobinsa.AppImage
+
+      - name: Zip AppImage
+        run: |
+          zip mobinsa_linux.zip Mobinsa.AppImage
+      - name: Check Current directory
+        run: pwd
+      - name: checkContent
+        run: ls
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-linux-x86
+          path: Mobinsa.AppImage
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./release_files
+
+      - name: Create GitHub draft release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.build.outputs.version }}
+          name: v${{ needs.build.outputs.version }}
+          draft: true
+          files: ./release_files/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
