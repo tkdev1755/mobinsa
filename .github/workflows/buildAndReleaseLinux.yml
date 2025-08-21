@@ -55,16 +55,16 @@ jobs:
           mkdir -p AppDir/usr/bin
           cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
-          cp assets/icons/monapp.png AppDir/usr/share/icons/hicolor/256x256/apps/monapp.png
+          cp assets/logo.png AppDir/usr/share/icons/hicolor/256x256/apps/mobinsa.png
           
           mkdir -p AppDir/usr/share/applications
-          cat > AppDir/usr/share/applications/monapp.desktop <<EOF
+          cat > AppDir/usr/share/applications/mobinsa.desktop <<EOF
           [Desktop Entry]
-          Name=MonApp
+          Name=Mobinsa
           Exec=monapp
-          Icon=monapp
+          Icon=mobinsa.png
           Type=Application
-          Categories=Utility;
+          Categories=Productivity;
           EOF
 
       - name: Download AppImageTool
