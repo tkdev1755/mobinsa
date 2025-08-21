@@ -58,7 +58,7 @@ jobs:
           cp assets/logo.png AppDir/usr/share/icons/hicolor/256x256/apps/mobinsa.png
           
           mkdir -p AppDir/usr/share/applications
-          cat > AppDir/usr/share/applications/mobinsa.desktop <<EOF
+          cat > AppDir/mobinsa.desktop <<EOF
           [Desktop Entry]
           Name=Mobinsa
           Exec=monapp
@@ -67,8 +67,7 @@ jobs:
           Categories=Productivity;
           EOF
           
-          mkdir -p AppDir/usr/share/applications
-          cp AppDir/usr/share/applications/mobinsa.desktop AppDir/usr/share/applications/
+          cp AppDir/mobinsa.desktop AppDir/usr/share/applications/
       - name: Download AppImageTool
         run: |
           wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
