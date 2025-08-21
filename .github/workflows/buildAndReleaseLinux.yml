@@ -68,7 +68,7 @@ jobs:
           EOF
           
           mkdir -p AppDir/usr/share/applications
-          cp AppDir/mobinsa.desktop AppDir/usr/share/applications/
+          cp AppDir/usr/share/applications/mobinsa.desktop AppDir/usr/share/applications/
       - name: Download AppImageTool
         run: |
           wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
