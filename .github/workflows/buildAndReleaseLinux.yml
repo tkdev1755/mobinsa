@@ -60,10 +60,11 @@ jobs:
           mkdir -p AppDir/usr/share/applications
           cat > AppDir/mobinsa.desktop <<EOF
           [Desktop Entry]
+          Version=2.2.1
+          Type=Application
           Name=Mobinsa
           Exec=monapp
-          Icon=mobinsa.png
-          Type=Application
+          Icon=mobinsa
           Categories=Productivity;
           EOF
           
