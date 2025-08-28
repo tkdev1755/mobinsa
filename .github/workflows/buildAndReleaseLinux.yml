@@ -59,7 +59,7 @@ jobs:
           
           mkdir -p AppDir/usr/share/applications
           
-          cp buildAssets/mobinsa.desktop AppDir/usr/share/applications/
+          cp buildAssets/mobinsa.desktop AppDir/
       - name: Download AppImageTool
         run: |
           wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
