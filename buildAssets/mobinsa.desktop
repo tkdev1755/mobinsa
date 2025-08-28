@@ -1,0 +1,8 @@
+Version=2.2.1
+Type=Application
+Name=Mobinsa
+Comment=Jury tool for INSA CVL
+TryExec=mobinsa
+Exec=fooview %F
+Icon=mobinsa
+
