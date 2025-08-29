@@ -55,7 +55,7 @@ jobs:
           mkdir -p AppDir/usr/bin
           cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
-          cp assets/logo.png AppDir/usr/share/icons/hicolor/256x256/apps/mobinsa.png
+          cp assets/logo.png AppDir/mobinsa.png
           
           mkdir -p AppDir/usr/share/applications
           
