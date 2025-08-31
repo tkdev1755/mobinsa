@@ -34,6 +34,23 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     "Debug" "Profile" "Release")
 endif()
 
+# Part which compiles and bundles the libkeychain.so library with the program
+set(LIBKEYCHAIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/KeychainAPI/linux")
+set(LIBKEYCHAIN_OUTPUT "${LIBKEYCHAIN_DIR}/libkeychain.so")
+
+add_custom_command(
+        OUTPUT ${LIBKEYCHAIN_OUTPUT}
+        WORKING_DIRECTORY ${LIBKEYCHAIN_DIR}
+        COMMAND make
+        COMMENT "Building libkeychain with Makefile"
+)
+
+add_custom_target(libkeychain ALL DEPENDS ${LIBKEYCHAIN_OUTPUT})
+
+install(FILES ${LIBKEYCHAIN_OUTPUT}
+        DESTINATION lib/mobinsa)
+add_dependencies(${BINARY_NAME} libkeychain)
+
 # Compilation settings that should be applied to most targets.
 #
 # Be cautious about adding new options here, as plugins use this function by
@@ -126,3 +143,4 @@ if(NOT CMAKE_BUILD_TYPE MATCHES "Debug")
   install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
     COMPONENT Runtime)
 endif()
+

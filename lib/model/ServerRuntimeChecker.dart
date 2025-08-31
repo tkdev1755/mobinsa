@@ -4,12 +4,12 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:mobinsa/KeychainAPI/keyring.dart';
 import 'package:path_provider/path_provider.dart' as pp;
 import 'package:path/path.dart' as path;
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:text_analysis/extensions.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:archive/archive.dart';
 class ServerRuntimeChecker{
   static String repoOwner = "tkdev1755";
@@ -20,8 +20,10 @@ class ServerRuntimeChecker{
   static String macOSAssetName = "mobinsaHTTPServer_macos_x64.zip";
   static String linuxAssetName = "mobinsaHTTPServer_linux_x64.zip";
   static String windowsAssetName = "mobinsaHTTPServer_windows_x64.zip";
+  static String _mobinsaServiceName = "mobinsaApp";
+  static String _localHashKeychainName = "mobinsaServerlocalHash";
   static const String serverDirectoryName = "mobinsaserver";
-  FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  Keyring secureStorage = Keyring();
   Map<String,dynamic>? githubInfo;
   Completer<bool> hasStartedDownload = Completer<bool>();
   bool downloadStarted = false;
@@ -120,10 +122,11 @@ class ServerRuntimeChecker{
   }
 
   Future<bool> checkLocalRuntimeHash(String path) async{
-    bool existingRuntimeHash = await secureStorage.containsKey(key: "downloadedRuntimeHash");
+    String? runtimeHash = secureStorage.getPassword(_mobinsaServiceName, _localHashKeychainName);
+    bool existingRuntimeHash = runtimeHash != null ;
     print("the localHash exists ? ${existingRuntimeHash} ");
     if (!existingRuntimeHash) return false;
-    String localHash = (await secureStorage.read(key: "downloadedRuntimeHash"))!;
+    String localHash = runtimeHash;
     String dirHash = await sha256OfDirectory(path);
     print("localHash is ${localHash}, \ndir hash is ${dirHash} ");
     return localHash == dirHash;
@@ -286,7 +289,7 @@ class ServerRuntimeChecker{
     String serverExecutableName = Platform.isWindows ? "mobinsahttpserver.exe" : "mobinsaHttpServer";
     String executablePath = "${serverDirectory.path}/$serverExecutableName";
     String directoryHash = await sha256OfDirectory(serverDirectory.path);
-    secureStorage.write(key: "downloadedRuntimeHash", value: directoryHash);
+    secureStorage.setPassword(_mobinsaServiceName, _localHashKeychainName,directoryHash);
     print("Directory Hash is ${directoryHash}");
     if (!Platform.isWindows){
       await Process.run("chmod", ["+x", executablePath]);

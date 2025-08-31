@@ -48,8 +48,6 @@ dependencies:
   window_manager: ^0.5.1
   shared_preferences: ^2.5.3
   dio: ^5.9.0
-  flutter_secure_storage: ^9.2.4
-
 
 
 
