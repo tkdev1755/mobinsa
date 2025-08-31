@@ -47,9 +47,17 @@ add_custom_command(
 
 add_custom_target(libkeychain ALL DEPENDS ${LIBKEYCHAIN_OUTPUT})
 
+add_dependencies(${BINARY_NAME} libkeychain)
+
+add_custom_command(TARGET ${BINARY_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${KEYCHAIN_API_OUTPUT}
+            $<TARGET_FILE_DIR:${BINARY_NAME}>/libkeychainapi.so
+    COMMENT "Copying KeychainAPI into bundle..."
+)
 install(FILES ${LIBKEYCHAIN_OUTPUT}
         DESTINATION lib/mobinsa)
-add_dependencies(${BINARY_NAME} libkeychain)
+        
 
 # Compilation settings that should be applied to most targets.
 #
