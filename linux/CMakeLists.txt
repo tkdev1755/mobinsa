@@ -77,16 +77,9 @@ add_custom_target(libkeychain ALL DEPENDS ${LIBKEYCHAIN_OUTPUT})
 # S'assurer que libkeychain est compilée avant myapp
 add_dependencies(${BINARY_NAME} libkeychain)
 
-add_custom_command(TARGET ${BINARY_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-        ${LIBKEYCHAIN_OUTPUT}
-        $<TARGET_FILE_DIR:${BINARY_NAME}>/../lib/libkeychain.so
-        COMMENT "Copying libkeychain.so into Flutter bundle..."
-)
 
-# Installation pour le .deb
-install(FILES ${LIBKEYCHAIN_OUTPUT}
-        DESTINATION "${INSTALL_BUNDLE_LIB_DIR}")
+
+
 
 # Run the Flutter tool portions of the build. This must not be removed.
 add_dependencies(${BINARY_NAME} flutter_assemble)
@@ -130,6 +123,9 @@ install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}
 
 install(FILES "${FLUTTER_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
   COMPONENT Runtime)
+# Installation pour le .deb
+install(FILES ${LIBKEYCHAIN_OUTPUT}
+        DESTINATION "${INSTALL_BUNDLE_LIB_DIR}")
 
 foreach(bundled_library ${PLUGIN_BUNDLED_LIBRARIES})
   install(FILES "${bundled_library}"
