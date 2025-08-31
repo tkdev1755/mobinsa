@@ -35,29 +35,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 # Part which compiles and bundles the libkeychain.so library with the program
-set(LIBKEYCHAIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/KeychainAPI/linux")
-set(LIBKEYCHAIN_OUTPUT "${LIBKEYCHAIN_DIR}/libkeychain.so")
 
-add_custom_command(
-        OUTPUT ${LIBKEYCHAIN_OUTPUT}
-        WORKING_DIRECTORY ${LIBKEYCHAIN_DIR}
-        COMMAND make
-        COMMENT "Building libkeychain with Makefile"
-)
-
-add_custom_target(libkeychain ALL DEPENDS ${LIBKEYCHAIN_OUTPUT})
-
-add_dependencies(${BINARY_NAME} libkeychain)
-
-add_custom_command(TARGET ${BINARY_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-            ${KEYCHAIN_API_OUTPUT}
-            $<TARGET_FILE_DIR:${BINARY_NAME}>/libkeychainapi.so
-    COMMENT "Copying KeychainAPI into bundle..."
-)
-install(FILES ${LIBKEYCHAIN_OUTPUT}
-        DESTINATION lib/mobinsa)
-        
 
 # Compilation settings that should be applied to most targets.
 #
@@ -81,6 +59,35 @@ pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0)
 
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")
+
+
+# Part which bundles the libkeychain.so with the program
+set(LIBKEYCHAIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/KeychainAPI/linux")
+set(LIBKEYCHAIN_OUTPUT "${LIBKEYCHAIN_DIR}/libkeychain.so")
+
+add_custom_command(
+        OUTPUT ${LIBKEYCHAIN_OUTPUT}
+        WORKING_DIRECTORY ${LIBKEYCHAIN_DIR}
+        COMMAND make
+        COMMENT "Building libkeychain with Makefile"
+)
+
+add_custom_target(libkeychain ALL DEPENDS ${LIBKEYCHAIN_OUTPUT})
+
+# S'assurer que libkeychain est compilée avant myapp
+add_dependencies(${BINARY_NAME} libkeychain)
+
+# Copier la .so dans le bundle Flutter (ex: build/linux/x64/release/bundle/lib/)
+add_custom_command(TARGET ${BINARY_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${LIBKEYCHAIN_OUTPUT}
+        $<TARGET_FILE_DIR:${BINARY_NAME}>/../lib/libkeychain.so
+        COMMENT "Copying libkeychain.so into Flutter bundle..."
+)
+
+# Installation pour le .deb
+install(FILES ${LIBKEYCHAIN_OUTPUT}
+        DESTINATION "${INSTALL_BUNDLE_LIB_DIR}")
 
 # Run the Flutter tool portions of the build. This must not be removed.
 add_dependencies(${BINARY_NAME} flutter_assemble)
