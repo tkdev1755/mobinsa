@@ -23,7 +23,7 @@ class LinuxKeychainBindings extends KeyringBase {
   late final DartDeletePassword _deletePassword;
 
   LinuxKeychainBindings() {
-    final _lib = DynamicLibrary.open('/usr/lib/mobinsa/libkeychain.so');
+    final _lib = DynamicLibrary.open('lib/libkeychain.so');
 
     _storePassword = _lib
         .lookup<NativeFunction<CStorePassword>>('store_password')
