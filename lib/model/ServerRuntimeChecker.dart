@@ -289,7 +289,7 @@ class ServerRuntimeChecker{
     String serverExecutableName = Platform.isWindows ? "mobinsahttpserver.exe" : "mobinsaHttpServer";
     String executablePath = "${serverDirectory.path}/$serverExecutableName";
     String directoryHash = await sha256OfDirectory(serverDirectory.path);
-    secureStorage.setPassword(_mobinsaServiceName, _localHashKeychainName,directoryHash);
+    secureStorage.updatePassword(_mobinsaServiceName, _localHashKeychainName,directoryHash);
     print("Directory Hash is ${directoryHash}");
     if (!Platform.isWindows){
       await Process.run("chmod", ["+x", executablePath]);
