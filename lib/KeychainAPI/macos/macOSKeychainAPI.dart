@@ -69,7 +69,7 @@ class MacOSKeychainBindings extends KeyringBase{
       libPath = Platform.isMacOS ? path.join('../Frameworks/libkeychain.dylib') : throw UnsupportedError("macOS only");
     }
     else{
-      libPath = Platform.isMacOS ? path.join(path.current,'../Frameworks/libkeychain.dylib') : throw UnsupportedError("macOS only");
+      libPath = Platform.isMacOS ? path.join('../Frameworks/libkeychain.dylib') : throw UnsupportedError("macOS only");
     }
 
     _lib = DynamicLibrary.open(libPath);

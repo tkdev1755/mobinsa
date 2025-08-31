@@ -77,7 +77,6 @@ add_custom_target(libkeychain ALL DEPENDS ${LIBKEYCHAIN_OUTPUT})
 # S'assurer que libkeychain est compilée avant myapp
 add_dependencies(${BINARY_NAME} libkeychain)
 
-# Copier la .so dans le bundle Flutter (ex: build/linux/x64/release/bundle/lib/)
 add_custom_command(TARGET ${BINARY_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
         ${LIBKEYCHAIN_OUTPUT}
