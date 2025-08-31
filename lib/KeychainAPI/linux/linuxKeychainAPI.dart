@@ -64,8 +64,8 @@ class LinuxKeychainBindings extends KeyringBase {
     final resultPtr = _getPassword(keyPtr);
     malloc.free(keyPtr);
     if (resultPtr == nullptr) return null;
-
     final result = resultPtr.toDartString();
+    logger("Password is -> ? ${result}");
     _freePassword(resultPtr);
     return result;
   }
