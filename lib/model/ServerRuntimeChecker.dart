@@ -79,7 +79,7 @@ class ServerRuntimeChecker{
       return windowsAssetName;
     }
     else if (Platform.isLinux){
-      return "linuxAssetName";
+      return linuxAssetName;
     }
     else if (Platform.isMacOS){
       return macOSAssetName;
