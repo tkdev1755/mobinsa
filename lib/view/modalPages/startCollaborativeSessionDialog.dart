@@ -15,10 +15,11 @@ import 'mobinsaServerDownloadDialog.dart';
 class StartCollaborativeSessionDialog extends StatefulWidget {
   final ServerRuntimeChecker serverRuntimeChecker;
   final NetworkManager networkManager;
+  final Function onServerDownloadFunc;
   final List<bool> startNetworkSession;
   final List<Student> students;
   final List<School> schools;
-  const StartCollaborativeSessionDialog({super.key, required this.networkManager, required this.startNetworkSession, required this.serverRuntimeChecker,required this.students, required this.schools});
+  const StartCollaborativeSessionDialog({super.key, required this.networkManager, required this.startNetworkSession, required this.serverRuntimeChecker,required this.students, required this.schools, required this.onServerDownloadFunc});
 
   @override
   State<StartCollaborativeSessionDialog> createState() => _StartCollaborativeSessionDialogState();
@@ -39,7 +40,7 @@ class _StartCollaborativeSessionDialogState extends State<StartCollaborativeSess
     // TODO: implement initState
     print("Checking if server was correctly donwloaded");
     try{
-    serverRuntimeStatus = widget.serverRuntimeChecker.hasDownloadedServerRuntime();
+      serverRuntimeStatus = widget.serverRuntimeChecker.hasDownloadedServerRuntime();
 
     }
     catch (e){
@@ -74,9 +75,10 @@ Rejoignez le jury Collaboratif Mob'INSA à l'adresse suivante :
   }
   void onServerDownload(){
     print("SERVER DOWNLOADED");
-    setState(() {
-      serverRuntimeStatus = Future.value(0);
-    });
+    /*setState(() {
+
+    });*/
+    serverRuntimeStatus = Future.value(0);
   }
   @override
   Widget build(BuildContext context) {
@@ -148,56 +150,61 @@ Rejoignez le jury Collaboratif Mob'INSA à l'adresse suivante :
       return Dialog(child : StartServerWidget);
     }*/
     return Dialog(
-      child: FutureBuilder(
-        future: serverRuntimeStatus,
-        builder: (BuildContext context, AsyncSnapshot snap){
-          if (snap.hasData){
-            if (snap.data == 0){
-              print("Server already downloaded");
-              return StartServerWidget;
-            }
-            else{
-              print("need to download the server");
-              return MobServerDlDialog(serverRuntimeChecker: widget.serverRuntimeChecker,onServerDownload: onServerDownload,);
-            }
-          }
-          else if (snap.hasError){
-            return Container(
-              width: 500,
-              height: 300,
-              child: Container(
-                padding: EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      child: ListenableBuilder(
+        listenable: widget.serverRuntimeChecker,
+        builder: (BuildContext context, Widget? child){
+          return FutureBuilder(
+            future: serverRuntimeStatus,
+            builder: (BuildContext context, AsyncSnapshot snap){
+              if (snap.hasData){
+                if (snap.data == 0){
+                  print("Server already downloaded");
+                  return StartServerWidget;
+                }
+                else{
+                  print("need to download the server");
+                  return MobServerDlDialog(serverRuntimeChecker: widget.serverRuntimeChecker,onServerDownload: onServerDownload,);
+                }
+              }
+              else if (snap.hasError){
+                return Container(
+                  width: 500,
+                  height: 300,
+                  child: Container(
+                    padding: EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
 
-                  children: [
-                    Row(
                       children: [
-                        Icon(PhosphorIcons.info()),
-                        UiShapes.rPadding(10),
-                        Text("Erreur lors de la vérification :",style: UiText().nText,),
+                        Row(
+                          children: [
+                            Icon(PhosphorIcons.info()),
+                            UiShapes.rPadding(10),
+                            Text("Erreur lors de la vérification :",style: UiText().nText,),
+                          ],
+                        ),
+                        UiShapes.bPadding(20),
+                        Text("${snap.error}", style: UiText().mediumText,),
                       ],
                     ),
-                    UiShapes.bPadding(20),
-                    Text("${snap.error}", style: UiText().mediumText,),
-                  ],
-                ),
-              ),
-            );
-          }
-          else{
-            return Container(
-              padding: EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  CircularProgressIndicator(),
-                  UiShapes.rPadding(20),
-                  Text("Vérification de la présence du logiciel collaboratif", style: UiText().largeText,)
-                ],
-              ),
-            );
-          }
+                  ),
+                );
+              }
+              else{
+                return Container(
+                  padding: EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      CircularProgressIndicator(),
+                      UiShapes.rPadding(20),
+                      Text("Vérification de la présence du logiciel collaboratif", style: UiText().largeText,)
+                    ],
+                  ),
+                );
+              }
 
+            },
+          );
         },
       ),
     );

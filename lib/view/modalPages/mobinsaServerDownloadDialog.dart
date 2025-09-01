@@ -17,6 +17,7 @@ class _MobServerDlDialogState extends State<MobServerDlDialog> {
   Stream<double>? downloadStream;
   bool hasBegunDownload = false;
   String displayedMessage = "Démarrage du téléchargement";
+  bool installState = false;
   @override
   Widget build(BuildContext context) {
     return Visibility(
@@ -31,14 +32,13 @@ class _MobServerDlDialogState extends State<MobServerDlDialog> {
             widget.serverRuntimeChecker.downloadStarted ? CircularProgressIndicator() :
                 ValueListenableBuilder<double>(valueListenable: widget.serverRuntimeChecker.progress,
                     builder: (BuildContext context, value,child){
-                      if (value == 1 && !widget.serverRuntimeChecker.hasDownloadedSoftware){
+                      if (value == 1 && widget.serverRuntimeChecker.hasDownloadedSoftware && !widget.serverRuntimeChecker.hasInstalledSoftware && !installState){
                         displayedMessage = "Installation du logiciel";
+                        //widget.serverRuntimeChecker.installServerRuntime();
+                        print("NOW INSTALLING THE SOFTWARE");
                         widget.serverRuntimeChecker.installServerRuntime();
-                        widget.serverRuntimeChecker.installServerRuntime();
-                        setState(() {
-
-                        });
-                        //widget.onServerDownload();
+                        installState = true;
+                        widget.onServerDownload();
                       }
                       return LinearProgressIndicator(
                         value: value,
@@ -81,7 +81,10 @@ class _MobServerDlDialogState extends State<MobServerDlDialog> {
                     hasBegunDownload = true;
                     widget.serverRuntimeChecker.downloadServerRuntime();
                   });
-                  await widget.serverRuntimeChecker.hasStartedDownload.future;
+                  if (widget.serverRuntimeChecker.hasCompletedCompleters()){
+                    widget.serverRuntimeChecker.resetAllCompleters();
+                  }
+                  await widget.serverRuntimeChecker.hasStartedDownloadCompleter.future;
                   displayedMessage = "Téléchargement du module complémentaire";
                   setState(() {
 

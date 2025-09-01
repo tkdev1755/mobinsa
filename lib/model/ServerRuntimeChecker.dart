@@ -11,7 +11,7 @@ import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:text_analysis/extensions.dart';
 import 'package:archive/archive.dart';
-class ServerRuntimeChecker{
+class ServerRuntimeChecker with ChangeNotifier {
   static String repoOwner = "tkdev1755";
   static String repoName = "mobinsaHttpServer";
   static Uri repoURI = Uri.parse("https://api.github.com/repos/$repoOwner/${repoName}");
@@ -25,11 +25,11 @@ class ServerRuntimeChecker{
   static const String serverDirectoryName = "mobinsaserver";
   Keyring secureStorage = Keyring();
   Map<String,dynamic>? githubInfo;
-  Completer<bool> hasStartedDownload = Completer<bool>();
+  Completer<bool> hasStartedDownloadCompleter = Completer<bool>();
   bool downloadStarted = false;
   bool hasDownloadedSoftware = false;
-  Completer<bool> hasInstalledSoftware = Completer<bool>();
-
+  Completer<bool> hasInstalledSoftwareCompleter = Completer<bool>();
+  bool get hasInstalledSoftware => hasInstalledSoftwareCompleter.isCompleted && hasInstalledSoftwareCompleter.future == Future.value(true);
   ValueNotifier<double> progress = ValueNotifier<double>(0.0);
   bool hasCheckedSoftwareIntegrity = false;
   DateTime? lastPull;
@@ -124,7 +124,7 @@ class ServerRuntimeChecker{
   Future<bool> checkLocalRuntimeHash(String path) async{
     String? runtimeHash = secureStorage.getPassword(_mobinsaServiceName, _localHashKeychainName);
     bool existingRuntimeHash = runtimeHash != null ;
-    print("the localHash exists ? ${existingRuntimeHash} ");
+    print("the localHash exists ? $existingRuntimeHash ");
     if (!existingRuntimeHash) return false;
     String localHash = runtimeHash;
     String dirHash = await sha256OfDirectory(path);
@@ -242,7 +242,7 @@ class ServerRuntimeChecker{
     }*/
     //final contentLength = request.contentLength ?? 0;
     String fileName = getAssetName();
-    hasStartedDownload.complete(true);
+    hasStartedDownloadCompleter.complete(true);
     await dio.download(assetUrl.toString(), path.join(serverDirectory.path,fileName),
      onReceiveProgress: (int received,int total){
       if (total != -1){
@@ -251,6 +251,7 @@ class ServerRuntimeChecker{
      }
     );
     progress.value = 1.0;
+    hasDownloadedSoftware = true;
     /*await for (final chunk in request.stream) {
       bytesReceived += chunk.length;
       file.add(chunk);
@@ -267,6 +268,7 @@ class ServerRuntimeChecker{
     }
     List<FileSystemEntity> items = serverDirectory.listSync();
     Iterable<FileSystemEntity> searchedArchive = items.where((e) => e.path.split("/").last == getAssetName());
+    print("There is ${items.length} elements in the server folder");
     if (searchedArchive.isEmpty){
       throw Exception("Asset wasn't downloaded properly");
     }
@@ -293,15 +295,28 @@ class ServerRuntimeChecker{
     print("Directory Hash is ${directoryHash}");
     if (!Platform.isWindows){
       await Process.run("chmod", ["+x", executablePath]);
-      hasInstalledSoftware.complete(true);
+      hasInstalledSoftwareCompleter.complete(true);
     }
     else{
-
+      hasInstalledSoftwareCompleter.complete(true);
     }
+    notifyListeners();
   }
 
+  bool hasCompletedCompleters(){
+    return hasInstalledSoftwareCompleter.isCompleted || hasStartedDownloadCompleter.isCompleted || downloadStarted || hasDownloadedSoftware;
+  }
+  void resetAllCompleters(){
+    hasInstalledSoftwareCompleter = Completer<bool>();
+    hasStartedDownloadCompleter = Completer<bool>();
+    hasStartedDownloadCompleter = Completer<bool>();
+    downloadStarted = false;
+    hasDownloadedSoftware = false;
+    progress = ValueNotifier<double>(0.0);
+  }
 
   void dispose(){
+    super.dispose();
     if (fileChanges != null){
       print("cancelling file changes listener on ${getServerDirectory()}");
       fileChanges!.cancel();

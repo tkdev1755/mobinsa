@@ -327,6 +327,11 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
     }
   }
   // de 0.0 à 1.0
+  void onCollaborativeServerDownload(){
+    showDialog(context: context, builder: (BuildContext context){
+      return StartCollaborativeSessionDialog(networkManager: _networkManager, startNetworkSession: _startNetworkSession, students: widget.students, schools: widget.schools,serverRuntimeChecker: serverRuntimeChecker,onServerDownloadFunc: onCollaborativeServerDownload,);
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -410,7 +415,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                   }
                   initializedNetworkManager!.then((e){
                     showDialog(context: context, builder: (BuildContext context){
-                      return StartCollaborativeSessionDialog(networkManager: _networkManager, startNetworkSession: _startNetworkSession, students: widget.students, schools: widget.schools,serverRuntimeChecker: serverRuntimeChecker,);
+                      return StartCollaborativeSessionDialog(networkManager: _networkManager, startNetworkSession: _startNetworkSession, students: widget.students, schools: widget.schools,serverRuntimeChecker: serverRuntimeChecker,onServerDownloadFunc: onCollaborativeServerDownload,);
                     });
                   });
                 },
