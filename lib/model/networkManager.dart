@@ -110,6 +110,9 @@ class NetworkManager with ChangeNotifier{
         serverSTDOUT.write(utf8.decode(data));
         notifyListeners();
       });
+      serverProcess.stderr.listen((List<int> data){
+        print("New entry in STDERR : data right now is ${utf8.decode(data)}");
+      });
     }
     print("[NETWORK] - Finished starting network communications");
     return _isInitialized;
