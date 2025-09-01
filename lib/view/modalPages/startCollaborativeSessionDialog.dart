@@ -413,18 +413,22 @@ Rejoignez le jury Collaboratif Mob'INSA à l'adresse suivante :
         );
       }
       else{
-        return Container(
-          child: ListenableBuilder(
-              listenable: widget.networkManager,
-              builder: (BuildContext context,Widget? child) {
-                return Expanded(
-                  child: Visibility(
-                      child: Text(
-                          widget.networkManager.serverSTDOUT.toString()
-                      )),
-                );
-              }
-          ),
+        return ListenableBuilder(
+            listenable: widget.networkManager,
+            builder: (BuildContext context,Widget? child) {
+              return Expanded(
+                child: Visibility(
+                    visible: true,
+                    child: Column(
+                      children: [
+                        Text("Logs du server : ", style: UiText().nText,),
+                        Text(
+                            widget.networkManager.serverSTDOUT.toString()
+                        ),
+                      ],
+                    )),
+              );
+            }
         );
       }
     });

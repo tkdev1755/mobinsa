@@ -104,7 +104,9 @@ class NetworkManager with ChangeNotifier{
     }
     else{
       Process serverProcess = await Process.start("${serverDirectory.path}/${ServerRuntimeChecker.httpServerProgramName}", []);
+      print("Listening to the Standard output of the program");
       serverProcess.stdout.listen((List<int> data){
+        print("New entry in the STDOUT :  data right now is ${data}");
         serverSTDOUT.write(utf8.decode(data));
         notifyListeners();
       });
