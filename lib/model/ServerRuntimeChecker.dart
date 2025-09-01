@@ -291,7 +291,9 @@ class ServerRuntimeChecker with ChangeNotifier {
     String serverExecutableName = Platform.isWindows ? "mobinsahttpserver.exe" : "mobinsaHttpServer";
     String executablePath = "${serverDirectory.path}/$serverExecutableName";
     String directoryHash = await sha256OfDirectory(serverDirectory.path);
-    secureStorage.updatePassword(_mobinsaServiceName, _localHashKeychainName,directoryHash);
+    if (!Platform.isLinux){
+      secureStorage.updatePassword(_mobinsaServiceName, _localHashKeychainName,directoryHash);
+    }
     print("Directory Hash is ${directoryHash}");
     if (!Platform.isWindows){
       await Process.run("chmod", ["+x", executablePath]);

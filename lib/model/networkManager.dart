@@ -68,6 +68,7 @@ class NetworkManager with ChangeNotifier{
   String httpIPAddress= "";
   String? httpHostAdress;
   Socket? client;
+  StringBuffer serverSTDOUT = StringBuffer();
   NetworkManager(this.softwareVersion, this.onVoteUpdate,this.onLogin){
    masterProgramIdentity = "mobinsaV${softwareVersion}";
   }
@@ -103,7 +104,10 @@ class NetworkManager with ChangeNotifier{
     }
     else{
       Process serverProcess = await Process.start("${serverDirectory.path}/${ServerRuntimeChecker.httpServerProgramName}", []);
-      print(stdout);
+      serverProcess.stdout.listen((List<int> data){
+        serverSTDOUT.write(utf8.decode(data));
+        notifyListeners();
+      });
     }
     print("[NETWORK] - Finished starting network communications");
     return _isInitialized;

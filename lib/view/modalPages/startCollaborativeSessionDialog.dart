@@ -398,6 +398,17 @@ Rejoignez le jury Collaboratif Mob'INSA à l'adresse suivante :
               ],
             ),
             UiShapes.bPadding(10),
+            ListenableBuilder(
+              listenable: widget.networkManager,
+              builder: (BuildContext context,Widget? child) {
+                return Expanded(
+                  child: Visibility(
+                      child: Text(
+                    widget.networkManager.serverSTDOUT.toString()
+                  )),
+                );
+              }
+            )
           ],
         );
       }
