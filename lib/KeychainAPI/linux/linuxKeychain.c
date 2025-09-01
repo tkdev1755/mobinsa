@@ -21,7 +21,7 @@ int store_password(const char *key, const char *password) {
     int result = secret_password_store_sync(
             get_schema(),
             SECRET_COLLECTION_DEFAULT,
-            "CeleneManager Credentials",
+            "MobinsaServer HASH",
             password,
             NULL,  // GCancellable
             NULL,  // GError**
