@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:convert';
+import 'dart:nativewrappers/_internal/vm/bin/vmservice_io.dart';
 import 'package:mobinsa/model/ServerRuntimeChecker.dart';
 import 'package:path_provider/path_provider.dart' as pp;
 import 'package:path/path.dart' as path;
@@ -103,7 +104,9 @@ class NetworkManager with ChangeNotifier{
       Process.run("open", [serverDirectory.path]);
     }
     else{
-      Process serverProcess = await Process.start("${serverDirectory.path}/${ServerRuntimeChecker.httpServerProgramName}", []);
+      print(serverDirectory.path);
+      print("${serverDirectory.path}/${ServerRuntimeChecker.httpServerProgramName}");
+      Process serverProcess = await Process.start("", []);
       print("Listening to the Standard output of the program");
       serverProcess.stdout.listen((List<int> data){
         print("New entry in the STDOUT :  data right now is ${data}");
