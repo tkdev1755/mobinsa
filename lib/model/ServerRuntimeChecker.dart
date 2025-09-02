@@ -273,7 +273,8 @@ class ServerRuntimeChecker with ChangeNotifier {
     }
     print("Now listing the elements of the directory and searching for the archive");
     List<FileSystemEntity> items = serverDirectory.listSync();
-    Iterable<FileSystemEntity> searchedArchive = items.where((e) => e.path.split("/").last == getAssetName());
+    String slash = Platform.isWindows ?"\\" : "/";
+    Iterable<FileSystemEntity> searchedArchive = items.where((e) => e.path.split(slash).last == getAssetName());
     print("There is ${items.length} elements in the server folder");
     if (searchedArchive.isEmpty){
       throw Exception("Asset wasn't downloaded properly");
