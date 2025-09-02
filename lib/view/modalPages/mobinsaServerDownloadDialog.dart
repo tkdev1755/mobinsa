@@ -34,8 +34,6 @@ class _MobServerDlDialogState extends State<MobServerDlDialog> {
                     builder: (BuildContext context, value,child){
                       if (value == 1 && widget.serverRuntimeChecker.hasDownloadedSoftware && !widget.serverRuntimeChecker.hasInstalledSoftware && !installState){
                         displayedMessage = "Installation du logiciel";
-                        //widget.serverRuntimeChecker.installServerRuntime();
-                        print("NOW INSTALLING THE SOFTWARE");
                         widget.serverRuntimeChecker.installServerRuntime();
                         installState = true;
                         widget.onServerDownload();

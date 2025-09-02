@@ -44,7 +44,6 @@ class _StartCollaborativeSessionDialogState extends State<StartCollaborativeSess
 
     }
     catch (e){
-
         rethrow;
     }
     super.initState();
@@ -112,6 +111,7 @@ Rejoignez le jury Collaboratif Mob'INSA à l'adresse suivante :
                         widget.startNetworkSession[0] = false;
                         widget.networkManager.hasInitializedPassword = false;
                         setState(() {
+
                         });
                       }
                       else{
@@ -403,9 +403,16 @@ Rejoignez le jury Collaboratif Mob'INSA à l'adresse suivante :
               builder: (BuildContext context,Widget? child) {
                 return Expanded(
                   child: Visibility(
-                      child: Text(
-                    widget.networkManager.serverSTDOUT.toString()
-                  )),
+                      visible: true,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment : CrossAxisAlignment.start,
+                          children: [
+                            Text("Logs du server : ", style: UiText().nText,),
+                            Text(widget.networkManager.serverSTDOUT.toString()),
+                          ],
+                        ),
+                      )),
                 );
               }
             )
@@ -419,13 +426,14 @@ Rejoignez le jury Collaboratif Mob'INSA à l'adresse suivante :
               return Expanded(
                 child: Visibility(
                     visible: true,
-                    child: Column(
-                      children: [
-                        Text("Logs du server : ", style: UiText().nText,),
-                        Text(
-                            widget.networkManager.serverSTDOUT.toString()
-                        ),
-                      ],
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment : CrossAxisAlignment.start,
+                        children: [
+                          Text("Logs du server : ", style: UiText().nText,),
+                          Text(widget.networkManager.serverSTDOUT.toString()),
+                        ],
+                      ),
                     )),
               );
             }

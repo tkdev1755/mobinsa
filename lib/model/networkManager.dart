@@ -92,7 +92,7 @@ class NetworkManager with ChangeNotifier{
     _isInitialized = await initServer();
     Directory serverDirectory = await ServerRuntimeChecker.getServerDirectory();
     if (Platform.isWindows){
-      Stream<ProcessResult> processStream = Process.run("start", ["${serverDirectory}/${ServerRuntimeChecker.httpServerProgramName}"]).asStream();
+      Stream<ProcessResult> processStream = Process.run("start", ["${serverDirectory}/${ServerRuntimeChecker.httpServerProgramName}"], workingDirectory: serverDirectory.path ).asStream();
       processStream.listen((ProcessResult? result){
         if (result != null){
           print("STDOUT -> ${result.stdout}");
@@ -105,8 +105,12 @@ class NetworkManager with ChangeNotifier{
     }
     else{
       print(serverDirectory.path);
+      List<FileSystemEntity> files = serverDirectory.listSync();
+      for (var file in files){
+        print(file.path);
+      }
       print("${serverDirectory.path}/${ServerRuntimeChecker.httpServerProgramName}");
-      Process serverProcess = await Process.start("", []);
+      Process serverProcess = await Process.start("${serverDirectory.path}/${ServerRuntimeChecker.httpServerProgramName}", [],workingDirectory: serverDirectory.path);
       print("Listening to the Standard output of the program");
       serverProcess.stdout.listen((List<int> data){
         print("New entry in the STDOUT :  data right now is ${data}");

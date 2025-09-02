@@ -147,13 +147,14 @@ class ServerRuntimeChecker with ChangeNotifier {
   }
 
   Future<String> sha256OfDirectory(String path) async {
+    print("Now computing $path Hash");
     final dir = Directory(path);
-    print(dir);
     if (!dir.existsSync()) {
       throw Exception('Le dossier $path n’existe pas');
     }
     final digests = <String>[];
     for (final entity in dir.listSync(recursive: true, followLinks: false)) {
+      print("Now computing $entity Hash");
       if (entity is File) {
         final hash = await sha256OfFile(entity.path);
         digests.add('$hash:${entity.path}');
@@ -252,6 +253,8 @@ class ServerRuntimeChecker with ChangeNotifier {
     );
     progress.value = 1.0;
     hasDownloadedSoftware = true;
+    notifyListeners();
+    print("Finished downloading software -> Available at ${serverDirectory.path}");
     /*await for (final chunk in request.stream) {
       bytesReceived += chunk.length;
       file.add(chunk);
@@ -262,16 +265,20 @@ class ServerRuntimeChecker with ChangeNotifier {
   }
 
   Future<void> installServerRuntime() async{
+    print("Installing the server runtime");
     Directory serverDirectory = await getServerDirectory();
+    print("Checking if the directory already exists");
     if (!serverDirectory.existsSync()){
       throw Exception("Impossible to install the Server Runtime if the server doesn't exists");
     }
+    print("Now listing the elements of the directory and searching for the archive");
     List<FileSystemEntity> items = serverDirectory.listSync();
     Iterable<FileSystemEntity> searchedArchive = items.where((e) => e.path.split("/").last == getAssetName());
     print("There is ${items.length} elements in the server folder");
     if (searchedArchive.isEmpty){
       throw Exception("Asset wasn't downloaded properly");
     }
+    print("Beginning archive unzipping");
     File archiveFile = File(searchedArchive.first.path);
     Archive archive = ZipDecoder().decodeBytes(archiveFile.readAsBytesSync());
     for (var file in archive){
@@ -286,14 +293,14 @@ class ServerRuntimeChecker with ChangeNotifier {
         Directory(filepath).createSync(recursive: true);
       }
     }
+    print("Cleaned the archive");
     // Cleaning up
     archiveFile.deleteSync();
     String serverExecutableName = Platform.isWindows ? "mobinsahttpserver.exe" : "mobinsaHttpServer";
     String executablePath = "${serverDirectory.path}/$serverExecutableName";
     String directoryHash = await sha256OfDirectory(serverDirectory.path);
-    if (!Platform.isLinux){
-      secureStorage.updatePassword(_mobinsaServiceName, _localHashKeychainName,directoryHash);
-    }
+    secureStorage.updatePassword(_mobinsaServiceName, _localHashKeychainName,directoryHash);
+
     print("Directory Hash is ${directoryHash}");
     if (!Platform.isWindows){
       await Process.run("chmod", ["+x", executablePath]);
