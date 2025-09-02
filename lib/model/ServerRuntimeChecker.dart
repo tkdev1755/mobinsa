@@ -15,7 +15,7 @@ class ServerRuntimeChecker with ChangeNotifier {
   static String repoOwner = "tkdev1755";
   static String repoName = "mobinsaHttpServer";
   static Uri repoURI = Uri.parse("https://api.github.com/repos/$repoOwner/${repoName}");
-  static String httpServerProgramName = Platform.isWindows ? "mobinsaHttpServer.exe" : "mobinsaHttpServer";
+  static String httpServerProgramName = Platform.isWindows ? "mobinsahttpserver.exe" : "mobinsaHttpServer";
   static String httpLibkeychainName = Platform.isWindows ? "libkeychain.dll" : Platform.isLinux ? "libkeychain.so" : "libkeychain.dylib";
   static String macOSAssetName = "mobinsaHTTPServer_macos_x64.zip";
   static String linuxAssetName = "mobinsaHTTPServer_linux_x64.zip";
