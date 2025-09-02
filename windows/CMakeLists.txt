@@ -60,7 +60,7 @@ include(flutter/generated_plugins.cmake)
 # Part to compile the libkeychain library
 # Ajoute un custom target qui exécute ton makefile
 add_custom_target(build_keychain_dll ALL
-        COMMAND ${CMAKE_MAKE_PROGRAM} -C ${CMAKE_SOURCE_DIR}/../lib/KeychainAPI/windows
+        COMMAND make -C ${CMAKE_SOURCE_DIR}/../lib/KeychainAPI/windows
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../lib/KeychainAPI/windows
 )
 
