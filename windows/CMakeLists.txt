@@ -68,11 +68,7 @@ add_custom_target(build_keychain_dll ALL
 add_dependencies(${BINARY_NAME} build_keychain_dll)
 
 # Optionnel : copie la DLL dans le dossier de sortie
-add_custom_command(TARGET ${BINARY_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_SOURCE_DIR}/../lib/KeychainAPI/windows/libkeychain.dll
-        $<TARGET_FILE_DIR:${BINARY_NAME}>
-)
+
 
 # === Installation ===
 # Support files are copied into place next to the executable, so that it can
