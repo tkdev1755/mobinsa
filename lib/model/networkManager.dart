@@ -92,7 +92,7 @@ class NetworkManager with ChangeNotifier{
     _isInitialized = await initServer();
     Directory serverDirectory = await ServerRuntimeChecker.getServerDirectory();
     if (Platform.isWindows){
-      Stream<ProcessResult> processStream = Process.run("start", ["${serverDirectory.path}\\${ServerRuntimeChecker.httpServerProgramName}"], workingDirectory: serverDirectory.path ).asStream();
+      Stream<ProcessResult> processStream = Process.run("start", ["${serverDirectory.path}\\windows_x64\\${ServerRuntimeChecker.httpServerProgramName}"], workingDirectory: serverDirectory.path ).asStream();
       processStream.listen((ProcessResult? result){
         if (result != null){
           print("STDOUT -> ${result.stdout}");
