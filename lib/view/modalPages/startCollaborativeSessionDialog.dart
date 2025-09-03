@@ -63,7 +63,7 @@ Rejoignez le jury Collaboratif Mob'INSA à l'adresse suivante :
     final mailto = 'mailto:?subject=Rejoignez mon Jury Collaboratif - MobINSA&body=$body';
     if(Platform.isWindows){
       final mailto2 = 'mailto:?subject=Rejoignez%20mon%20Jury%20Collaboratif%20-%20MobINSA';
-      Process.run("start", [mailto2]);
+      Process.run("explorer", [mailto]);
     }
     else{
       Process.run("open", [mailto]);
