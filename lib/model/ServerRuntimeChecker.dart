@@ -55,7 +55,7 @@ class ServerRuntimeChecker with ChangeNotifier {
     }
   }
 
-  String getArch(){
+  static String getArch(){
     String version = Platform.version;
     version = version.substring(version.indexOf('"')).removeQuotes();
     switch (version){

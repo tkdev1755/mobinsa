@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:convert';
+import 'dart:nativewrappers/_internal/vm/bin/vmservice_io.dart';
 
 import 'package:mobinsa/model/ServerRuntimeChecker.dart';
 import 'package:path_provider/path_provider.dart' as pp;
@@ -92,10 +93,11 @@ class NetworkManager with ChangeNotifier{
     _isInitialized = await initServer();
     Directory serverDirectory = await ServerRuntimeChecker.getServerDirectory();
     if (Platform.isWindows){
-      Stream<ProcessResult> processStream = Process.run("${serverDirectory.path}\\windows_x64\\${ServerRuntimeChecker.httpServerProgramName}", [], workingDirectory: serverDirectory.path ).asStream();
+      Stream<ProcessResult> processStream = Process.run("${serverDirectory.path}\\windows_x64\\${ServerRuntimeChecker.httpServerProgramName}", [], workingDirectory: "${serverDirectory.path}\\windows_s" ).asStream();
       processStream.listen((ProcessResult? result){
         if (result != null){
           serverSTDOUT.write(result.stdout);
+          serverSTDOUT.write(result.stderr);
         }
       });
     }
