@@ -182,6 +182,7 @@ class ServerRuntimeChecker with ChangeNotifier {
     },onDone: (){}
     );
   }
+
   Uri getServerRuntimeAssetUrl(Map<String,dynamic> data){
     List<Map<String,dynamic>> assetData = getAssetInfo(data);
     String assetName = getAssetName();
@@ -206,6 +207,9 @@ class ServerRuntimeChecker with ChangeNotifier {
     if (!serverDirectory.existsSync()){
       print("Server directory doesn't exists $serverDirectory");
       return -1;
+    }
+    if (Platform.isWindows){
+      serverDirectory = Directory("${serverDirectory.path}\\windows_${getArch()}");
     }
     bool serverHashVerification = await checkRuntimeHash(serverDirectory.path);
     print("Is hash equals ? ${serverHashVerification}");
