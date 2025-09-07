@@ -10,6 +10,14 @@ jobs:
     if: "contains(github.event.head_commit.message, '[RELEASE]') || github.event_name == 'workflow_dispatch'"
     runs-on: windows-latest
 
+    needs:
+    with:
+    permissions:
+    name:
+    uses:
+    strategy:
+    secrets:
+    concurrency:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,7 +39,9 @@ jobs:
 
       - name: Get dependencies
         run: flutter pub get
-
+      - name: Create releases Folder
+        run: |
+          New-Item -ItemType Directory -Force -Path releases\v${{steps.version.outputs.major}}.${{steps.version.outputs.minor}}.${{steps.version.outputs.patch}}\unzipped
       - name: Build Windows app
         run: flutter build windows --release
 
@@ -57,7 +67,7 @@ jobs:
           aip-path: 'buildAssets/Mobinsa.aip'
           aip-build-name: 'DefaultBuild'
           aip-package-name: 'Installer MobINSA'
-          aip-output-dir: 'releases\v-${{steps.version.outputs.major}}-${{steps.version.outputs.minor}}-${{steps.version.outputs.patch}}\unzipped'
+          aip-output-dir: 'releases\v${{steps.version.outputs.major}}.${{steps.version.outputs.minor}}.${{steps.version.outputs.patch}}\unzipped'
           aip-commands: |
             SetVersion ${{steps.version.outputs.version}}
       - name: Build the zip archive
