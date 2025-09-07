@@ -88,9 +88,10 @@ class NetworkManager with ChangeNotifier{
     _sessionPassword = password;
   }
 
-  Future<bool> startNetworkCommunications() async {
+  Future<bool> startNetworkCommunications(ServerRuntimeChecker runtimeChecker) async {
     _isInitialized = await initServer();
     Directory serverDirectory = await ServerRuntimeChecker.getServerDirectory();
+    runtimeChecker.overrideRuntimeHash(serverDirectory.path);
     if (Platform.isWindows){
       Stream<ProcessResult> processStream = Process.run("${serverDirectory.path}\\windows_x64\\${ServerRuntimeChecker.httpServerProgramName}", [], workingDirectory: "${serverDirectory.path}\\windows_${ServerRuntimeChecker.getArch()}" ).asStream();
       processStream.listen((ProcessResult? result){
@@ -123,6 +124,10 @@ class NetworkManager with ChangeNotifier{
       });
     }
     print("[NETWORK] - Finished starting network communications");
+    Future.delayed(Duration(seconds: 2), (){
+      String path = Platform.isWindows ? "${serverDirectory.path}\\windows_x64\\${ServerRuntimeChecker.httpServerProgramName}" : "${serverDirectory.path}/${ServerRuntimeChecker.httpServerProgramName}";
+      runtimeChecker.overrideRuntimeHash(path);
+    });
     return _isInitialized;
   }
 

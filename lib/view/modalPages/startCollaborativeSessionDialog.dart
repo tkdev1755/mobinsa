@@ -252,7 +252,7 @@ Rejoignez le jury Collaboratif Mob'INSA à l'adresse suivante :
                 ElevatedButton(onPressed: () async{
                   print("Starting communications");
                   widget.networkManager.setSessionPassword(_sessionPassword);
-                  widget.networkManager.hasInitializedPassword = await widget.networkManager.startNetworkCommunications();
+                  widget.networkManager.hasInitializedPassword = await widget.networkManager.startNetworkCommunications(widget.serverRuntimeChecker);
                   setState(() {
 
                   });

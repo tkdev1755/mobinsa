@@ -104,6 +104,11 @@ class ServerRuntimeChecker with ChangeNotifier {
 
   }
 
+  void overrideRuntimeHash(String path) async{
+    String dirHash = await sha256OfDirectory(path);
+    secureStorage.updatePassword(_mobinsaServiceName, _localHashKeychainName, dirHash);
+    hasCheckedSoftwareIntegrity = true;
+  }
   String getRemoteAssetHash(Map<String,dynamic> data) {
     List<Map<String,dynamic>> assetData = getAssetInfo(data) ;
     print("Trying to get asset name");
@@ -202,7 +207,6 @@ class ServerRuntimeChecker with ChangeNotifier {
       Future.delayed(Duration(milliseconds: 100));
       return 0;
     }
-    Future.delayed(Duration(milliseconds: 100));
     Directory serverDirectory = await getServerDirectory();
     if (!serverDirectory.existsSync()){
       print("Server directory doesn't exists $serverDirectory");
