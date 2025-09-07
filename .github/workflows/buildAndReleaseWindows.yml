@@ -60,7 +60,6 @@ jobs:
           aip-path: 'buildAssets/Mobinsa.aip'
           aip-build-name: 'DefaultBuild'
           aip-package-name: 'Installer MobINSA'
-          aip-output-dir: 'releases\v${{steps.version.outputs.major}}.${{steps.version.outputs.minor}}.${{steps.version.outputs.patch}}\unzipped'
           aip-commands: |
             SetVersion ${{steps.version.outputs.version}}
       - name: Build the zip archive
