@@ -96,8 +96,8 @@ class NetworkManager with ChangeNotifier{
       Stream<ProcessResult> processStream = Process.run("${serverDirectory.path}\\windows_x64\\${ServerRuntimeChecker.httpServerProgramName}", [], workingDirectory: "${serverDirectory.path}\\windows_${ServerRuntimeChecker.getArch()}").asStream();
       processStream.listen((ProcessResult? result){
         if (result != null){
-          serverSTDOUT.write(result.stdout);
-          serverSTDOUT.write(result.stderr);
+          serverSTDOUT.write(utf8.decode(result.stdout));
+          serverSTDOUT.write(utf8.decode(result.stderr));
         }
       });
     }
