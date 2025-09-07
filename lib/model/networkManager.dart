@@ -40,6 +40,7 @@ class NetworkManager with ChangeNotifier{
   static const String startVoteHeader  = "startVote";
   static const String stopVoteHeader = "closeVote";
   static const String sessionUpdateHeader = "sessionUpdate";
+  static const closeConnectionsHeader = "closeConnections";
   static const List<String> masterProgramHeaders = [sessionDataHeader,startVoteHeader, stopVoteHeader, sessionUpdateHeader];
 
   ServerSocket? _server;
@@ -220,7 +221,7 @@ class NetworkManager with ChangeNotifier{
         this.client = null;
         closeConnections();
       }
-      print("[NETWORK] - Client Disconnected");
+
       return;
     });
   }
@@ -295,8 +296,9 @@ class NetworkManager with ChangeNotifier{
 
   Future<void> closeConnections() async {
     // TODO - Add code to send a message on connection close;
+    client?.write("$closeConnectionsHeader;${masterProgramIdentity};null");
     if (_server == null){
-        print("Impossible to server");
+        print("Impossible to get server");
         throw Exception("Server is not initialized");
     }
     await _server!.close();

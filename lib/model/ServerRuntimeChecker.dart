@@ -22,7 +22,7 @@ class ServerRuntimeChecker with ChangeNotifier {
   static String windowsAssetName = "mobinsaHTTPServer_windows_x64.zip";
   static String _mobinsaServiceName = "mobinsaApp";
   static String _localHashKeychainName = "mobinsaServerlocalHash";
-  static const String serverDirectoryName = "mobinsaserver";
+  static const String serverBinaryDirectoryName = "mobinsaserver/bin";
   Keyring secureStorage = Keyring();
   Map<String,dynamic>? githubInfo;
   Completer<bool> hasStartedDownloadCompleter = Completer<bool>();
@@ -91,7 +91,7 @@ class ServerRuntimeChecker with ChangeNotifier {
 
   static Future<Directory> getServerDirectory() async{
     Directory tempDir = await pp.getTemporaryDirectory();
-    Directory serverDirectory = Directory(path.join(tempDir.path,serverDirectoryName));
+    Directory serverDirectory = Directory(path.join(tempDir.path,serverBinaryDirectoryName));
     return serverDirectory;
   }
 
