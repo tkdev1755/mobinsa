@@ -68,13 +68,25 @@ jobs:
           mkdir artifacts
           $msi = Get-ChildItem -Path . -Recurse -Filter *.msi | Select-Object -First 1
           Compress-Archive -Path $msi.FullName -DestinationPath artifacts/mobinsa_windows.zip
-
-      - name: Créer une release draft
-        uses: softprops/action-gh-release@v2
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
+          name: mobinsaWindows
+          path: artifacts/mobinsa_windows.zip
+  release:
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - name: Download Release
+        uses: actions/download-artifact@v4
+        with:
+          path: ./release_files
+      - name: Create Github Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.build.outputs.version }}
+          name: v${{ needs.build.outputs.version }}
           draft: true
-          tag_name: ${{ github.ref_name }}
-          name: "v${{ steps.version.outputs.version }}"
-          files: artifacts/mobinsa_windows.zip
+          files: ./release_files/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
