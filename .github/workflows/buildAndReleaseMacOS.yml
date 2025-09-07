@@ -44,22 +44,7 @@ jobs:
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | cut -d ' ' -f2)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-      
-      - name: Download server binary
-        run: |
-          mkdir server_bin
-          curl -L -o server.zip https://github.com/tkdev1755/mobinsaHttpServer/releases/latest/download/mobinsaHTTPServer_macos_x64.zip
-          unzip mobinsaHTTPServer_macos_x64.zip -d server_bin
 
-      
-      - name: Copy server binary into .app bundle
-        run: |
-          APP_PATH="build/macos/Build/Products/Release/mobinsa.app"
-          RES_PATH="$APP_PATH/Contents/Resources"
-          mkdir -p "$RES_PATH"
-          cp server_bin/mobinsaHttpServer "$RES_PATH/"
-          chmod +x "$RES_PATH/mobinsaHttpServer"
-      
       - name: Zip up the executable
         run: |
           APP_PATH="build/macos/Build/Products/Release"
