@@ -96,6 +96,7 @@ class NetworkManager with ChangeNotifier{
         if (result != null){
           serverSTDOUT.write(utf8.decode(result.stdout));
           serverSTDOUT.write(utf8.decode(result.stderr));
+          notifyListeners();
         }
       });
     }
