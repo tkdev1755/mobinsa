@@ -33,6 +33,7 @@ class _StartCollaborativeSessionDialogState extends State<StartCollaborativeSess
   bool startSession = false;
   bool sentData = false;
   String _sessionPassword = "";
+  bool expandedLogs = false;
   late Future<int> serverRuntimeStatus;
   @override
   @override
@@ -426,16 +427,38 @@ Rejoignez le jury Collaboratif Mob'INSA à l'adresse suivante :
             builder: (BuildContext context,Widget? child) {
               return Expanded(
                 child: Visibility(
-                    visible: true,
-                    child: SingleChildScrollView(
+                  visible: expandedLogs,
+                  child: SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment : CrossAxisAlignment.start,
                         children: [
-                          Text("Logs du server : ", style: UiText().nText,),
+                          Row(
+                            children: [
+                              Text("Logs du server : ", style: UiText().nText,),
+                              Spacer(),
+                              IconButton(onPressed: (){
+                                setState(() {
+                                  expandedLogs = false;
+                                });
+                              }, icon: Icon(PhosphorIcons.arrowUp()))
+                            ],
+                          ),
                           Text(widget.networkManager.serverSTDOUT.toString()),
                         ],
                       ),
-                    )),
+                    ),
+                  replacement: Row(
+                    children: [
+                      Text("Logs du server : ", style: UiText().nText,),
+                      Spacer(),
+                      IconButton(onPressed: (){
+                        setState(() {
+                          expandedLogs = true;
+                        });
+                      }, icon: Icon(PhosphorIcons.arrowDown()))
+                    ],
+                  ),
+                ),
               );
             }
         );

@@ -291,11 +291,11 @@ class ServerRuntimeChecker with ChangeNotifier {
           file.deleteSync(recursive: true);
         }
       }
-      serverDirectory.deleteSync();
-      serverDirectory.createSync();
+      serverDirectory.deleteSync(recursive: true);
+      serverDirectory.createSync(recursive: true);
     }
     else{
-      serverDirectory.createSync();
+      serverDirectory.createSync(recursive: true);
     }
     Map<String,dynamic> data = await getRepoInfo();
     print("Got repo Info");
