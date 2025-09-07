@@ -94,7 +94,7 @@ class NetworkManager with ChangeNotifier{
     Directory serverDirectory = await ServerRuntimeChecker.getServerDirectory();
     runtimeChecker.overrideRuntimeHash(serverDirectory.path);
     if (Platform.isWindows){
-      Stream<ProcessResult> processStream = Process.run("${serverDirectory.path}\\windows_x64\\${ServerRuntimeChecker.httpServerProgramName}", [], workingDirectory: "${serverDirectory.path}\\windows_${ServerRuntimeChecker.getArch()}").asStream();
+      Stream<ProcessResult> processStream = Process.run("${serverDirectory.path}\\${ServerRuntimeChecker.httpServerProgramName}", [], workingDirectory: "${serverDirectory.path}").asStream();
       processStream.listen((ProcessResult? result){
         if (result != null){
           serverSTDOUT.write(utf8.decode(result.stdout));
@@ -126,8 +126,6 @@ class NetworkManager with ChangeNotifier{
     }
     print("[NETWORK] - Finished starting network communications");
     Future.delayed(Duration(seconds: 2), (){
-      String path = Platform.isWindows ? "${serverDirectory.path}\\windows_x64\\${ServerRuntimeChecker.httpServerProgramName}" : "${serverDirectory.path}/${ServerRuntimeChecker.httpServerProgramName}";
-      runtimeChecker.overrideRuntimeHash(path);
     });
     return _isInitialized;
   }
