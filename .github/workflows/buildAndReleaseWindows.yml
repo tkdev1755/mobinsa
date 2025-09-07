@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - '*'   # Sur tous les tags
-
+  workflow_dispatch:
 jobs:
   build:
     if: "contains(github.event.head_commit.message, '[RELEASE]') || github.event_name == 'workflow_dispatch'"
