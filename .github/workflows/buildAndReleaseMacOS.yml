@@ -1,4 +1,4 @@
-name: Build macOS & Release (MacOS
+name: Build & Release (MacOS)
 permissions:
   contents: write
 on:
