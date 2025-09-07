@@ -1,0 +1,77 @@
+name: Build Windows Release
+
+on:
+  push:
+    tags:
+      - '*'   # Sur tous les tags
+  workflow_dispatch:
+jobs:
+  build:
+    if: "contains(github.event.head_commit.message, '[RELEASE]') || github.event_name == 'workflow_dispatch'"
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version-file: 'pubspec.yaml' # adapte selon ta version
+
+      - name: Restore pub cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~\AppData\Local\Pub\Cache
+          key: ${{ runner.os }}-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-cache-
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Windows app
+        run: flutter build windows --release
+
+
+      - name: Extract software version from pubspec.yaml
+        id: version
+        run: |
+          $line = (Select-String -Path pubspec.yaml -Pattern '^version:').Line
+          $rawVersion = $line.Split(' ')[1]
+          $cleanVersion = $rawVersion.Split('+')[0]
+          $major = $cleanVersion.Split('.')[0]
+          $minor = $cleanVersion.Split('.')[1]
+          $patch = $cleanVersion.Split('.')[2]
+          echo "version=$cleanVersion" >> $env:GITHUB_OUTPUT
+          echo "major=$major" >> $env:GITHUB_OUTPUT
+          echo "minor=$minor" >> $env:GITHUB_OUTPUT
+          echo "patch=$patch" >> $env:GITHUB_OUTPUT
+
+      - name: Create the .msi installer
+        uses: caphyon/advinst-github-action@main
+        with:
+          advinst-enable-automation: 'true'
+          aip-path: 'buildAssets/Mobinsa.aip'
+          aip-build-name: 'DefaultBuild'
+          aip-package-name: 'Installer MobINSA'
+          aip-output-dir: 'releases/v-${{steps.version.outputs.major}}-${{steps.version.outputs.minor}}-${{steps.version.outputs.patch}}/unzipped'
+          aip-commands: |
+            SetVersion ${{steps.version.outputs.version}}
+      - name: Build the zip archive
+        run: |
+          mkdir artifacts
+          $msi = Get-ChildItem -Path . -Recurse -Filter *.msi | Select-Object -First 1
+          Compress-Archive -Path $msi.FullName -DestinationPath artifacts/mobinsa_windows.zip
+
+      - name: Créer une release draft
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          tag_name: ${{ github.ref_name }}
+          name: "v${{ steps.version.outputs.version }}"
+          files: artifacts/mobinsa_windows.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
