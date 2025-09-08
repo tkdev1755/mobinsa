@@ -405,16 +405,38 @@ Rejoignez le jury Collaboratif Mob'INSA à l'adresse suivante :
               builder: (BuildContext context,Widget? child) {
                 return Expanded(
                   child: Visibility(
-                      visible: true,
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment : CrossAxisAlignment.start,
-                          children: [
-                            Text("Logs du server : ", style: UiText().nText,),
-                            Text(widget.networkManager.serverSTDOUT.toString()),
-                          ],
-                        ),
-                      )),
+                    visible: expandedLogs,
+                    replacement: Row(
+                      children: [
+                        Text("Logs du server : ", style: UiText().nText,),
+                        Spacer(),
+                        IconButton(onPressed: (){
+                          setState(() {
+                            expandedLogs = true;
+                          });
+                        }, icon: Icon(PhosphorIcons.arrowDown()))
+                      ],
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment : CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text("Logs du server : ", style: UiText().nText,),
+                              Spacer(),
+                              IconButton(onPressed: (){
+                                setState(() {
+                                  expandedLogs = false;
+                                });
+                              }, icon: Icon(PhosphorIcons.arrowUp()))
+                            ],
+                          ),
+                          Text(widget.networkManager.serverSTDOUT.toString()),
+                        ],
+                      ),
+                    ),
+                  ),
                 );
               }
             )

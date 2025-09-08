@@ -30,7 +30,8 @@ class _MobServerDlDialogState extends State<MobServerDlDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             widget.serverRuntimeChecker.downloadStarted ? CircularProgressIndicator() :
-                ValueListenableBuilder<double>(valueListenable: widget.serverRuntimeChecker.progress,
+            UiShapes.bPadding(20),
+            ValueListenableBuilder<double>(valueListenable: widget.serverRuntimeChecker.progress,
                     builder: (BuildContext context, value,child){
                       if (value == 1 && widget.serverRuntimeChecker.hasDownloadedSoftware && !widget.serverRuntimeChecker.hasInstalledSoftware && !installState){
                         displayedMessage = "Installation du logiciel";
@@ -45,7 +46,9 @@ class _MobServerDlDialogState extends State<MobServerDlDialog> {
 
                     }
                 ),
-            Text(displayedMessage, style: UiText().mediumText,)
+            Spacer(flex: 1,),
+            Text(displayedMessage, style: UiText().mediumText,),
+            Spacer(flex: 2,),
           ],
         ),
       ),
