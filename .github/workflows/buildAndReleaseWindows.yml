@@ -3,8 +3,9 @@ permissions:
   contents: write
 on:
   push:
-    tags:
-      - '*'   # Sur tous les tags
+    branches:
+      - main
+      - mobinsa_collaborative
   workflow_dispatch:
 jobs:
   build:

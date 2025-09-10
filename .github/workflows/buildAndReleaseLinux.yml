@@ -3,8 +3,9 @@ permissions:
   contents: write
 on:
   push:
-    tags:
-      - "v*" # déclenche seulement si le push correspond à un tag style v1.0.0
+    branches:
+      - main
+      - mobinsa_collaborative
   workflow_dispatch: # Permet de le lancer à la main
 
 jobs:
