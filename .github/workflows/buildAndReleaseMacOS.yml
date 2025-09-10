@@ -2,12 +2,10 @@ name: Build & Release (MacOS)
 
 on:
   push:
-    tags:
-      - "v*" # déclenche seulement si le push correspond à un tag style v1.0.0
-  workflow_dispatch:
-    branch:
-      - mobinsa_collaborative
+    branches:
       - main
+      - mobinsa_collaborative
+  workflow_dispatch:
 
 jobs:
   build:
