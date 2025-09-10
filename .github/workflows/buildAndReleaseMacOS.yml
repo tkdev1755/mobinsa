@@ -1,4 +1,4 @@
-name: Build macOS App with Embedded Binary
+name: Build & Release (MacOS)
 
 on:
   push:
