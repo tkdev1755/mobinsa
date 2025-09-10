@@ -56,6 +56,10 @@ jobs:
         run: |
           cd build/linux/x64/release/bundle/
           zip -r  mobinsa_linux.zip ./*
+      - name: Check Current directory
+        run: pwd
+      - name: checkContent
+        run: ls
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
