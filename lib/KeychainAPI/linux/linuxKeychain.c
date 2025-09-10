@@ -16,9 +16,20 @@ static const SecretSchema *get_schema() {
     };
     return &schema;
 }
+on_password_stored (GObject *source,GAsyncResult *result,gpointer unused)
+{
+    GError *error = NULL;
+    secret_password_store_finish (result, &error);
+    if (error != NULL) {
+        /* ... handle the failure here */
+        g_error_free (error);
+    } else {
+        /* ... do something now that the password has been stored */
+    }
+}
 
 int store_password(const char *key, const char *password) {
-    int result = secret_password_store_sync(
+    int result = secret_password_store(
             get_schema(),
             SECRET_COLLECTION_DEFAULT,
             "MobinsaServer HASH",
