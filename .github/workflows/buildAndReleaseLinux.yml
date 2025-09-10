@@ -55,7 +55,7 @@ jobs:
       - name: Zip AppImage
         run: |
           cd build/linux/x64/release/bundle/
-          zip -r  mobinsa_linux.zip ./*
+          zip -r  ../../../../../mobinsa_linux.zip ./*
       - name: Check Current directory
         run: pwd
       - name: checkContent
