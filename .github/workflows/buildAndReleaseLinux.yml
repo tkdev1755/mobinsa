@@ -50,28 +50,12 @@ jobs:
       - name: Build app
         run: flutter build linux
 
-      - name: Prepare AppDir
-        run: |
-          mkdir -p AppDir/usr/bin
-          cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
-          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
-          cp assets/logo.png AppDir/mobinsa.png
-          
-          mkdir -p AppDir/usr/share/applications
-          
-          cp buildAssets/mobinsa.desktop AppDir/
-      - name: Download AppImageTool
-        run: |
-          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-          chmod +x appimagetool-x86_64.AppImage
 
-      - name: Build AppImage
-        run: |
-          ./appimagetool-x86_64.AppImage AppDir Mobinsa.AppImage
 
       - name: Zip AppImage
         run: |
-          zip mobinsa_linux.zip Mobinsa.AppImage
+          cd build/linux/x64/release/bundle/
+          zip mobinsa_linux.zip ./
       - name: Check Current directory
         run: pwd
       - name: checkContent

@@ -29,7 +29,7 @@ on_password_stored (GObject *source,GAsyncResult *result,gpointer unused)
 }
 
 int store_password(const char *key, const char *password) {
-    int result = secret_password_store(
+    int result = secret_password_store_sync(
             get_schema(),
             SECRET_COLLECTION_DEFAULT,
             "MobinsaServer HASH",
