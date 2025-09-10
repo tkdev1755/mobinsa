@@ -48,7 +48,7 @@ jobs:
       - name: Zip up the executable
         run: |
           cd build/macos/Build/Products/Release
-          zip mobinsa_macos_universal.zip mobinsa.app
+          zip -r mobinsa_macos_universal.zip mobinsa.app
           cd ../../../../../
       # 7. Publier en artefact
       - name: Upload artifact
