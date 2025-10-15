@@ -44,7 +44,7 @@ class SessionStorage{
   /// Sur Windows et Linux, le chemin est le suivant
   /// ~/Documents/mobinsa/saves/
   /// Sur MacOS, à cause du système de conteuneurisation des apps,le chemin est le suivant
-  /// ~/Library/Containers/com.insacvl.mobinsa.mobinsa/Data/Documents/saves
+  /// ~/Library/Containers/com.insacvl.mobinsa.mobinsa/Data/Documents/mobinsa/saves
   static Future<String> askForSavePath(String saveName) async {
     /*final result = await FilePicker.platform.saveFile(
       type: FileType.custom,

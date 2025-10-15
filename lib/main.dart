@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:mobinsa/model/School.dart';
 import 'package:mobinsa/model/parser.dart';
 import 'package:mobinsa/model/Student.dart';
@@ -44,6 +45,18 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.montserratTextTheme()
       ),
       home: MyHomePage(title: "Bienvenue sur Mob'INSA", packageInfo: pkgInfo,),
+    );
+  }
+  Widget datePicker(DateTime? date){
+    DateTime selectedDate = date ?? DateTime.now();
+    return Container(
+      child: Row(
+        children: [
+          Text("${DateFormat("dd/MM/yyyy").format(selectedDate)}"),
+          Spacer(),
+          IconButton(onPressed: (){}, icon: Icon(Icons.calendar_month)),
+        ],
+      ),
     );
   }
 }

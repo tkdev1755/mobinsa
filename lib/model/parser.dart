@@ -63,7 +63,7 @@ class SheetParser{
   static const int _colEctsNumber = 7;      // Colonne 8
   static const int _colLangLvl = 8;         // Colonne 9
   static const int _colMissedHours = 9;     // Colonne 10
-  static const int _colComment = 10;        // Colonne 11
+  static const int _colComment = 11;        // Colonne 12 -> Colonne "COMMENTAIRE"
 
   // --- Constantes pour les indices des colonnes du Excel des écoles (A adapter si le fichier Ecoles venait à changer) ---
   // Ici un S à été ajouté avant le "nom" de la colonne pour éviter des conflits avec les constantes définies précédemment
@@ -167,10 +167,8 @@ class SheetParser{
     throw ExcelParsingException("La liste des écoles est vide. Importez d'abord les écoles.", errorCode: ExcelParsingException.getErrorCode("emptySchoolListException"));
   }
 
-
   Map<String, Student> tempStudentMap = {};
     int nextStudentId=1;
-
     if (excel.sheets.isEmpty) {
       print("Information: Le fichier Excel ne contient aucune feuille.");
       return [];
@@ -207,6 +205,7 @@ class SheetParser{
         String langLvl = _getStringCellData(rowData, _colLangLvl, defaultValue: "N/A");
         double missedHours = _getDoubleCellData(rowData, _colMissedHours);
         String comment = _getStringCellData(rowData, _colComment);
+        print("!!!! We have the following comment ${comment} !!!");
         // Lire d'autres champs de Student si nécessaire (post_comment, etc.)
         // String? postComment = _getStringCellData(rowData, _colPostComment, defaultValue: null); // Exemple
 

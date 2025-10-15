@@ -479,6 +479,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
         body: Row(
           children: [
             // Sidebar (20% de la largeur)
+
             Container(
               width: MediaQuery.of(context).size.width * 0.2,
               decoration: BoxDecoration(
