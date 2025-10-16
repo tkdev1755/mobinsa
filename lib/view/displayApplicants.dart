@@ -432,13 +432,14 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
     }
     return  atLeastOneNotAccepted && ladder.containsKey(choiceNumber);
   }
+
   void onSearchSelect(int index){
-    print("Now selecting student n°$index");
     selectStudentByIndex(index);
     setState(() {
 
     });
   }
+
   Widget TitleWidget(){
     return RichText(
       text: TextSpan(

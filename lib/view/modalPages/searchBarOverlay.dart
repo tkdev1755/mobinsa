@@ -33,7 +33,7 @@ class _StudentSearchBarState extends State<StudentSearchBar> {
                 autofocus: true,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20)
+                    borderRadius: BorderRadius.circular(16)
                   ),
                   labelText: 'Rechercher un étudiant',
                 )
