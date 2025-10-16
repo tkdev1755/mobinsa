@@ -10,6 +10,7 @@ import 'package:mobinsa/model/networkManager.dart';
 import 'package:mobinsa/model/parser.dart';
 import 'package:mobinsa/model/sessionStorage.dart';
 import 'package:mobinsa/model/versionManager.dart';
+import 'package:mobinsa/view/modalPages/searchBarOverlay.dart';
 import 'package:mobinsa/view/modalPages/sessionProgressDialog.dart';
 import 'package:mobinsa/view/modalPages/startCollaborativeSessionDialog.dart';
 import 'package:mobinsa/view/uiElements.dart';
@@ -332,6 +333,8 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
       return StartCollaborativeSessionDialog(networkManager: _networkManager, startNetworkSession: _startNetworkSession, students: widget.students, schools: widget.schools,serverRuntimeChecker: serverRuntimeChecker,onServerDownloadFunc: onCollaborativeServerDownload,);
     });
   }
+
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -341,248 +344,14 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: "Mob'",
-                  style: UiText(matColor: Colors.black, weight: FontWeight.bold).mLargeText
-                ),
-                TextSpan(
-                  text: "INSA",
-                  style: UiText(matColor: Colors.red).mLargeText
-                ),
-              ],
-            ),
-          ),
-
-          actions: [
-            AnimatedOpacity(
-              opacity: _showSaveMessage ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 300),
-              child: Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  borderRadius: UiShapes().frameRadius,
-                ),
-                child: Text(
-                  "Fichier enregistré !",
-                  style: UiText(color: UiColors.white).smallText,
-                ),
-              ),
-            ),
-            Padding(padding: EdgeInsets.only(left: 10)),
-            FutureBuilder(
-              future: initializedNetworkManager,
-              builder: (context, asyncSnapshot) {
-                if (asyncSnapshot.hasData){
-                  return ListenableBuilder(
-                    listenable: _networkManager,
-                    builder: (BuildContext context, Widget? child ){
-                      return Visibility(
-                          visible: _networkManager.hasJuryStarted,
-                          child: Container(
-                            padding: EdgeInsets.only(top : 5,bottom: 5, right: 10, left : 10),
-                            decoration: BoxDecoration(
-                                color: Colors.green.shade700,
-                                borderRadius: UiShapes().frameRadius
-                            ),
-                            child: Row(
-                              children: [
-                                Text("${_networkManager.connectedClients.length}", style: UiText(color : UiColors.white).smallText,),
-                                UiShapes.rPadding(10),
-                                Icon(PhosphorIcons.userSound(),color: Colors.white,)
-                              ],
-                            ),
-                          )
-                      );
-                    },
-                  );
-                }
-                else{
-                  return Container();
-                }
-
-              }
-            ),
-            Padding(padding: EdgeInsets.only(left: 10)),
-            IconButton(
-                onPressed: (){
-                  if (initializedNetworkManager == null){
-                    print("Not able to show the dialog rn");
-                    throw Exception("Not able to show the dialog");
-                  }
-                  initializedNetworkManager!.then((e){
-                    showDialog(context: context, builder: (BuildContext context){
-                      return StartCollaborativeSessionDialog(networkManager: _networkManager, startNetworkSession: _startNetworkSession, students: widget.students, schools: widget.schools,serverRuntimeChecker: serverRuntimeChecker,onServerDownloadFunc: onCollaborativeServerDownload,);
-                    });
-                  });
-                },
-                icon: Icon(PhosphorIcons.usersThree())
-            ),
-            Padding(padding: EdgeInsets.only(left: 10)),
-            IconButton(onPressed: () async {
-
-              await saveProcedure();
-              setState(() {
-                _showSaveMessage = true;
-              });
-              Future.delayed(const Duration(seconds: 2), () {
-                if (mounted) {
-                  setState(() {
-                    _showSaveMessage = false;
-                  });
-                }
-              });
-              
-            }, icon: Icon(PhosphorIcons.floppyDisk(PhosphorIconsStyle.regular)), tooltip: "Sauvegarder cette session",),
-            IconButton(
-              icon: Icon(
-                PhosphorIcons.export(PhosphorIconsStyle.regular),
-                size: 32.0,
-              ),
-              onPressed: () async {
-                List<int> bytes = SheetParser.exportResult(widget.students, widget.schools);
-                String? path = await FilePicker.platform.saveFile(
-                  fileName: Platform.isMacOS ? "CR_JURY_MOBILITE_${DateTime.now().year}" : "CR_JURY_MOBILITE_${DateTime.now().year}.xlsx",
-                  type: FileType.custom,
-                  allowedExtensions: ["xlsx"]
-                );
-                if (path != null){
-                  print("Now saving the excel file");
-                  SheetParser.saveExcelToDisk(path, bytes);
-                }
-                else{
-                  // TODO - Ajouter une gestion des erreurs
-                }},
-              tooltip: "Exporter vers excel",
-            ),
-
-            IconButton(
-              icon: Icon(PhosphorIcons.house(PhosphorIconsStyle.regular), size: 32.0),
-              onPressed: () => {
-                widget.schools.clear(),
-                widget.students.clear,
-                Navigator.pop(
-                  context,
-                ),
-                Navigator.pop(
-                  context,
-                )
-              },
-              tooltip: "Revenir à la page d'accueil",
-            ),
-          ],
+          title: TitleWidget(),
+          actions: appBarActions(),
           backgroundColor: disabledColor,
         ),
         body: Row(
           children: [
             // Sidebar (20% de la largeur)
-
-            Container(
-              width: MediaQuery.of(context).size.width * 0.2,
-              decoration: BoxDecoration(
-                color: const Color(0xFFf5f6fa), // Couleur douce
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(24),
-                  bottomRight: Radius.circular(24),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withAlpha((0.15 * 255).toInt()),
-                    spreadRadius: 2,
-                    blurRadius: 8,
-                    offset: const Offset(2, 0),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: ListView.builder(
-                  itemCount: widget.students.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12.0,left: 5,right: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: BorderSide(
-                          color: currentStudentIndex == index
-                              ? Colors.blueAccent
-                              : Colors.grey[300]!,
-                          width: 2,
-                        ),
-                      ),
-                      elevation: currentStudentIndex == index ? 8 : 2,
-                      color: currentStudentIndex == index
-                          ? const Color.fromARGB(255, 120, 151, 211)
-                          : (widget.students[index].accepted != null
-                              ? const Color.fromARGB(255, 134, 223, 137)
-                              : widget.students[index].refused.length == widget.students[index].choices.length
-                                  ? const Color.fromARGB(255, 213, 62, 35)
-                                  : widget.students[index].hasNoChoiceLeft() ? Colors.orange.shade200: Colors.white),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(20),
-                        onTap: (){
-                          {
-                            setState(() {
-                              selectedStudent = widget.students[index];
-                              currentStudentIndex = index;
-                              schoolChoices.clear();
-                              expandedStudentsChoice = List.generate(
-                                  widget.students[index].choices.values.toList().length,
-                                      (_) => false
-                              );
-                              showCancelButton.clear();
-                              widget.students[index].choices.forEach((key, choice) {
-                                showCancelButton[key] = (choice.student.accepted == choice) ||
-                                    choice.student.refused.contains(choice);
-
-                                if (choice.student.accepted == choice) {
-                                  schoolChoices[key] = true;
-                                } else if (choice.student.refused.contains(choice)) {
-                                  schoolChoices[key] = false;
-                                }
-                              });
-                            });
-                          }
-                        },
-                        child: ListTile(
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  widget.students[index].name,
-                                  style: GoogleFonts.montserrat(textStyle : TextStyle(
-                                    fontSize: 14,
-                                    color: currentStudentIndex == index
-                                        ? const Color.fromARGB(255, 242, 244, 246)
-                                        : Colors.black,
-                                    fontWeight: currentStudentIndex == index ? FontWeight.bold : FontWeight.normal,
-                                  )),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Padding(padding: EdgeInsets.only(right: 10)),
-                              Text(
-                                widget.students[index].get_max_rank().toStringAsFixed(2),
-                                style: GoogleFonts.montserrat(textStyle : TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: interrankingColor(index),
-                                )),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
+            appSideBar(),
             // Contenu principal (80% de la largeur)
             Expanded(
               child: Container(
@@ -597,118 +366,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                   ],
                 ),
                 child: selectedStudent != null
-                    ? SingleChildScrollView(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Section nom/prénom/promo
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Nom et promo à gauche
-                                Expanded(
-                                  flex: 2,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '${selectedStudent?.name}',
-                                        style:  GoogleFonts.montserrat(textStyle: TextStyle(
-                                          fontSize: 28,
-                                          fontWeight: FontWeight.bold,
-                                        )),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        '${selectedStudent?.year}A ${selectedStudent?.departement}',
-                                        style: GoogleFonts.montserrat(textStyle : TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500,
-                                        )),
-                                      ),
-                                      UiShapes.bPadding(20),
-                                      Visibility(
-                                        child: notificationCard(selectedStudent!),
-                                        visible : selectedStudent?.refused.length != selectedStudent?.choices.length && (selectedStudent?.accepted == null) &&(selectedStudent?.hasNoChoiceLeft() ?? false) ,
-                                      )
-
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 20),
-                                // Informations sur l'élève à droite
-                                Expanded(
-                                  flex: 1,
-                                  child: StudentInfoCard(selectedStudent!)
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 30),
-
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Section Écoles (gauche)
-                                Expanded(
-                                  flex: 2,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      // Liste des écoles
-                                      ...selectedStudent!.choices.entries.map((entry) {
-                                        int index = entry.key;
-                                        //Map<String, String> school = entry.value;
-                                        return choiceCard(selectedStudent!, entry.value, index,);
-                                      }),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 20),
-                                // Section Boutons d'action (droite)
-                                Expanded(
-                                  flex: 1,
-                                  child: Column(
-                                    children: [
-                                      // Bouton Laisser un commentaire
-                                      letACommentButton(selectedStudent!),
-
-                                      // Bouton Revenir à l'étudiant précédent
-                                      previousStudentButton(selectedStudent!),
-
-                                      // Bouton Passer à l'étudiant suivant
-                                      nextStudentButton(selectedStudent!),
-                                      UiShapes.bPadding(20),
-                                      // Bouton pour démarrer le vote
-                                      ListenableBuilder(
-                                        listenable: _networkManager,
-                                        builder: (BuildContext context, Widget? child){
-                                          return Visibility(
-                                            visible: _networkManager.hasJuryStarted,
-                                            child: SizedBox(
-                                              width: double.infinity,
-                                              height: 50,
-                                              child: Visibility(
-                                                visible: !_networkManager.hasVoteStarted,
-                                                replacement: stopVoteButton(),
-                                                child: startVoteButton(),
-                                              )
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.only(bottom : 40),
-                                      ),
-                                      progressCard()
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
+                    ? StudentInfo()
                     :  Center(child: Text("Sélectionnez un étudiant",style: UiText().mediumText,)),
               ),
             ),
@@ -772,6 +430,383 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
       }
     }
     return  atLeastOneNotAccepted && ladder.containsKey(choiceNumber);
+  }
+  void onSearchSelect(int index){
+    print("Now selecting student n°$index");
+    selectStudentByIndex(index);
+    setState(() {
+
+    });
+  }
+  Widget TitleWidget(){
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+              text: "Mob'",
+              style: UiText(matColor: Colors.black, weight: FontWeight.bold).mLargeText
+          ),
+          TextSpan(
+              text: "INSA",
+              style: UiText(matColor: Colors.red).mLargeText
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> appBarActions(){
+    return [
+      AnimatedOpacity(
+        opacity: _showSaveMessage ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 300),
+        child: Container(
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.green,
+            borderRadius: UiShapes().frameRadius,
+          ),
+          child: Text(
+            "Fichier enregistré !",
+            style: UiText(color: UiColors.white).smallText,
+          ),
+        ),
+      ),
+      Padding(padding: EdgeInsets.only(left: 10)),
+      FutureBuilder(
+          future: initializedNetworkManager,
+          builder: (context, asyncSnapshot) {
+            if (asyncSnapshot.hasData){
+              return ListenableBuilder(
+                listenable: _networkManager,
+                builder: (BuildContext context, Widget? child ){
+                  return Visibility(
+                      visible: _networkManager.hasJuryStarted,
+                      child: Container(
+                        padding: EdgeInsets.only(top : 5,bottom: 5, right: 10, left : 10),
+                        decoration: BoxDecoration(
+                            color: Colors.green.shade700,
+                            borderRadius: UiShapes().frameRadius
+                        ),
+                        child: Row(
+                          children: [
+                            Text("${_networkManager.connectedClients.length}", style: UiText(color : UiColors.white).smallText,),
+                            UiShapes.rPadding(10),
+                            Icon(PhosphorIcons.userSound(),color: Colors.white,)
+                          ],
+                        ),
+                      )
+                  );
+                },
+              );
+            }
+            else{
+              return Container();
+            }
+
+          }
+      ),
+      Padding(padding: EdgeInsets.only(left: 10)),
+      IconButton(
+          onPressed: (){
+            if (initializedNetworkManager == null){
+              print("Not able to show the dialog rn");
+              throw Exception("Not able to show the dialog");
+            }
+            initializedNetworkManager!.then((e){
+              showDialog(context: context, builder: (BuildContext context){
+                return StartCollaborativeSessionDialog(networkManager: _networkManager, startNetworkSession: _startNetworkSession, students: widget.students, schools: widget.schools,serverRuntimeChecker: serverRuntimeChecker,onServerDownloadFunc: onCollaborativeServerDownload,);
+              });
+            });
+          },
+          icon: Icon(PhosphorIcons.usersThree())
+      ),
+      Padding(padding: EdgeInsets.only(left: 10)),
+      IconButton(onPressed: () async {
+
+        await saveProcedure();
+        setState(() {
+          _showSaveMessage = true;
+        });
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) {
+            setState(() {
+              _showSaveMessage = false;
+            });
+          }
+        });
+
+      }, icon: Icon(PhosphorIcons.floppyDisk(PhosphorIconsStyle.regular)), tooltip: "Sauvegarder cette session",),
+      IconButton(
+        icon: Icon(
+          PhosphorIcons.export(PhosphorIconsStyle.regular),
+          size: 32.0,
+        ),
+        onPressed: () async {
+          List<int> bytes = SheetParser.exportResult(widget.students, widget.schools);
+          String? path = await FilePicker.platform.saveFile(
+              fileName: Platform.isMacOS ? "CR_JURY_MOBILITE_${DateTime.now().year}" : "CR_JURY_MOBILITE_${DateTime.now().year}.xlsx",
+              type: FileType.custom,
+              allowedExtensions: ["xlsx"]
+          );
+          if (path != null){
+            print("Now saving the excel file");
+            SheetParser.saveExcelToDisk(path, bytes);
+          }
+          else{
+            // TODO - Ajouter une gestion des erreurs
+          }},
+        tooltip: "Exporter vers excel",
+      ),
+
+      IconButton(
+        icon: Icon(PhosphorIcons.house(PhosphorIconsStyle.regular), size: 32.0),
+        onPressed: () => {
+          widget.schools.clear(),
+          widget.students.clear,
+          Navigator.pop(
+            context,
+          ),
+          Navigator.pop(
+            context,
+          )
+        },
+        tooltip: "Revenir à la page d'accueil",
+      ),
+    ];
+  }
+
+  Widget appSideBar(){
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.2,
+      height: MediaQuery.of(context).size.height,
+      decoration: BoxDecoration(
+        color: const Color(0xFFf5f6fa), // Couleur douce
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withAlpha((0.15 * 255).toInt()),
+            spreadRadius: 2,
+            blurRadius: 8,
+            offset: const Offset(2, 0),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 5,right: 8),
+              child: searchBar(),
+            ),
+            UiShapes.bPadding(10),
+            Expanded(
+              child: ListView.builder(
+                itemCount: widget.students.length,
+                itemBuilder: (context, index) {
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12.0,left: 5,right: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: currentStudentIndex == index
+                            ? Colors.blueAccent
+                            : Colors.grey[300]!,
+                        width: 2,
+                      ),
+                    ),
+                    elevation: currentStudentIndex == index ? 8 : 2,
+                    color: currentStudentIndex == index
+                        ? const Color.fromARGB(255, 120, 151, 211)
+                        : (widget.students[index].accepted != null
+                        ? const Color.fromARGB(255, 134, 223, 137)
+                        : widget.students[index].refused.length == widget.students[index].choices.length
+                        ? const Color.fromARGB(255, 213, 62, 35)
+                        : widget.students[index].hasNoChoiceLeft() ? Colors.orange.shade200: Colors.white),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: (){
+                        {
+                          setState(() {
+                            selectedStudent = widget.students[index];
+                            currentStudentIndex = index;
+                            schoolChoices.clear();
+                            expandedStudentsChoice = List.generate(
+                                widget.students[index].choices.values.toList().length,
+                                    (_) => false
+                            );
+                            showCancelButton.clear();
+                            widget.students[index].choices.forEach((key, choice) {
+                              showCancelButton[key] = (choice.student.accepted == choice) ||
+                                  choice.student.refused.contains(choice);
+
+                              if (choice.student.accepted == choice) {
+                                schoolChoices[key] = true;
+                              } else if (choice.student.refused.contains(choice)) {
+                                schoolChoices[key] = false;
+                              }
+                            });
+                          });
+                        }
+                      },
+                      child: ListTile(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                widget.students[index].name,
+                                style: GoogleFonts.montserrat(textStyle : TextStyle(
+                                  fontSize: 14,
+                                  color: currentStudentIndex == index
+                                      ? const Color.fromARGB(255, 242, 244, 246)
+                                      : Colors.black,
+                                  fontWeight: currentStudentIndex == index ? FontWeight.bold : FontWeight.normal,
+                                )),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Padding(padding: EdgeInsets.only(right: 10)),
+                            Text(
+                              widget.students[index].get_max_rank().toStringAsFixed(2),
+                              style: GoogleFonts.montserrat(textStyle : TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: interrankingColor(index),
+                              )),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget StudentInfo(){
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section nom/prénom/promo
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Nom et promo à gauche
+              Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${selectedStudent?.name}',
+                      style:  GoogleFonts.montserrat(textStyle: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      )),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${selectedStudent?.year}A ${selectedStudent?.departement}',
+                      style: GoogleFonts.montserrat(textStyle : TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      )),
+                    ),
+                    UiShapes.bPadding(20),
+                    Visibility(
+                      child: notificationCard(selectedStudent!),
+                      visible : selectedStudent?.refused.length != selectedStudent?.choices.length && (selectedStudent?.accepted == null) &&(selectedStudent?.hasNoChoiceLeft() ?? false) ,
+                    )
+
+                  ],
+                ),
+              ),
+              const SizedBox(width: 20),
+              // Informations sur l'élève à droite
+              Expanded(
+                  flex: 1,
+                  child: StudentInfoCard(selectedStudent!)
+              ),
+            ],
+          ),
+          const SizedBox(height: 30),
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Section Écoles (gauche)
+              Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Liste des écoles
+                    ...selectedStudent!.choices.entries.map((entry) {
+                      int index = entry.key;
+                      //Map<String, String> school = entry.value;
+                      return choiceCard(selectedStudent!, entry.value, index,);
+                    }),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 20),
+              // Section Boutons d'action (droite)
+              Expanded(
+                flex: 1,
+                child: Column(
+                  children: [
+                    // Bouton Laisser un commentaire
+                    letACommentButton(selectedStudent!),
+
+                    // Bouton Revenir à l'étudiant précédent
+                    previousStudentButton(selectedStudent!),
+
+                    // Bouton Passer à l'étudiant suivant
+                    nextStudentButton(selectedStudent!),
+                    UiShapes.bPadding(20),
+                    // Bouton pour démarrer le vote
+                    ListenableBuilder(
+                      listenable: _networkManager,
+                      builder: (BuildContext context, Widget? child){
+                        return Visibility(
+                          visible: _networkManager.hasJuryStarted,
+                          child: SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: Visibility(
+                                visible: !_networkManager.hasVoteStarted,
+                                replacement: stopVoteButton(),
+                                child: startVoteButton(),
+                              )
+                          ),
+                        );
+                      },
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(bottom : 40),
+                    ),
+                    progressCard()
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget StudentInfoCard(Student selectedStudent){
@@ -1093,6 +1128,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
       ),
     );
   }
+
   Widget choiceActionButtons(int index, Student selectedStudent, Choice choice, int availablePlaces){
     print("_showVoteCounter => ${_showVoteCounter} ;currentStudentIndex == currentStudentVoteIndex => ${currentStudentIndex == currentStudentVoteIndex}");
 
@@ -1453,6 +1489,9 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
     );
   }
 
+  Widget searchBar(){
+    return StudentSearchBar(students: widget.students,onSelect: onSearchSelect ,);
+  }
 }
 
 // Widget modal pour les commentaires

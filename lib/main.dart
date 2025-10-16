@@ -91,7 +91,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
   late Future<bool> isUpToDate;
 
   bool noExceptions = false;
-  List<bool> writeExcelToDisk = [false];
+  List<bool> writeExcelToDisk = [false];  
   List<bool> cancelSimilarSchoolsProcedure = [false];
   Future<String?> pickFile() async {
     final result = await FilePicker.platform.pickFiles();
