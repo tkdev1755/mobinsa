@@ -301,6 +301,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
     (School, (int,int)) mostRequestedSchool = getMostRequestedSchool();
     List<MapEntry<int, (int,int)>> overflowedSchools = getNumberOfOverflows();
     List<MapEntry<int, (int,int)>> emptySchools = getEmptyDestinations();
+    double padding = MediaQuery.sizeOf(context).height*0.1;
     return MaterialApp(
       title: 'Welcome to Flutter',
       theme: ThemeData(
@@ -310,193 +311,197 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
       home: Scaffold(
 
         body: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Spacer(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Après la première passe",style: UiText().mediumText,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text("${stats.choice1}",style: UiText(weight: FontWeight.w700).vvLargeText),
-                          Padding(padding: EdgeInsets.only(right: 30)),
-                          Text("Étudiants ont eu leur premier voeu",style: UiText().mediumText),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children:[
-                          Text("${stats.choice2 }",style: UiText(weight: FontWeight.w700).vvLargeText),
-                          Padding(padding: EdgeInsets.only(right: 30)),
-                          Text("Étudiants ont eu leur 2nd voeu",style: UiText().mediumText),
-                          Padding(padding: EdgeInsets.only(right: 40)),
-                        ]
-                      ),
-                      Row(
-                        children: [
-                          Text("${ stats.choice3}",style: UiText(weight: FontWeight.w700).vvLargeText),
-                          Padding(padding: EdgeInsets.only(right: 30)),
-                          Text("Étudiants ont eu leur 3eme voeu",style: UiText().mediumText),
-                        ],
-                      ),
-                      Padding(padding: EdgeInsets.only(bottom: 20)),
-                      Row(
-                        children: [
-                          Text("${stats.rejected}",style: UiText(color: UiColors.alertRed2,weight: FontWeight.w700).vvLargeText,),
-                          Padding(padding: EdgeInsets.only(right: 30)),
-                          Text("Étudiants n'ont pas eu de voeux",style: UiText().mediumText,),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Padding(padding: EdgeInsets.only(right: 40)),
-                  Container(
-                    width: MediaQuery.sizeOf(context).width*0.3,
-                    padding: EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: UiShapes().frameRadius
-                    ),
-                    child: Column(
+          child: Padding(
+            padding: EdgeInsets.only(top: padding, bottom : padding),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Spacer(),
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("L'école la plus demandée est ",style: UiText().nText,),
-                        UiShapes.bPadding(10),
-                        SizedBox(
-                          child: Row(
+                        Text("Après la première passe",style: UiText().mediumText,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("${stats.choice1}",style: UiText(weight: FontWeight.w700).vvLargeText),
+                            Padding(padding: EdgeInsets.only(right: 30)),
+                            Text("Étudiants ont eu leur premier voeu",style: UiText().mediumText),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children:[
+                            Text("${stats.choice2 }",style: UiText(weight: FontWeight.w700).vvLargeText),
+                            Padding(padding: EdgeInsets.only(right: 30)),
+                            Text("Étudiants ont eu leur 2nd voeu",style: UiText().mediumText),
+                            Padding(padding: EdgeInsets.only(right: 40)),
+                          ]
+                        ),
+                        Row(
+                          children: [
+                            Text("${ stats.choice3}",style: UiText(weight: FontWeight.w700).vvLargeText),
+                            Padding(padding: EdgeInsets.only(right: 30)),
+                            Text("Étudiants ont eu leur 3eme voeu",style: UiText().mediumText),
+                          ],
+                        ),
+                        Padding(padding: EdgeInsets.only(bottom: 20)),
+                        Row(
+                          children: [
+                            Text("${stats.rejected}",style: UiText(color: UiColors.alertRed2,weight: FontWeight.w700).vvLargeText,),
+                            Padding(padding: EdgeInsets.only(right: 30)),
+                            Text("Étudiants n'ont pas eu de voeux",style: UiText().mediumText,),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Padding(padding: EdgeInsets.only(right: 40)),
+                    Container(
+                      width: MediaQuery.sizeOf(context).width*0.3,
+                      padding: EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: UiShapes().frameRadius
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("L'école la plus demandée est ",style: UiText().nText,),
+                          UiShapes.bPadding(10),
+                          SizedBox(
+                            child: Row(
+                              children: [
+                                Expanded(child: Text(mostRequestedSchool.$1.name,style: UiText(weight: FontWeight.w600).mediumText,)),
+                                IconButton(onPressed: (){
+                                  showDialog(context: context, builder: (BuildContext context){
+                                    return mostDemandedSchoolDialog(mostRequestedSchool.$1, widget.students);
+                                  });
+                                }, icon: Icon(PhosphorIcons.info()))
+                              ],
+                            ),
+                          ),
+                          UiShapes.bPadding(5),
+                          Text("Pays : ${mostRequestedSchool.$1.country} - ${mostRequestedSchool.$1.program}",style: UiText().smallText,),
+                          UiShapes.bPadding(20),
+                          RichText(text: TextSpan(
                             children: [
-                              Expanded(child: Text(mostRequestedSchool.$1.name,style: UiText(weight: FontWeight.w600).mediumText,)),
+                              TextSpan(
+                                style: UiText(color: Colors.red.toARGB32(), weight: FontWeight.w600).mediumText,
+                                text: "${mostRequestedSchool.$2.$1} "
+                              ),
+                              TextSpan(
+                                style: UiText(color: UiColors.black).mediumText,
+                                text: "voeux pour "
+                              ),
+                              TextSpan(
+                                style: UiText(color: UiColors.black, weight: FontWeight.w600).mediumText,
+                                text: '${mostRequestedSchool.$2.$2} '
+                              ),
+                              TextSpan(
+                                style: UiText(color: UiColors.black).mediumText,
+                                text: "places disponibles"
+                              )
+                            ]
+                          )),
+                          UiShapes.bPadding(10),
+                          Divider(),
+                          UiShapes.bPadding(5),
+                          Text("Nombre de destinations ayant plus de voeux que de places disponibles", style: UiText().nText,),
+                          UiShapes.bPadding(10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: RichText(
+                                  text: TextSpan(
+                                    children:
+                                      [
+                                        TextSpan(
+                                          style: UiText(weight: FontWeight.w700, color: Colors.red.toARGB32()).mediumText,
+                                          text: "${overflowedSchools.length}"
+                                        ),
+                                        TextSpan(
+                                            style: UiText(weight : FontWeight.w500).mediumText,
+                                            text: " destinations sur ${widget.schools.length}"
+                                        ),
+                                      ]
+                                  ),
+                                ),
+                              ),
                               IconButton(onPressed: (){
                                 showDialog(context: context, builder: (BuildContext context){
-                                  return mostDemandedSchoolDialog(mostRequestedSchool.$1, widget.students);
+                                  return overflowedSchoolDialog(overflowedSchools, widget.schools);
                                 });
                               }, icon: Icon(PhosphorIcons.info()))
                             ],
                           ),
-                        ),
-                        UiShapes.bPadding(5),
-                        Text("Pays : ${mostRequestedSchool.$1.country} - ${mostRequestedSchool.$1.program}",style: UiText().smallText,),
-                        UiShapes.bPadding(20),
-                        RichText(text: TextSpan(
-                          children: [
-                            TextSpan(
-                              style: UiText(color: Colors.red.toARGB32(), weight: FontWeight.w600).mediumText,
-                              text: "${mostRequestedSchool.$2.$1} "
-                            ),
-                            TextSpan(
-                              style: UiText(color: UiColors.black).mediumText,
-                              text: "voeux pour "
-                            ),
-                            TextSpan(
-                              style: UiText(color: UiColors.black, weight: FontWeight.w600).mediumText,
-                              text: '${mostRequestedSchool.$2.$2} '
-                            ),
-                            TextSpan(
-                              style: UiText(color: UiColors.black).mediumText,
-                              text: "places disponibles"
-                            )
-                          ]
-                        )),
-                        UiShapes.bPadding(10),
-                        Divider(),
-                        UiShapes.bPadding(5),
-                        Text("Nombre de destinations ayant plus de voeux que de places disponibles", style: UiText().nText,),
-                        UiShapes.bPadding(10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: RichText(
-                                text: TextSpan(
-                                  children:
-                                    [
-                                      TextSpan(
-                                        style: UiText(weight: FontWeight.w700, color: Colors.red.toARGB32()).mediumText,
-                                        text: "${overflowedSchools.length}"
-                                      ),
-                                      TextSpan(
-                                          style: UiText(weight : FontWeight.w500).mediumText,
-                                          text: " destinations sur ${widget.schools.length}"
-                                      ),
-                                    ]
-                                ),
-                              ),
-                            ),
-                            IconButton(onPressed: (){
-                              showDialog(context: context, builder: (BuildContext context){
-                                return overflowedSchoolDialog(overflowedSchools, widget.schools);
-                              });
-                            }, icon: Icon(PhosphorIcons.info()))
-                          ],
-                        ),
-                        UiShapes.bPadding(10),
-                        Divider(),
-                        UiShapes.bPadding(5),
-                        Text("Nombre de destinations sans aucun voeu", style: UiText().nText,),
-                        UiShapes.bPadding(10),
-                        Row(
-                          children: [
-                            Expanded(child: Text("${emptySchools.length} sur ${widget.schools.length} établissements",style: UiText(weight: FontWeight.w500).mediumText,)),
-                            IconButton(onPressed: (){
-                              showDialog(context: context, builder: (BuildContext context){
-                                return emptySchoolsDialog(emptySchools, widget.schools);
-                              });
-                            }, icon: Icon(PhosphorIcons.info()))
-                          ],
-                        )
-                      ],
+                          UiShapes.bPadding(10),
+                          Divider(),
+                          UiShapes.bPadding(5),
+                          Text("Nombre de destinations sans aucun voeu", style: UiText().nText,),
+                          UiShapes.bPadding(10),
+                          Row(
+                            children: [
+                              Expanded(child: Text("${emptySchools.length} sur ${widget.schools.length} établissements",style: UiText(weight: FontWeight.w500).mediumText,)),
+                              IconButton(onPressed: (){
+                                showDialog(context: context, builder: (BuildContext context){
+                                  return emptySchoolsDialog(emptySchools, widget.schools);
+                                });
+                              }, icon: Icon(PhosphorIcons.info()))
+                            ],
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                  Spacer(),
-                ],
-              ),
-              Padding(padding: EdgeInsets.only(bottom: 20)),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                      onPressed: (){
-                        Navigator.pop(context);
+                    Spacer(),
+                  ],
+                ),
+                Padding(padding: EdgeInsets.only(bottom: 20)),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                        onPressed: (){
+                          Navigator.pop(context);
+                        },
+                        icon: Icon(PhosphorIcons.caretLeft()),
+                      tooltip: "Revenir à l'accueil",
+                    ),
+                    Padding(padding: EdgeInsets.only(right: 10),),
+                    ElevatedButton(
+                        onPressed: (){
+                       Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => DisplayApplicants(schools: widget.schools, students: widget.students)),);
+                    }, child: Text("Continuer", style: GoogleFonts.montserrat(fontWeight: FontWeight.w500 ),)),
+                    Padding(padding: EdgeInsets.only(right: 10),),
+                    IconButton(
+                      icon: Icon(
+                        PhosphorIcons.export(PhosphorIconsStyle.regular),
+                        size: 32.0,
+                      ),
+                      onPressed: () async {
+                        List<int> bytes = SheetParser.exportResult(export_list, widget.schools);
+                        String? path = await FilePicker.platform.saveFile(
+                            fileName: Platform.isMacOS ? "Preview_JURY_MOBILITE_${DateTime.now().year}" : "Preview_JURY_MOBILITE_${DateTime.now().year}.xlsx",
+                            type: FileType.custom,
+                            allowedExtensions: ["xlsx"]
+                        );
+                        if (path != null){
+                          print("Now saving the excel file");
+                          SheetParser.saveExcelToDisk(path, bytes);
+                        }
                       },
-                      icon: Icon(PhosphorIcons.caretLeft()),
-                    tooltip: "Revenir à l'accueil",
-                  ),
-                  Padding(padding: EdgeInsets.only(right: 10),),
-                  ElevatedButton(
-                      onPressed: (){
-                     Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => DisplayApplicants(schools: widget.schools, students: widget.students)),);
-                  }, child: Text("Continuer", style: GoogleFonts.montserrat(fontWeight: FontWeight.w500 ),)),
-                  Padding(padding: EdgeInsets.only(right: 10),),
-                  IconButton(
-                    icon: Icon(
-                      PhosphorIcons.export(PhosphorIconsStyle.regular),
-                      size: 32.0,
-                    ),
-                    onPressed: () async {
-                      List<int> bytes = SheetParser.exportResult(export_list, widget.schools);
-                      String? path = await FilePicker.platform.saveFile(
-                          fileName: Platform.isMacOS ? "Preview_JURY_MOBILITE_${DateTime.now().year}" : "Preview_JURY_MOBILITE_${DateTime.now().year}.xlsx",
-                          type: FileType.custom,
-                          allowedExtensions: ["xlsx"]
-                      );
-                      if (path != null){
-                        print("Now saving the excel file");
-                        SheetParser.saveExcelToDisk(path, bytes);
-                      }
-                    },
-                    tooltip: "Exporter vers excel",
-                  )
-                ],
-              ),
-            ],
+                      tooltip: "Exporter vers excel",
+                    )
+                  ],
+                ),
+              ],
+            ),
           ),
         )
       ),

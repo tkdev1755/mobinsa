@@ -28,6 +28,7 @@ import 'package:window_manager/window_manager.dart';
     - Modifié le widget dans la liste de voeux pour le mettre à jour vers choice card
     - Ajouté l'export du fichier excel
  */
+
 class DisplayApplicants extends StatefulWidget {
   final List<School> schools;
   final List<Student> students;
