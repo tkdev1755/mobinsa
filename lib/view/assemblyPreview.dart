@@ -309,7 +309,6 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
         textTheme: GoogleFonts.montserratTextTheme()
       ),
       home: Scaffold(
-
         body: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.only(top: padding, bottom : padding),
@@ -485,7 +484,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
                         size: 32.0,
                       ),
                       onPressed: () async {
-                        List<int> bytes = SheetParser.exportResult(export_list, widget.schools);
+                        List<int> bytes = SheetParser.exportResult(export_list, widget.schools, sheetOrder: SheetParser.assemblyPreviewOrder,writeChoiceStatus: true);
                         String? path = await FilePicker.platform.saveFile(
                             fileName: Platform.isMacOS ? "Preview_JURY_MOBILITE_${DateTime.now().year}" : "Preview_JURY_MOBILITE_${DateTime.now().year}.xlsx",
                             type: FileType.custom,

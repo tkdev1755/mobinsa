@@ -31,6 +31,7 @@ class ExcelParsingException implements Exception {
     "readDetailsException" : 3005, // Les champs ont été mal lus,
     "incoherentSchoolException" : 3006, // L'école contient des incohérences
     "emptySchoolsException" : 3007, // La liste des écoles à l'issue de la fonction est vide
+    "unknownSheetName": 4000, // La feuill demandée n'existe pas dans le code
     "unknown" : 9999 // Exception générique
   };
   final int errorCode;
@@ -64,6 +65,7 @@ class SheetParser{
   static const int _colLangLvl = 8;         // Colonne 9
   static const int _colMissedHours = 9;     // Colonne 10
   static const int _colComment = 11;        // Colonne 12 -> Colonne "COMMENTAIRE"
+  static const int _colStatus = 13;         // Colonne 13 -> Colonne "status" utile pour le preview du jury
 
   // --- Constantes pour les indices des colonnes du Excel des écoles (A adapter si le fichier Ecoles venait à changer) ---
   // Ici un S à été ajouté avant le "nom" de la colonne pour éviter des conflits avec les constantes définies précédemment
@@ -79,9 +81,41 @@ class SheetParser{
   static const int _colSLangage = 9;        // Colonne 10 -> Colonne "Langue d'enseignement"
   static const int _colSLangLvl = 10;       // Colonne 11 -> Colonne "Niveau langue"
   static const int _colSAcademicLvl = 11;   // Colonne 12 -> Colonne "Niveau Académique"
+  static const List<String> assemblyPreviewOrder = [
+    "Tout les choix",
+    "Choix acceptés",
+    "Choix refusés",
+    "Second tour"
+  ];
+  static const List<String> secondTurnOrder = [
+    "Second tour",
+    "Choix acceptés",
+    "Choix refusés",
+    "Tout les choix"
+  ];
 
+  static Map<String,List<(int,int,Choice)>> sheetExportMap = {
+    "Second tour" :[],
+    "Choix acceptés" : [],
+    "Choix refusés" : [],
+    "Tout les choix" : [],
+  };
 
+  static List<(int,int,Choice)> _getSheetExportList(String name){
+    if (!sheetExportMap.containsKey(name)) throw ExcelParsingException("Impossible to export the excel file", errorCode: ExcelParsingException.getErrorCode("unknownSheetName"));
+    return sheetExportMap[name]!;
+  }
 
+  static void _addExportListElement(String name,(int,int,Choice) value){
+    if (!sheetExportMap.containsKey(name)) throw ExcelParsingException("Impossible to add an element to the export list -> name : ${name}", errorCode: ExcelParsingException.getErrorCode("unknownSheetName"));
+    sheetExportMap[name]!.add(value);
+  }
+
+  static void _clearExportLists(){
+    for (var exportList in sheetExportMap.keys){
+      sheetExportMap[exportList]!.clear();
+    }
+  }
 
 
 
@@ -111,8 +145,6 @@ class SheetParser{
     }
     return defaultValue;
   }
-
-
 
   static Excel parseExcel(String path) {
   try {
@@ -145,7 +177,6 @@ class SheetParser{
   }
 }
 
-
   /// Fonction qui s'occupe de modifier les caractères non communs présents dans l'excel par des caractères commun
   ///
   /// Si d'autres caractères peu communs venait à apparaitre dans l'excel, veuillez les ajouter ici en faisant usage de la méthode suivante
@@ -160,6 +191,7 @@ class SheetParser{
     similarSchools.sort((a,b) => b.$1.compareTo(a.$1));
     return similarSchools;
   }
+
   // --- Méthode principale pour extraire les étudiants ---
   static List<Student> extractStudents(Excel excel, List<School> schools) {
   // Check if schools list is empty
@@ -186,6 +218,7 @@ class SheetParser{
       return [];
     }
     // Itérer sur les lignes, en commençant par la deuxième (index 1) pour sauter l'en-tête
+  bool fromPreviewValue = false;
     for (int rowIndex = 1; rowIndex < sheet.maxRows; rowIndex++) {
       var rowData = sheet.row(rowIndex); // Récupère les données de la ligne actuelle
       // Vérification minimale : le nom de l'étudiant doit être présent
@@ -205,6 +238,7 @@ class SheetParser{
         String langLvl = _getStringCellData(rowData, _colLangLvl, defaultValue: "N/A");
         double missedHours = _getDoubleCellData(rowData, _colMissedHours);
         String comment = _getStringCellData(rowData, _colComment);
+
         print("!!!! We have the following comment ${comment} !!!");
         // Lire d'autres champs de Student si nécessaire (post_comment, etc.)
         // String? postComment = _getStringCellData(rowData, _colPostComment, defaultValue: null); // Exemple
@@ -244,7 +278,7 @@ class SheetParser{
       String country = _getStringCellData(rowData, _colCountry);
       String schoolName = _getStringCellData(rowData, _colSchoolName);
       String rawInterRanking = _getStringCellData(rowData, _colInterRanking);
-
+      String status = _getStringCellData(rowData, _colStatus);
       // Un vœu nécessite au moins un ordre, un nom d'école et un pays
       if (rawWishOrder.isEmpty || schoolName.isEmpty || country.isEmpty || rawInterRanking.isEmpty) {
         // print("Ligne ${rowIndex + 1} pour ${studentName}: Données de vœu incomplètes, vœu ignoré.");
@@ -272,11 +306,21 @@ class SheetParser{
       }
       // Création de l'objet Choice (en passant l'instance de Student, comme défini dans votre classe Choice)
       Choice choice = Choice(school: school, interranking: interRanking,student:  currentStudent);
-
+      fromPreviewValue = status != "NULL";
+      switch (status){
+        case "X":
+          choice.refuse();
+          break;
+        case "O":
+          choice.accepted(currentStudent);
+          break;
+        default:
+          break;
+      }
       // Ajout du choix à la map de choix de l'étudiant
       currentStudent.choices[wishOrder] = choice;
     }
-    // Conversion de la map des étudiants en une liste triée par ID
+  // Conversion de la map des étudiants en une liste triée par ID
     List<Student> finalStudentList = tempStudentMap.values.toList();
     finalStudentList.sort((a, b) => a.id.compareTo(b.id));
 
@@ -296,6 +340,7 @@ class SheetParser{
     }
     return finalStudentList;
   }
+
   static int updateExcelOnDisk(Excel excel, String savePath){
     List<int>? bytes = excel.save();
     if (bytes == null){
@@ -310,6 +355,7 @@ class SheetParser{
     }
     return 0;
   }
+
   static List<School> parseSchools(Excel file) {
     List<School> schools = [];
     
@@ -534,7 +580,12 @@ class SheetParser{
     return spez;
   }
 
-  static List<int> exportResult(List<Student> students, List<School> schools) {
+  static List<int> exportResult(List<Student> students, List<School> schools, {List<String> sheetOrder = assemblyPreviewOrder, bool writeChoiceStatus=false}) {
+    _clearExportLists();
+    if (sheetOrder.isEmpty){
+      throw ExcelParsingException("Impossible d'exporter le fichier excel car l'ordre des feuilles n'est pas spécifié", errorCode: ExcelParsingException.getErrorCode("unknown"));
+    }
+
     Map<int, String> indexes = {
       0: "Nom",
       1: "Voeu",
@@ -542,13 +593,17 @@ class SheetParser{
       3: "Etablissement",
       4: "Département",
       5: "Interclassement",
-      6: "Nb ECTS",
-      7: "Niveau Anglais",
-      8: "Absences",
-      9: "Nbre de Places",
-      10: "Commentaires",
-      11: "Commentaires post-jury"
+      6: "Classement S1",
+      7: "Nb ECTS",
+      8: "Niveau Anglais",
+      9: "Absences",
+      10: "Nbre de Places",
+      11: "Commentaires",
+      12: "Commentaires post-jury",
     };
+    if (writeChoiceStatus){
+      indexes[13] = "status";
+    }
 
     // Create separate lists for different sheets
     List<(int, int, Choice)> allChoices = [];
@@ -567,16 +622,18 @@ class SheetParser{
       
       for (var c in s.choices.entries) {
         // Add to all choices list
-        allChoices.add((s.id, c.key, c.value));
-        
+
+        _addExportListElement("Tout les choix",(s.id, c.key, c.value));
         // Check acceptance status
         if (s.accepted != null && s.accepted!.school.id == c.value.school.id) {
+          _addExportListElement("Choix acceptés",(s.id, c.key, c.value));
           acceptedChoices.add((s.id, c.key, c.value));
           studentHasResponse[s.id] = true;
           studentAllChoicesRejected[s.id] = false; // At least one choice is accepted
         }
         // Check rejection status
         else if (s.refused.any((choice) => choice.school.id == c.value.school.id)) {
+          _addExportListElement("Choix refusés",(s.id, c.key, c.value));
           rejectedChoices.add((s.id, c.key, c.value));
           studentHasResponse[s.id] = true;
           // Note: We don't set studentAllChoicesRejected to false here
@@ -599,6 +656,7 @@ class SheetParser{
           (studentAllChoicesRejected[s.id] == true && s.choices.isNotEmpty)) {
         // This student has NO responses OR all choices rejected - add ALL their choices
         for (var c in s.choices.entries) {
+          _addExportListElement("Second tour",(s.id, c.key, c.value));
           noResponseChoices.add((s.id, c.key, c.value));
         }
       }
@@ -606,45 +664,50 @@ class SheetParser{
 
     // Sort all lists by interranking
     allChoices.sort((a, b) => b.$3.interranking.compareTo(a.$3.interranking));
-    acceptedChoices.sort((a, b) => b.$3.interranking.compareTo(a.$3.interranking));
-    rejectedChoices.sort((a, b) => b.$3.interranking.compareTo(a.$3.interranking));
-    noResponseChoices.sort((a, b) => b.$3.interranking.compareTo(a.$3.interranking));
+    for (var sheet in sheetOrder){
+      _getSheetExportList(sheet).sort((a, b) => b.$3.interranking.compareTo(a.$3.interranking));
+    }
 
     // Create Excel workbook
     Excel exportedExcel = Excel.createExcel();
     
     // Get default sheet name
     String defaultSheetName = exportedExcel.getDefaultSheet() ?? "Sheet1";
-    
+    exportedExcel.rename(defaultSheetName, sheetOrder.first);
+    for (var sheet in sheetOrder.sublist(1)){
+      exportedExcel.copy(defaultSheetName, sheet);
+    }
     // Create additional sheets by copying the default one
-    exportedExcel.copy(defaultSheetName, "Choix acceptés");
-    exportedExcel.copy(defaultSheetName, "Choix refusés");
-    exportedExcel.copy(defaultSheetName, "Second Tour"); // Changed name
-    
+    //exportedExcel.copy(defaultSheetName, "Choix acceptés");
+    //exportedExcel.copy(defaultSheetName, "Choix refusés");
+    //exportedExcel.copy(defaultSheetName, "Second Tour"); // Changed name
+
     // Rename default sheet and get sheet references
-    exportedExcel.rename(defaultSheetName, "Tous les choix");
-    Sheet allSheet = exportedExcel.sheets["Tous les choix"]!;
+    /*Sheet allSheet = exportedExcel.sheets["Tous les choix"]!;
     Sheet acceptedSheet = exportedExcel.sheets["Choix acceptés"]!;
     Sheet rejectedSheet = exportedExcel.sheets["Choix refusés"]!;
-    Sheet secondTourSheet = exportedExcel.sheets["Second Tour"]!; // Reference to new sheet
+    Sheet secondTourSheet = exportedExcel.sheets["Second Tour"]!; // Reference to new sheet*/
     
     // Clear copied content
     //acceptedSheet.clear();
     //rejectedSheet.clear();
     //noResponseSheet.clear();
-    
+    for (var sheet in sheetOrder){
+      setupSheetHeaders(exportedExcel.sheets[sheet]!, indexes);
+    }
     // Add headers to each sheet
-    setupSheetHeaders(allSheet, indexes);
-    setupSheetHeaders(acceptedSheet, indexes);
+    /*setupSheetHeaders(acceptedSheet, indexes);
     setupSheetHeaders(rejectedSheet, indexes);
-    setupSheetHeaders(secondTourSheet, indexes); // Add headers to new sheet
+    setupSheetHeaders(secondTourSheet, indexes); // Add headers to new sheet*/
     
     // Fill each sheet with data
-    fillSheetWithChoices(allSheet, allChoices, students, true);
-    fillSheetWithChoices(acceptedSheet, acceptedChoices, students, false);
-    fillSheetWithChoices(rejectedSheet, rejectedChoices, students, false);
-    fillSheetWithChoices(secondTourSheet, noResponseChoices, students, false); // Fill new sheet
-    
+    for (var sheet in sheetOrder){
+      List<(int,int,Choice)> choices = _getSheetExportList(sheet);
+      fillSheetWithChoices(exportedExcel.sheets[sheet]!, choices, students, applyColors: (sheet == "Tout les choix"), writeStatus: writeChoiceStatus);
+    }
+    /*fillSheetWithChoices(acceptedSheet, acceptedChoices, students,);
+    fillSheetWithChoices(rejectedSheet, rejectedChoices, students);
+    fillSheetWithChoices(secondTourSheet, noResponseChoices, students); // Fill new sheet*/
     return exportedExcel.save() ?? [];
   }
 
@@ -671,9 +734,8 @@ class SheetParser{
   }
 
   // Helper method to fill a sheet with choice data
-  static void fillSheetWithChoices(Sheet sheet, List<(int, int, Choice)> choices, List<Student> students, bool applyColors) {
+  static void fillSheetWithChoices(Sheet sheet, List<(int, int, Choice)> choices, List<Student> students, { bool applyColors=false, bool writeStatus=false}) {
     int rowIndex = 1; // Start after header
-    
     for (var c in choices) {
       Student? currentStudent = students.where((e) => e.id == c.$1).firstOrNull;
       if (currentStudent == null) continue;
@@ -687,15 +749,31 @@ class SheetParser{
         IntCellValue(choiceNumber),
         TextCellValue(currentChoice.school.country),
         TextCellValue(currentChoice.school.name),
-        TextCellValue(currentStudent.departement),
+        TextCellValue("${currentStudent.departement} ${currentStudent.year}"),
         DoubleCellValue(currentChoice.interranking),
+        IntCellValue(currentStudent.ranking_s1),
         IntCellValue(currentStudent.ects_number),
         TextCellValue(currentStudent.lang_lvl),
         DoubleCellValue(currentStudent.missed_hours),
         IntCellValue(currentChoice.school.available_slots),
         TextCellValue(currentStudent.comment),
         TextCellValue(currentChoice.post_comment ?? " - ")
+
       ];
+      if (writeStatus){
+        String status = "";
+        if (currentStudent.accepted != null && currentStudent.accepted!.school.id == currentChoice.school.id) {
+          status = "O";
+        }
+        // Red for rejected choices
+        else if (currentStudent.refused.any((choice) => choice.school.id == currentChoice.school.id)) {
+          status = "X";
+        }
+        else if (currentStudent.hasNoChoiceLeft() && !(currentStudent.refused.any((choice) => choice.school.id == currentChoice.school.id))){
+          status = "-";
+        }
+        studentValues.add(TextCellValue(status));
+      }
       
       sheet.appendRow(studentValues);
 
@@ -735,6 +813,10 @@ class SheetParser{
         for (var data in currentRow){
           data?.cellStyle = CellStyle(fontSize: 12, fontFamily: "Arial");
         }
+      }
+
+      if (writeStatus){
+
       }
       rowIndex++;
     }

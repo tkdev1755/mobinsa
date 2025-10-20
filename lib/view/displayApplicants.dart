@@ -545,7 +545,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
           size: 32.0,
         ),
         onPressed: () async {
-          List<int> bytes = SheetParser.exportResult(widget.students, widget.schools);
+          List<int> bytes = SheetParser.exportResult(widget.students, widget.schools, sheetOrder: SheetParser.secondTurnOrder);
           String? path = await FilePicker.platform.saveFile(
               fileName: Platform.isMacOS ? "CR_JURY_MOBILITE_${DateTime.now().year}" : "CR_JURY_MOBILITE_${DateTime.now().year}.xlsx",
               type: FileType.custom,

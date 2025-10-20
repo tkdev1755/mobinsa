@@ -11,6 +11,7 @@ import 'package:mobinsa/model/parser.dart';
 import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/versionManager.dart';
 import 'package:mobinsa/view/assemblyPreview.dart';
+import 'package:mobinsa/view/displayApplicants.dart';
 import 'package:mobinsa/view/modalPages/saveDialog.dart';
 import 'package:mobinsa/view/modalPages/similarSchoolsDialog.dart';
 import 'package:mobinsa/view/modalPages/updaterDialog.dart';
@@ -147,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
 
   Widget build(BuildContext context) {
-
+    List<bool> fromPreview = [false];
     // Keep your existing button style definition
     final ButtonStyle customButtonStyle = ElevatedButton.styleFrom(
       backgroundColor: Colors.grey[300],
@@ -490,10 +491,19 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                           ElevatedButton(
                               style: customButtonStyle,
                               onPressed: (schoolsLoaded && studentsLoaded) ? () {
+                                print("fromPrev ? ${fromPreview}");
                                 students.sort((a,b) => b.get_max_rank().compareTo(a.get_max_rank()));
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => AssemblyPreview(students: students, schools: schools)),);
+                                if (fromPreview.firstOrNull ?? false){
+                                  print("File was loaded from preview, skipping session preview");
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => DisplayApplicants(students: students, schools: schools)),);
+                                }
+                                else{
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => AssemblyPreview(students: students, schools: schools)),);
+                                }
                               } : null,
                               child: Text("Génerer",style: UiText().nsText,)
                           ),
