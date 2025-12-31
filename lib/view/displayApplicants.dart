@@ -1083,7 +1083,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                   ),
                                   Padding(padding: EdgeInsets.only(bottom: 5)),
                                   Text("Interclassement"),
-                                  Text("${choice.interranking}",
+                                  Text("${choice.interranking.toStringAsFixed(3)}",
                                     style:  GoogleFonts.montserrat(textStyle: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w500,
