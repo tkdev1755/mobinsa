@@ -88,10 +88,11 @@ class SheetParser{
     "Second tour"
   ];
   static const List<String> secondTurnOrder = [
-    "Second tour",
+    "Tout les choix",
     "Choix acceptés",
     "Choix refusés",
-    "Tout les choix"
+    "Second tour",
+
   ];
 
   static Map<String,List<(int,int,Choice)>> sheetExportMap = {
