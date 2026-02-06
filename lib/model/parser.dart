@@ -31,6 +31,7 @@ class ExcelParsingException implements Exception {
     "readDetailsException" : 3005, // Les champs ont été mal lus,
     "incoherentSchoolException" : 3006, // L'école contient des incohérences
     "emptySchoolsException" : 3007, // La liste des écoles à l'issue de la fonction est vide
+    "missingColumnException" : 3008, // Il manque une feuille dans le fichier Excel des écoles
     "unknownSheetName": 4000, // La feuill demandée n'existe pas dans le code
     "unknown" : 9999 // Exception générique
   };
@@ -357,6 +358,8 @@ class SheetParser{
     return 0;
   }
 
+
+
   static List<School> parseSchools(Excel file) {
     List<School> schools = [];
     
@@ -378,18 +381,18 @@ class SheetParser{
       //Afficher la première colonne
       //int MAXCOLUMN = sheet.rows[0].length - 1;
       String? colData = sheet.rows[0][0]?.value.toString();
-      int MAXCOLUMN = 1;
-      while (colData != "" && colData != null){
-        print(colData);
+      int MAXCOLUMN = sheet.maxColumns;
+
+      /*while (colData != "" && colData != null){
         colData = sheet.rows[0][MAXCOLUMN]?.value.toString();
         MAXCOLUMN++;
-      }
-      MAXCOLUMN--;
+      }*/
+
       /*for (int col = 0; col < MAXCOLUMN; col++) {
         String value = sheet.rows[0][col]?.value.toString() ?? "Problème 1ere colonne" ;
         stdout.write("$value; ");
       }*/
-      print("");
+
       // Traiter chaque ligne à partir de la ligne 2 (index 1) qui contient les données
       for (int row = 1; row < sheet.maxRows; row++) {
         // Vérifiez si la ligne contient des données
@@ -428,6 +431,7 @@ class SheetParser{
           int mSlots = -1;
           List<String> readSlots = ["Places", "Places Bachelor","Places Master"];
           try{
+            print("Slots value is ??? ${sheet.rows[row][_colSSlots]?.value.runtimeType}");
             slots = int.parse(sheet.rows[row][_colSSlots]?.value.toString() ?? "-1");
             readSlots.remove("Places");
             bSlots = int.parse(sheet.rows[row][_colSBachelorSlots]?.value.toString() ?? "-1");
