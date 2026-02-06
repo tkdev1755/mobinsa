@@ -394,6 +394,7 @@ class SheetParser{
         String value = sheet.rows[0][col]?.value.toString() ?? "Problème 1ere colonne" ;
         stdout.write("$value; ");
       }*/
+
       // Traiter chaque ligne à partir de la ligne 2 (index 1) qui contient les données
       for (int row = 1; row < sheet.maxRows; row++) {
         // Vérifiez si la ligne contient des données
