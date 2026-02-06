@@ -382,17 +382,18 @@ class SheetParser{
       //int MAXCOLUMN = sheet.rows[0].length - 1;
       String? colData = sheet.rows[0][0]?.value.toString();
       int MAXCOLUMN = sheet.maxColumns;
+      if (MAXCOLUMN < 12){
+        throw ExcelParsingException("La feuille $sheetName ne semble pas contenir le nombre correct de colonnes", errorCode: ExcelParsingException.getErrorCode("missingColumnException"));
+      }
 
       /*while (colData != "" && colData != null){
         colData = sheet.rows[0][MAXCOLUMN]?.value.toString();
         MAXCOLUMN++;
       }*/
-
       /*for (int col = 0; col < MAXCOLUMN; col++) {
         String value = sheet.rows[0][col]?.value.toString() ?? "Problème 1ere colonne" ;
         stdout.write("$value; ");
       }*/
-
       // Traiter chaque ligne à partir de la ligne 2 (index 1) qui contient les données
       for (int row = 1; row < sheet.maxRows; row++) {
         // Vérifiez si la ligne contient des données
