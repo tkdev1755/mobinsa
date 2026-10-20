@@ -15,7 +15,7 @@ import 'package:mobinsa/view/modalPages/similarSchoolsDialog.dart';
 import 'package:mobinsa/view/modalPages/updaterDialog.dart';
 import 'package:mobinsa/view/uiElements.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async{
@@ -226,7 +226,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     double width = constraints.maxWidth * 0.25; // 25% de la largeur
-                    return Icon(PhosphorIcons.globe(), size: MediaQuery.sizeOf(context).height*1.2,);
+                    return Icon(PhosphorIconsRegular.globe, size: MediaQuery.sizeOf(context).height*1.2,);
                   },
                 ),
               ),
@@ -286,7 +286,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                                         SnackBar(
                                           content: Row(
                                             children: [
-                                              Icon(PhosphorIcons.check(), size: 40, color: Colors.white),
+                                              Icon(PhosphorIconsRegular.check, size: 40, color: Colors.white),
                                               Padding(padding: EdgeInsets.all(10)),
                                               Text('${schools.length} écoles importées avec succès', style: UiText(color: UiColors.white).nText,),
                                             ],
@@ -352,7 +352,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                                           SnackBar(
                                             content: Row(
                                               children: [
-                                                Icon(PhosphorIcons.check(), size : 40, color: Colors.white),
+                                                Icon(PhosphorIconsRegular.check, size : 40, color: Colors.white),
                                                 Padding(padding: EdgeInsets.all(10)),
                                                 Text('${students.length} étudiants importés avec succès', style: UiText(color: UiColors.white).nText,),
                                               ],
@@ -378,7 +378,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                                                 content: Row(
                                                   mainAxisAlignment: MainAxisAlignment.start,
                                                   children: [
-                                                    Icon(PhosphorIcons.warning(), size : 40, color: Colors.white,),
+                                                    Icon(PhosphorIconsRegular.warning, size : 40, color: Colors.white,),
                                                     Padding(padding: EdgeInsets.all(10)),
                                                     Text("Aucun étudiant n'a été importé", style: UiText(color : UiColors.white).nText,),
                                                   ],
@@ -399,7 +399,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                                                   SnackBar(
                                                     content: Row(
                                                       children: [
-                                                        Icon(PhosphorIcons.check(), size : 40, color: Colors.white,),
+                                                        Icon(PhosphorIconsRegular.check, size : 40, color: Colors.white,),
                                                         Padding(padding: EdgeInsets.all(10)),
                                                         Text('${students.length} étudiants importés avec succès',style: UiText(color: UiColors.white).nText),
                                                       ],
@@ -429,7 +429,7 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                                                       content: Row(
                                                         mainAxisAlignment: MainAxisAlignment.start,
                                                         children: [
-                                                          Icon(PhosphorIcons.warning(), size : 40, color: Colors.white,),
+                                                          Icon(PhosphorIconsRegular.warning, size : 40, color: Colors.white,),
                                                           Padding(padding: EdgeInsets.all(10)),
                                                           Text("Aucun étudiant n'a été importé", style: UiText(color : UiColors.white).nText,),
                                                         ],

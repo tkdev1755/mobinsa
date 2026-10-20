@@ -12,7 +12,7 @@ import 'package:mobinsa/model/sessionStorage.dart';
 import 'package:mobinsa/view/displayApplicants.dart';
 import 'package:mobinsa/view/uiElements.dart';
 import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../model/Student.dart';
 
 
@@ -198,13 +198,13 @@ class _SaveDialogState extends State<SaveDialog> {
               Spacer(),
               IconButton(onPressed: () async {
                 final exportedPath = await SessionStorage.exportSave(saveInfo);
-              }, icon: Icon(PhosphorIcons.export())),
+              }, icon: Icon(PhosphorIconsRegular.export)),
               IconButton(onPressed: (){
                 SessionStorage.deleteSave(saveInfo);
                 saves = SessionStorage.getSaveFolder();
                 setState(() {
                 });
-              }, icon: Icon(PhosphorIcons.trash()))
+              }, icon: Icon(PhosphorIconsRegular.trash))
             ],
           ),
         ),

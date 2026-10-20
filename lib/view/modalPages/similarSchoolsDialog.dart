@@ -1,7 +1,7 @@
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:mobinsa/model/parser.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 
 import '../../model/School.dart';
 import '../../model/Student.dart';
@@ -53,7 +53,7 @@ class _SimilarSchoolsDialogState extends State<SimilarSchoolsDialog> {
                   widget.cancelProcedure[0] = true;
                   Navigator.pop(context);
                 },
-                    icon: Icon(PhosphorIcons.x()),
+                    icon: Icon(PhosphorIconsRegular.x),
                   tooltip: "Annuler",
                 )
               ],
@@ -114,7 +114,7 @@ class _SimilarSchoolsDialogState extends State<SimilarSchoolsDialog> {
                             },
                             decoration: InputDecoration(
                               hintText: "Recherchez votre école",
-                              suffixIcon: IconButton(onPressed: (){},icon: Icon(PhosphorIcons.magnifyingGlass()))
+                              suffixIcon: IconButton(onPressed: (){},icon: Icon(PhosphorIconsRegular.magnifyingGlass))
                             ),
                           ),
                           UiShapes.bPadding(10),
@@ -220,7 +220,7 @@ class _SimilarSchoolsDialogState extends State<SimilarSchoolsDialog> {
                           }
                         }, child: Icon(
                           color: Colors.white,
-                          PhosphorIcons.check()),
+                          PhosphorIconsRegular.check),
                       ),
                     ),
                     child: Tooltip(
@@ -235,7 +235,7 @@ class _SimilarSchoolsDialogState extends State<SimilarSchoolsDialog> {
                         ),
                         onPressed: null, child: Icon(
                           color: Colors.white,
-                          PhosphorIcons.check()),
+                          PhosphorIconsRegular.check),
                       ),
                     )
                 ),
@@ -255,7 +255,7 @@ class _SimilarSchoolsDialogState extends State<SimilarSchoolsDialog> {
                         });
                       }, child: Icon(
                         color: Colors.white,
-                        PhosphorIcons.x()),
+                        PhosphorIconsRegular.x),
                     ),
                   ),
               )

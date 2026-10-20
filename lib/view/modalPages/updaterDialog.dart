@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobinsa/model/versionManager.dart';
 import 'package:mobinsa/view/uiElements.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
+
 
 
 
@@ -44,7 +45,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
               children: [
                 Text("v${widget.softwareUpdater.currentVersion.$1}.${widget.softwareUpdater.currentVersion.$2}.${widget.softwareUpdater.currentVersion.$3}", style: UiText().smallText,),
                 Padding(padding: EdgeInsets.only(right: 10)),
-                Icon(PhosphorIcons.arrowRight(), size: 25,),
+                Icon(PhosphorIconsRegular.arrowRight, size: 25,),
                 Padding(padding: EdgeInsets.only(right: 10)),
                 Text("v${widget.softwareUpdater.latestVersion!.$1}.${widget.softwareUpdater.latestVersion!.$2}.${widget.softwareUpdater.latestVersion!.$3}", style: UiText().smallText),
               ],

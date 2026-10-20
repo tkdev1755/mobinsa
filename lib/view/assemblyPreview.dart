@@ -7,7 +7,7 @@ import 'package:mobinsa/model/Student.dart';
 import 'package:mobinsa/model/School.dart';
 import 'package:mobinsa/view/uiElements.dart';
 import 'package:mobinsa/view/displayApplicants.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:mobinsa/model/parser.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -375,7 +375,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
                               showDialog(context: context, builder: (BuildContext context){
                                 return mostDemandedSchoolDialog(mostRequestedSchool.$1, widget.students);
                               });
-                            }, icon: Icon(PhosphorIcons.info()))
+                            }, icon: Icon(PhosphorIconsRegular.info))
                           ],
                         ),
                       ),
@@ -430,7 +430,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
                             showDialog(context: context, builder: (BuildContext context){
                               return overflowedSchoolDialog(overflowedSchools, widget.schools);
                             });
-                          }, icon: Icon(PhosphorIcons.info()))
+                          }, icon: Icon(PhosphorIconsRegular.info))
                         ],
                       ),
                       UiShapes.bPadding(10),
@@ -445,7 +445,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
                             showDialog(context: context, builder: (BuildContext context){
                               return emptySchoolsDialog(emptySchools, widget.schools);
                             });
-                          }, icon: Icon(PhosphorIcons.info()))
+                          }, icon: Icon(PhosphorIconsRegular.info))
                         ],
                       )
                     ],
@@ -463,7 +463,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
                     onPressed: (){
                       Navigator.pop(context);
                     },
-                    icon: Icon(PhosphorIcons.caretLeft()),
+                    icon: Icon(PhosphorIconsRegular.caretLeft),
                   tooltip: "Revenir à l'accueil",
                 ),
                 Padding(padding: EdgeInsets.only(right: 10),),
@@ -476,7 +476,7 @@ class _AssemblyPreviewState extends State<AssemblyPreview> {
                 Padding(padding: EdgeInsets.only(right: 10),),
                 IconButton(
                   icon: Icon(
-                    PhosphorIcons.export(PhosphorIconsStyle.regular),
+                    PhosphorIconsRegular.export,
                     size: 32.0,
                   ),
                   onPressed: () async {

@@ -9,7 +9,7 @@ import 'package:mobinsa/model/parser.dart';
 import 'package:mobinsa/model/sessionStorage.dart';
 import 'package:mobinsa/view/modalPages/sessionProgressDialog.dart';
 import 'package:mobinsa/view/uiElements.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../model/School.dart';
 import 'dart:io';
 import 'package:window_manager/window_manager.dart';
@@ -279,10 +279,10 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                 }
               });
               
-            }, icon: Icon(PhosphorIcons.floppyDisk(PhosphorIconsStyle.regular)), tooltip: "Sauvegarder cette session",),
+            }, icon: Icon(PhosphorIconsRegular.floppyDisk), tooltip: "Sauvegarder cette session",),
             IconButton(
               icon: Icon(
-                PhosphorIcons.export(PhosphorIconsStyle.regular),
+                PhosphorIconsRegular.export,
                 size: 32.0,
               ),
               onPressed: () async {
@@ -303,7 +303,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
             ),
 
             IconButton(
-              icon: Icon(PhosphorIcons.house(PhosphorIconsStyle.regular), size: 32.0),
+              icon: Icon(PhosphorIconsRegular.house, size: 32.0),
               onPressed: () => {
                 widget.schools.clear(),
                 widget.students.clear,
@@ -795,7 +795,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                     expandedStudentsChoice[index-1] = false;
                                   });
                                 },
-                                icon: Icon(PhosphorIcons.arrowUp()),
+                                icon: Icon(PhosphorIconsRegular.arrowUp),
                             ),
                           ],
                         )
@@ -1065,7 +1065,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                                 expandedStudentsChoice[index-1] = true;
                               });
                             },
-                            icon: Icon(PhosphorIcons.arrowDown()),
+                            icon: Icon(PhosphorIconsRegular.arrowDown),
                           ),
                           Padding(padding: EdgeInsets.only(bottom: 10)),
                           Row(
@@ -1217,7 +1217,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
       padding: EdgeInsets.all(10),
       child: Row(
         children: [
-          Icon(PhosphorIcons.info(),size: 50,),
+          Icon(PhosphorIconsRegular.info,size: 50,),
           Padding(padding: EdgeInsets.only(right: 10)),
           Expanded(child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1250,7 +1250,7 @@ class _DisplayApplicantsState extends State<DisplayApplicants> with TickerProvid
                 showDialog(context: context, builder: (BuildContext context){
                   return SessionProgressDialog(students: widget.students, schools: widget.schools);
                 });
-              }, icon: Icon(PhosphorIcons.info()))
+              }, icon: Icon(PhosphorIconsRegular.info))
             ],
           ),
           UiShapes.bPadding(10),
